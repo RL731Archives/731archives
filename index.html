@@ -269,6 +269,15 @@
           <div class="row">
             <div style="flex:1"><label>&nbsp;</label><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div>
           </div>
+          <div style="margin:10px 0">
+            <select id="memChangeId" style="width:auto;display:inline-block;margin-right:4px"><option value="">Changer grade de...</option></select>
+            <select id="memChangeGrade" style="width:auto;display:inline-block;margin-right:4px">
+              <option value="1">Apprenti</option>
+              <option value="2">Compagnon</option>
+              <option value="3">Maître</option>
+            </select>
+            <button class="btn btn-gold" style="display:inline-block;padding:6px 12px" onclick="changeMemberGrade()">Appliquer</button>
+          </div>
           <div id="memList"></div>
           <div id="memMsg" class="msg"></div>
         </div>
@@ -558,11 +567,29 @@ async function refreshMembers() {
   const list = document.getElementById('memList');
   try {
     const snap = await db.collection('membres').get();
-    members = snap.docs.map(d => d.data());
+    members = snap.docs.map(d => ({...d.data(), _fireId: d.id }));
   } catch(e) { list.innerHTML = '<p style="font-size:12px;color:#999">Erreur de chargement</p>'; return; }
   if (!members.length) { list.innerHTML = '<p style="font-size:12px;color:#999">Aucun membre</p>'; return; }
-  list.innerHTML = '<table><tr><th>Identifiant</th><th>Nom</th><th>Grade</th><th></th></tr>' +
-    members.map(m => '<tr><td>' + m.id + '</td><td>' + m.prenom + ' ' + m.nom + '</td><td>' + ['','Apprenti','Compagnon','Maître'][m.grade] + '</td><td><button class="btn btn-outline mini-btn" onclick="removeMember(\'' + m.id + '\')">✕</button></td></tr>').join('') + '</table>';
+  // Remplir select changement grade
+  const sel = document.getElementById('memChangeId');
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">Changer grade de...</option>' +
+    members.map(m => '<option value="'+m.id+'"' + (m.id===currentVal?' selected':'') + '>'+m.prenom+' '+m.nom+' ('+['','Apprenti','Compagnon','Maître'][m.grade]+')</option>').join('');
+  list.innerHTML = '<div style="max-height:300px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px;text-align:left">Identifiant</th><th style="padding:6px;text-align:left">Nom</th><th style="padding:6px;text-align:left">Grade</th><th style="padding:6px;text-align:center">Action</th></tr>' +
+    members.map(m => '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + m.id + '</td><td style="padding:6px">' + m.prenom + ' ' + m.nom + '</td><td style="padding:6px">' + ['','Apprenti','Compagnon','Maître'][m.grade] + '</td><td style="padding:6px;text-align:center"><button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="removeMember(\'' + m.id + '\')">✕ Supprimer</button></td></tr>').join('') + '</table></div>';
+}
+
+async function changeMemberGrade() {
+  const id = document.getElementById('memChangeId').value;
+  const newGrade = parseInt(document.getElementById('memChangeGrade').value);
+  const msg = document.getElementById('memMsg');
+  if (!id) { msg.textContent = 'Sélectionnez un membre'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  try {
+    await db.collection('membres').doc(id).update({ grade: newGrade });
+    msg.textContent = '✅ Grade changé avec succès'; msg.className = 'msg'; msg.style.display = 'block';
+    refreshMembers();
+  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
 }
 
 function refreshArchives() {
@@ -630,9 +657,9 @@ function showDocumentsInSub(container) {
     const dateA = a.dateDoc || '';
     const dateB = b.dateDoc || '';
     if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
+    if (!dateA) return 1;  // les documents sans date passent à la fin
     if (!dateB) return -1;
-    return dateB.localeCompare(dateA);
+    return dateB.localeCompare(dateA); // ordre décroissant
   });
   
   const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','webp':'🖼️','mp4':'🎬','mov':'🎬','webm':'🎬','avi':'🎬' };
