@@ -26,6 +26,7 @@
     .btn-gold{background:var(--gold);color:#fff}
     .btn-bdx{background:var(--bordeaux);color:#fff}
     .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
+    .btn-danger{background:#c62828;color:#fff}
     nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
     nav ul{list-style:none;display:flex}
     nav li{flex:1}
@@ -58,13 +59,11 @@
     .admin-panel .row>*{flex:1}
     .admin-panel .mini-btn{font-size:11px;padding:2px 8px}
     footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee}
-    th{color:var(--bordeaux)}
     .doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-    .doc-item .icon{font-size:24px}
+    .doc-item .icon{font-size:24px;cursor:pointer}
     .doc-item .info{flex:1}
-    .doc-item .info strong{display:block;font-size:14px}
+    .doc-item .info strong{display:block;font-size:14px;cursor:pointer}
+    .doc-item .info strong:hover{color:var(--bordeaux)}
     .doc-item .info span{font-size:11px;color:#888}
     .badge{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;display:inline-block}
     .badge-1{background:#8B4513}
@@ -92,6 +91,19 @@
     #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
     #loginOverlay .modal h2{color:var(--bordeaux);margin-bottom:12px}
     #loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
+    #viewerOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;place-items:center;padding:20px}
+    #viewerOverlay.open{display:grid}
+    #viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:90vw;max-width:900px;max-height:90vh;overflow-y:auto;position:relative}
+    #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
+    #viewerOverlay .viewer-header h3{font-size:16px}
+    #viewerOverlay .viewer-header button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:14px}
+    #viewerOverlay .viewer-header button:hover{background:rgba(255,255,255,0.15)}
+    #viewerOverlay .viewer-body{padding:18px;text-align:center;min-height:100px}
+    #viewerOverlay .viewer-body img{max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto}
+    #viewerOverlay .viewer-body video{max-width:100%;max-height:65vh;border-radius:4px}
+    #viewerOverlay .viewer-body iframe{width:100%;height:65vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .embed-pdf{width:100%;height:65vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .text-preview{padding:20px;background:#f9f9f9;border-radius:4px;font-size:14px;line-height:1.6;text-align:left;max-height:55vh;overflow-y:auto}
     .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
   </style>
@@ -235,6 +247,10 @@
             <option value="2">Compagnon (niveau 2)</option>
             <option value="3">Maître (niveau 3)</option>
           </select>
+          <label>Date du document</label>
+          <input id="docDate" type="date" />
+          <label>Conférencier / Auteur</label>
+          <input id="docAuteur" placeholder="Nom du conférencier ou auteur..." />
           <label>Fichier (PDF, DOC, XLS, image, vidéo)</label>
           <input id="docFile" type="file" />
           <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter le document</button>
@@ -300,6 +316,19 @@
   </div>
 </div>
 
+<!-- MODAL VISUALISATEUR -->
+<div id="viewerOverlay">
+  <div class="viewer-modal">
+    <div class="viewer-header">
+      <h3 id="viewerTitle">Document</h3>
+      <button onclick="closeViewer()">✕ Fermer</button>
+    </div>
+    <div class="viewer-body" id="viewerBody">
+      <p style="color:#999">Chargement...</p>
+    </div>
+  </div>
+</div>
+
 <footer>731archives.netlify.app — Étoile du Temple — 1956</footer>
 
 <script>
@@ -353,7 +382,7 @@ async function loadAllData() {
     const snapMem = await db.collection('membres').get();
     members = snapMem.docs.map(d => d.data());
     const snapDocs = await db.collection('documents').get();
-    documents = snapDocs.docs.map(d => d.data());
+    documents = snapDocs.docs.map(d => ({...d.data(), _fireId: d.id }));
     const histDoc = await db.collection('contenu').doc('histoire').get();
     if (histDoc.exists) historyText = histDoc.data().texte || '';
     dataLoaded = true;
@@ -367,7 +396,6 @@ async function loadAllData() {
 }
 
 function updateSubsForCards() {
-  // Masquer/afficher les cartes selon le grade du membre connecté
   document.querySelectorAll('[data-grade-card]').forEach(card => {
     const cardGrade = parseInt(card.dataset.gradeCard);
     if (!currentUser || currentUser.grade < cardGrade) {
@@ -376,8 +404,6 @@ function updateSubsForCards() {
       card.style.display = 'block';
     }
   });
-  
-  // Gérer les sous-rubriques dans les cartes visibles
   document.querySelectorAll('.card .sub-list li').forEach(li => {
     if (!currentUser) {
       li.style.pointerEvents = 'none';
@@ -567,16 +593,91 @@ function selectNiveau(n) { currentNiveau = n; refreshArchives(); }
 function selectSub(key) { currentSub = key; refreshArchives(); }
 function backToRubriques() { currentSub = null; refreshArchives(); }
 
+function openViewer(doc) {
+  document.getElementById('viewerTitle').textContent = doc.title || 'Document';
+  const body = document.getElementById('viewerBody');
+  const data = doc.data;
+  const ext = (doc.type || '').toLowerCase();
+
+  // Images
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+    body.innerHTML = '<img src="' + data + '" alt="' + doc.title + '" />';
+  }
+  // Videos
+  else if (['mp4','mov','webm','avi'].includes(ext)) {
+    body.innerHTML = '<video src="' + data + '" controls style="max-width:100%;max-height:65vh"></video>';
+  }
+  // PDF
+  else if (ext === 'pdf') {
+    body.innerHTML = '<iframe src="' + data + '" class="embed-pdf"></iframe>';
+  }
+  // Word documents - display as download notice but show link
+  else if (['doc','docx'].includes(ext)) {
+    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📝 Document Word</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+  }
+  // Excel
+  else if (['xls','xlsx'].includes(ext)) {
+    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📊 Tableur Excel</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+  }
+  // Fallback
+  else {
+    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📁 Document</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+  }
+
+  document.getElementById('viewerOverlay').classList.add('open');
+}
+
+function closeViewer() {
+  document.getElementById('viewerOverlay').classList.remove('open');
+}
+
 function showDocumentsInSub(container) {
   const sub = sousRubriques[currentSub];
   if (!sub) { currentSub = null; refreshArchives(); return; }
   const visible = documents.filter(d => d.sub === currentSub && d.grade <= currentUser.grade);
-  const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','mp4':'🎬','mov':'🎬' };
+  const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','webp':'🖼️','mp4':'🎬','mov':'🎬','webm':'🎬','avi':'🎬' };
   container.innerHTML = '<a class="back-link" onclick="backToRubriques()">← Retour aux rubriques</a>' +
     '<h3 style="color:var(--bordeaux);margin-bottom:8px">' + sub.label + '</h3>' +
     '<p style="font-size:13px;color:#666;margin-bottom:10px">' + visible.length + ' document(s)</p>' +
     (!visible.length ? '<p style="color:#999;padding:20px;text-align:center">Aucun document dans cette rubrique.</p>' :
-      visible.map(d => '<div class="doc-item"><div class="icon">' + (icons[d.type]||'📁') + '</div><div class="info"><strong>' + d.title + '</strong><span>' + d.date + ' · <span class="badge badge-' + d.grade + '">' + ['','Apprenti','Compagnon','Maître'][d.grade] + '</span></span></div><a class="btn btn-outline" style="padding:4px 10px;font-size:12px" href="' + d.data + '" download="' + d.filename + '">📥</a></div>').join(''));
+      visible.map(d => {
+        const dateAffichee = d.dateDoc || d.date || '';
+        const auteur = d.auteur ? ' · ' + d.auteur : '';
+        const adminBtns = (currentUser && currentUser.isAdmin)
+          ? '<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteDocument(\'' + d.id + '\')">✕</button>'
+          : '';
+        return '<div class="doc-item">' +
+          '<div class="icon" onclick="openViewer(\'' + d.id + '\')">' + (icons[d.type]||'📁') + '</div>' +
+          '<div class="info">' +
+            '<strong onclick="openViewer(\'' + d.id + '\')">' + d.title + '</strong>' +
+            '<span>' + dateAffichee + auteur + ' · <span class="badge badge-' + d.grade + '">' + ['','Apprenti','Compagnon','Maître'][d.grade] + '</span></span>' +
+          '</div>' +
+          '<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openViewer(\'' + d.id + '\')">👁</button>' +
+          adminBtns +
+          '</div>';
+      }).join(''));
+}
+
+async function deleteDocument(id) {
+  if (!confirm('Supprimer ce document définitivement ?')) return;
+  try {
+    // Find the document in our local array to get its Firestore doc ID
+    const doc = documents.find(d => d.id === id);
+    if (doc && doc._fireId) {
+      await db.collection('documents').doc(doc._fireId).delete();
+    } else {
+      // If no _fireId stored, try all docs
+      const snap = await db.collection('documents').get();
+      for (const d of snap.docs) {
+        if (d.data().id === id) {
+          await d.ref.delete();
+          break;
+        }
+      }
+    }
+    documents = documents.filter(d => d.id !== id);
+    refreshArchives();
+  } catch(e) { alert('Erreur de suppression : ' + e.message); }
 }
 
 async function addDocument() {
@@ -589,12 +690,24 @@ async function addDocument() {
   const reader = new FileReader();
   reader.onload = async function(e) {
     const ext = file.name.split('.').pop().toLowerCase();
-    const type = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','gif','mp4','mov'].includes(ext) ? ext : 'fichier';
-    const docData = { id: Date.now().toString(), title, grade, sub, type, filename: file.name, data: e.target.result, date: new Date().toLocaleDateString('fr-FR') };
+    const type = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(ext) ? ext : 'fichier';
+    const dateChoisie = document.getElementById('docDate').value;
+    const auteurSaisi = document.getElementById('docAuteur').value.trim();
+    const docData = { 
+      id: Date.now().toString(), 
+      title, grade, sub, type, 
+      filename: file.name, 
+      data: e.target.result, 
+      date: new Date().toLocaleDateString('fr-FR'), 
+      dateDoc: dateChoisie || '', 
+      auteur: auteurSaisi || '',
+      dateUpload: new Date().toISOString()
+    };
     try {
       await db.collection('documents').doc(docData.id).set(docData);
       msg.textContent = '✅ Document ajouté : ' + title; msg.className = 'msg'; msg.style.display = 'block';
-      document.getElementById('docTitle').value = ''; document.getElementById('docFile').value = '';
+      document.getElementById('docTitle').value = ''; document.getElementById('docFile').value = ''; 
+      document.getElementById('docDate').value = ''; document.getElementById('docAuteur').value = '';
       refreshDocs();
     } catch(err) { msg.textContent = 'Erreur : ' + err.message; msg.className = 'msg error'; msg.style.display = 'block'; }
   };
@@ -610,13 +723,13 @@ async function refreshMedia() {
   const list = document.getElementById('mediaList');
   if (!currentUser) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>'; return; }
   if (!dataLoaded) await loadAllData();
-  const visible = documents.filter(d => ['jpg','jpeg','png','gif','mp4','mov'].includes(d.type) && d.grade <= currentUser.grade);
+  const visible = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
   if (!visible.length) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible.</p>'; return; }
   list.innerHTML = visible.map(d => {
-    if (['mp4','mov'].includes(d.type)) {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee"><video src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
+    if (['mp4','mov','webm','avi'].includes(d.type)) {
+      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewer(\'' + d.id + '\')"><video src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
     } else {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee"><img src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" alt="' + d.title + '" /><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
+      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewer(\'' + d.id + '\')"><img src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" alt="' + d.title + '" /><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
     }
   }).join('');
 }
