@@ -149,7 +149,6 @@
       <h2 style="color:var(--bordeaux);margin-bottom:10px">Bienvenue</h2>
       <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple. Connectez-vous selon votre grade pour accéder aux documents.</p>
       <div class="cards">
-        <!-- Carte APPRENTI - Niveau 1 -->
         <div class="card apprenti" data-grade-card="1">
           <h3>APPRENTI</h3>
           <div class="lock">🔒</div>
@@ -160,7 +159,6 @@
             <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 1° degré</li>
           </ul>
         </div>
-        <!-- Carte COMPAGNON - Niveau 2 -->
         <div class="card compagnon" data-grade-card="2">
           <h3>COMPAGNON</h3>
           <div class="lock">🔒</div>
@@ -174,7 +172,6 @@
             <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 2° degré</li>
           </ul>
         </div>
-        <!-- Carte MAITRE - Niveau 3 -->
         <div class="card maitre" data-grade-card="3">
           <h3>MAÎTRE</h3>
           <div class="lock">🔒</div>
@@ -247,7 +244,7 @@
             <option value="2">Compagnon (niveau 2)</option>
             <option value="3">Maître (niveau 3)</option>
           </select>
-          <label>Date du document</label>
+          <label>Date du document (aaaa-mm-jj)</label>
           <input id="docDate" type="date" />
           <label>Conférencier / Auteur</label>
           <input id="docAuteur" placeholder="Nom du conférencier ou auteur..." />
@@ -598,32 +595,24 @@ function openViewer(doc) {
   const body = document.getElementById('viewerBody');
   const data = doc.data;
   const ext = (doc.type || '').toLowerCase();
-
-  // Images
   if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
     body.innerHTML = '<img src="' + data + '" alt="' + doc.title + '" />';
   }
-  // Videos
   else if (['mp4','mov','webm','avi'].includes(ext)) {
     body.innerHTML = '<video src="' + data + '" controls style="max-width:100%;max-height:65vh"></video>';
   }
-  // PDF
   else if (ext === 'pdf') {
     body.innerHTML = '<iframe src="' + data + '" class="embed-pdf"></iframe>';
   }
-  // Word documents - display as download notice but show link
   else if (['doc','docx'].includes(ext)) {
     body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📝 Document Word</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
-  // Excel
   else if (['xls','xlsx'].includes(ext)) {
     body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📊 Tableur Excel</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
-  // Fallback
   else {
     body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📁 Document</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
-
   document.getElementById('viewerOverlay').classList.add('open');
 }
 
@@ -634,7 +623,18 @@ function closeViewer() {
 function showDocumentsInSub(container) {
   const sub = sousRubriques[currentSub];
   if (!sub) { currentSub = null; refreshArchives(); return; }
-  const visible = documents.filter(d => d.sub === currentSub && d.grade <= currentUser.grade);
+  let visible = documents.filter(d => d.sub === currentSub && d.grade <= currentUser.grade);
+  
+  // TRI PAR DATE DÉCROISSANTE (aaaa-mm-jj) : du plus récent au plus ancien
+  visible.sort((a, b) => {
+    const dateA = a.dateDoc || '';
+    const dateB = b.dateDoc || '';
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;  // les documents sans date passent à la fin
+    if (!dateB) return -1;
+    return dateB.localeCompare(dateA); // ordre décroissant
+  });
+  
   const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','webp':'🖼️','mp4':'🎬','mov':'🎬','webm':'🎬','avi':'🎬' };
   container.innerHTML = '<a class="back-link" onclick="backToRubriques()">← Retour aux rubriques</a>' +
     '<h3 style="color:var(--bordeaux);margin-bottom:8px">' + sub.label + '</h3>' +
@@ -647,26 +647,29 @@ function showDocumentsInSub(container) {
           ? '<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteDocument(\'' + d.id + '\')">✕</button>'
           : '';
         return '<div class="doc-item">' +
-          '<div class="icon" onclick="openViewer(\'' + d.id + '\')">' + (icons[d.type]||'📁') + '</div>' +
+          '<div class="icon" onclick="openViewerById(\'' + d.id + '\')">' + (icons[d.type]||'📁') + '</div>' +
           '<div class="info">' +
-            '<strong onclick="openViewer(\'' + d.id + '\')">' + d.title + '</strong>' +
+            '<strong onclick="openViewerById(\'' + d.id + '\')">' + d.title + '</strong>' +
             '<span>' + dateAffichee + auteur + ' · <span class="badge badge-' + d.grade + '">' + ['','Apprenti','Compagnon','Maître'][d.grade] + '</span></span>' +
           '</div>' +
-          '<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openViewer(\'' + d.id + '\')">👁</button>' +
+          '<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openViewerById(\'' + d.id + '\')">👁</button>' +
           adminBtns +
           '</div>';
       }).join(''));
 }
 
+function openViewerById(id) {
+  const doc = documents.find(d => d.id === id);
+  if (doc) openViewer(doc);
+}
+
 async function deleteDocument(id) {
   if (!confirm('Supprimer ce document définitivement ?')) return;
   try {
-    // Find the document in our local array to get its Firestore doc ID
     const doc = documents.find(d => d.id === id);
     if (doc && doc._fireId) {
       await db.collection('documents').doc(doc._fireId).delete();
     } else {
-      // If no _fireId stored, try all docs
       const snap = await db.collection('documents').get();
       for (const d of snap.docs) {
         if (d.data().id === id) {
@@ -727,9 +730,9 @@ async function refreshMedia() {
   if (!visible.length) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible.</p>'; return; }
   list.innerHTML = visible.map(d => {
     if (['mp4','mov','webm','avi'].includes(d.type)) {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewer(\'' + d.id + '\')"><video src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
+      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewerById(\'' + d.id + '\')"><video src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
     } else {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewer(\'' + d.id + '\')"><img src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" alt="' + d.title + '" /><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
+      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewerById(\'' + d.id + '\')"><img src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" alt="' + d.title + '" /><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
     }
   }).join('');
 }
@@ -751,5 +754,3 @@ async function saveHistory() {
 </script>
 </body>
 </html>
-
-Généré par Sider Fusion
