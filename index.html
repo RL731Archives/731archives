@@ -1,406 +1,379 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>731 Archives — Étoile du Temple</title>
-  <style>
-    :root{
-      --bg:#F5F0E8;
-      --bordeaux:#800020;
-      --gold:#D4AF37;
-      --text:#2a2a2a;
-      --card1:#fffaf6;
-      --card2:#f0ece8;
-      --card3:#e7e2de;
-      --radius:8px;
-      --shadow:0 4px 12px rgba(0,0,0,0.08);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:50px;height:50px;background:linear-gradient(135deg,var(--gold),#b8942b);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700}
-    .site-title{color:var(--bordeaux);font-size:18px;font-weight:700;line-height:1.2}
-    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;text-decoration:none;font-size:14px}
-    .btn-gold{background:var(--gold);color:#fff}
-    .btn-bdx{background:var(--bordeaux);color:#fff}
-    .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
-    nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
-    nav ul{list-style:none;display:flex}
-    nav li{flex:1}
-    nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
-    nav a:hover{color:var(--gold)}
-    nav a.active{color:var(--gold);background:rgba(0,0,0,0.1)}
-    .banner{position:relative;height:280px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
-    .banner img{width:100%;height:100%;object-fit:cover;opacity:0.85}
-    .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.0) 50%,rgba(0,0,0,0.4) 100%);display:flex;align-items:flex-end;padding:24px}
-    .banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,0.5)}
-    .banner p{color:rgba(255,255,255,0.9);font-size:14px;margin-top:4px}
-    .page{display:none}
-    .page.active{display:block}
-    .cards{display:flex;gap:12px;margin:14px 0}
-    .card{flex:1;padding:20px 16px;border-radius:8px;border:2px solid var(--gold);position:relative;min-height:120px}
-    .card h3{color:var(--bordeaux);font-size:16px;margin-bottom:6px}
-    .card p{font-size:13px;color:#555}
-    .card .lock{position:absolute;right:10px;bottom:10px;background:var(--gold);color:#fff;width:36px;height:36px;border-radius:6px;display:grid;place-items:center;font-size:18px}
-    .card.apprenti{background:var(--card1)}
-    .card.compagnon{background:var(--card2)}
-    .card.maitre{background:var(--card3)}
-    .two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
-    .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
-    .admin-panel h3{color:var(--bordeaux);margin-bottom:8px}
-    .admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
-    .admin-panel label{font-size:12px;color:#777}
-    .admin-panel .row{display:flex;gap:8px;margin-bottom:8px}
-    .admin-panel .row>*{flex:1}
-    footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee}
-    th{color:var(--bordeaux)}
-    .doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-    .doc-item .icon{font-size:24px}
-    .doc-item .info{flex:1}
-    .doc-item .info strong{display:block;font-size:14px}
-    .doc-item .info span{font-size:11px;color:#888}
-    .badge{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;display:inline-block}
-    .badge-1{background:#8B4513}
-    .badge-2{background:#4A6741}
-    .badge-3{background:var(--bordeaux)}
-    .msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
-    .msg.error{background:#ffebee;color:#c62828}
-    .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px}
-    .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
-    .sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
-    .sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
-    .sub-tabs button.active{background:var(--bordeaux);color:#fff}
-    #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
-    #loginOverlay.open{display:grid}
-    #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
-    #loginOverlay .modal h2{color:var(--bordeaux);margin-bottom:12px}
-    #loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
-    @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>731 Archives — Étoile du Temple</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#F5F0E8;--bdx:#800020;--gold:#D4AF37;--text:#2a2a2a;--c1:#fffaf6;--c2:#f0ece8;--c3:#e7e2de}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:50px;height:50px;background:linear-gradient(135deg,var(--gold),#b8942b);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700}
+.site-title{color:var(--bdx);font-size:18px;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;font-size:14px}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-bdx{background:var(--bdx);color:#fff}
+.btn-out{background:transparent;color:var(--bdx);border:1px solid var(--bdx)}
+.btn-sm{padding:4px 10px;font-size:12px}
+nav{background:var(--bdx);border-radius:6px;margin:10px 0 14px}
+nav ul{list-style:none;display:flex}
+nav li{flex:1}
+nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+nav a:hover,nav a.active{color:var(--gold)}
+.banner{position:relative;height:280px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
+.banner img{width:100%;height:100%;object-fit:cover;opacity:.85}
+.banner .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0)50%,rgba(0,0,0,.4)100%);display:flex;align-items:flex-end;padding:24px}
+.banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,.5)}
+.banner p{color:rgba(255,255,255,.9);font-size:14px}
+.page{display:none}.page.active{display:block}
+.cards{display:flex;gap:12px;margin:14px 0}
+.card{flex:1;padding:20px 16px;border-radius:8px;border:2px solid var(--gold);min-height:120px}
+.card h3{color:var(--bdx);font-size:16px;margin-bottom:6px}
+.card p{font-size:13px;color:#555}
+.card .lock{float:right;background:var(--gold);color:#fff;width:36px;height:36px;border-radius:6px;display:grid;place-items:center;font-size:18px}
+.card.apprenti{background:var(--c1)}.card.compagnon{background:var(--c2)}.card.maitre{background:var(--c3)}
+.two-col{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,.06)}
+.admin-panel h3{color:var(--bdx);margin-bottom:8px}
+.admin-panel input,.admin-panel select,.admin-panel textarea{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
+.admin-panel label{font-size:12px;color:#777}
+.admin-panel .row{display:flex;gap:8px}
+.admin-panel .row>*{flex:1}
+footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee}
+th{color:var(--bdx)}
+.doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
+.doc-item .icon{font-size:24px}.doc-item .info{flex:1}
+.doc-item .info strong{display:block;font-size:14px}
+.doc-item .info span{font-size:11px;color:#888}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;display:inline-block}
+.badge-1{background:#8B4513}.badge-2{background:#4A6741}.badge-3{background:var(--bdx)}
+.msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
+.msg.err{background:#ffebee;color:#c62828}
+.hist{cursor:pointer}
+.hist[contenteditable]{border:2px dashed var(--gold);outline:none}
+.sub-tabs{display:flex;border-radius:5px;overflow:hidden;border:1px solid var(--bdx);margin-bottom:10px}
+.sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bdx);cursor:pointer;font-weight:600;font-size:13px}
+.sub-tabs button.active{background:var(--bdx);color:#fff}
+#loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;place-items:center}
+#loginOverlay.open{display:grid}
+#loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:380px;max-width:90vw;text-align:center}
+#loginOverlay .modal h2{color:var(--bdx);margin-bottom:12px}
+#loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bdx);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.toast.ok{background:#2e7d32}.toast.bad{background:#c62828}
+.m-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.m-item{border-radius:5px;overflow:hidden;border:1px solid #eee;background:#fff}
+.m-item img,.m-item video{width:100%;height:130px;object-fit:cover;display:block}
+.m-item .lb{padding:6px 8px;font-size:12px}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}.f-row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
 <header>
-  <div class="brand">
-    <div class="logo">★</div>
-    <div class="site-title">Archives de l'Étoile du Temple</div>
-  </div>
-  <div>
-    <button class="btn btn-gold" onclick="openLogin()">👤 Connexion</button>
-  </div>
+<div class="brand"><div class="logo">★</div><div class="site-title">Archives de l'Étoile du Temple</div></div>
+<div>
+<button id="btnCnx" class="btn btn-gold" onclick="openLogin()">👤 Connexion</button>
+<button id="btnDcnx" class="btn btn-out" onclick="doLogout()" style="display:none">Déconnexion</button>
+</div>
 </header>
 
-<nav>
-  <ul>
-    <li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li>
-    <li><a onclick="showPage('histoire',this)">Histoire</a></li>
-    <li><a onclick="showPage('archives',this)">Archives</a></li>
-    <li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li>
-    <li><a onclick="showPage('contact',this)">Contact</a></li>
-  </ul>
-</nav>
+<nav><ul>
+<li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li>
+<li><a onclick="showPage('histoire',this)">Histoire</a></li>
+<li><a onclick="showPage('archives',this)">Archives</a></li>
+<li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li>
+<li><a onclick="showPage('contact',this)">Contact</a></li>
+</ul></nav>
 
 <div class="banner">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Le_Locle_Loge_ma%C3%A7onnique_Temple.jpg/1280px-Le_Locle_Loge_ma%C3%A7onnique_Temple.jpg" alt="Temple maçonnique">
-  <div class="overlay">
-    <div>
-      <h1>Archives de l'Étoile du Temple</h1>
-      <p>Conserver et transmettre — Loge fondée en 1956</p>
-    </div>
-  </div>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Le_Locle_Loge_ma%C3%A7onnique_Temple.jpg/1280px-Le_Locle_Loge_ma%C3%A7onnique_Temple.jpg" alt="Temple">
+<div class="ov"><div><h1>Archives de l'Étoile du Temple</h1><p>Conserver et transmettre — Loge fondée en 1956</p></div></div>
 </div>
 
-<!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
-  <div class="two-col">
-    <div>
-      <h2 style="color:var(--bordeaux);margin-bottom:10px">Bienvenue</h2>
-      <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple. Connectez-vous selon votre grade pour accéder aux documents.</p>
-      <div class="cards">
-        <div class="card apprenti"><h3>APPRENTI</h3><p>Documents niveau 1<br>Accès de base</p><div class="lock">🔒</div></div>
-        <div class="card compagnon"><h3>COMPAGNON</h3><p>Documents niveaux 1-2<br>Accès intermédiaire</p><div class="lock">🔒</div></div>
-        <div class="card maitre"><h3>MAÎTRE</h3><p>Tous les documents<br>Accès complet</p><div class="lock">🔒</div></div>
-      </div>
-    </div>
-    <div>
-      <div class="admin-panel">
-        <h3>⚡ Accès rapide</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
-        <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">👤 Se connecter</button>
-        <div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956<br>Membres : mot de passe par défaut 1234</div>
-      </div>
-    </div>
-  </div>
+<div class="two-col">
+<div>
+<h2 style="color:var(--bdx);margin-bottom:10px">Bienvenue</h2>
+<p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple. Connectez-vous selon votre grade pour accéder aux documents.</p>
+<div class="cards">
+<div class="card apprenti"><h3>APPRENTI</h3><p>Documents niveau 1<br>Accès de base</p><div class="lock">🔒</div></div>
+<div class="card compagnon"><h3>COMPAGNON</h3><p>Documents niveaux 1-2<br>Accès intermédiaire</p><div class="lock">🔒</div></div>
+<div class="card maitre"><h3>MAÎTRE</h3><p>Tous les documents<br>Accès complet</p><div class="lock">🔒</div></div>
+</div>
+</div>
+<div><div class="admin-panel" id="cni"><h3>⚡ Accès rapide</h3><p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p><button class="btn btn-bdx" style="width:100%" onclick="openLogin()">👤 Se connecter</button><div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956</div></div></div>
+</div>
 </div>
 
-<!-- HISTOIRE -->
 <div id="page-histoire" class="page">
-  <h2 style="color:var(--bordeaux);margin-bottom:10px">Histoire de l'Étoile du Temple</h2>
-  <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956. Le récit de sa fondation et de son histoire sera rédigé ici.</p></div>
-  <div id="historyAdminOnly" style="display:none;margin-top:10px"><p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier directement. Il sera sauvegardé automatiquement.</p></div>
+<h2 style="color:var(--bdx);margin-bottom:10px">Histoire de l'Étoile du Temple</h2>
+<div id="histDisp" class="hist" style="background:#fff;padding:20px;border-radius:8px;min-height:100px"><p style="color:#999;font-style:italic">Chargement...</p></div>
+<div id="histAdmin" style="display:none;margin-top:8px">
+<p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier directement.</p>
+<button class="btn btn-gold btn-sm" onclick="saveHistory()" style="margin-top:6px">💾 Sauvegarder l'histoire</button>
+<span id="histSaveMsg" style="font-size:12px;color:#2e7d32;display:none">✅ Sauvegardé !</span>
+</div>
 </div>
 
-<!-- ARCHIVES -->
 <div id="page-archives" class="page">
-  <div class="two-col">
-    <div>
-      <h2 style="color:var(--bordeaux);margin-bottom:10px">Archives documentaires</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour voir les documents selon votre grade.</p>
-      <div id="docList"><p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les documents disponibles.</p></div>
-    </div>
-    <div>
-      <div class="admin-panel" id="adminPanel" style="display:none">
-        <h3>📁 Administration</h3>
-        <div class="sub-tabs">
-          <button class="active" onclick="showAdminTab('docs',this)">Documents</button>
-          <button onclick="showAdminTab('membres',this)">Membres</button>
-        </div>
-        <div id="adminDocs">
-          <label>Titre du document</label>
-          <input id="docTitle" placeholder="Titre du document...">
-          <label>Grade requis</label>
-          <select id="docGrade">
-            <option value="1">Apprenti (niveau 1)</option>
-            <option value="2">Compagnon (niveau 2)</option>
-            <option value="3">Maître (niveau 3)</option>
-          </select>
-          <label>Fichier (PDF, DOC, XLS, image, vidéo)</label>
-          <input id="docFile" type="file">
-          <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter le document</button>
-          <div id="docMsg" class="msg"></div>
-        </div>
-        <div id="adminMembres" style="display:none">
-          <label>Prénom</label>
-          <input id="memPrenom" placeholder="Prénom">
-          <label>Nom</label>
-          <input id="memNom" placeholder="Nom">
-          <label>Grade</label>
-          <select id="memGrade">
-            <option value="1">Apprenti</option>
-            <option value="2">Compagnon</option>
-            <option value="3">Maître</option>
-          </select>
-          <div class="row">
-            <div style="flex:1"><label>Mot de passe</label><input id="memPass" value="1234"></div>
-            <div style="flex:1"><label>&nbsp;</label><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div>
-          </div>
-          <div id="memList"></div>
-          <div id="memMsg" class="msg"></div>
-        </div>
-      </div>
-      <div id="loginPrompt" class="admin-panel">
-        <h3>🔒 Connexion requise</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en tant qu'admin pour gérer les archives.</p>
-        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">👤 Connexion admin</button>
-      </div>
-    </div>
-  </div>
+<div class="two-col">
+<div>
+<h2 style="color:var(--bdx);margin-bottom:10px">Archives documentaires</h2>
+<p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour voir les documents selon votre grade.</p>
+<div id="docList"><p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les documents.</p></div>
+</div>
+<div>
+<div class="admin-panel" id="adminPanel" style="display:none">
+<h3>📁 Administration</h3>
+<div class="sub-tabs">
+<button class="active" onclick="showAdminTab('docs',this)">Documents</button>
+<button onclick="showAdminTab('membres',this)">Membres</button>
+</div>
+<div id="adminDocs">
+<label>Titre</label><input id="docTitre" placeholder="Titre du document...">
+<label>Grade requis</label>
+<select id="docGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+<label>Fichier</label><input id="docFile" type="file">
+<button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDoc()">➕ Ajouter</button>
+<div id="docMsg" class="msg"></div>
+</div>
+<div id="adminMembres" style="display:none">
+<p style="font-size:13px;color:#666;margin-bottom:8px">Ajouter un membre :</p>
+<div class="f-row"><div><label>Prénom</label><input id="mPrenom" placeholder="Prénom"></div><div><label>Nom</label><input id="mNom" placeholder="Nom"></div></div>
+<div class="f-row"><div><label>Grade</label><select id="mGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select></div><div><label>Date naissance (JJMMAAAA)</label><input id="mBirth" placeholder="ex: 15031960" maxlength="8"></div></div>
+<button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter le membre</button>
+<div id="memMsg" class="msg"></div>
+<div style="margin-top:10px"><strong style="font-size:13px;color:var(--bdx)">Membres enregistrés</strong></div>
+<div id="memList"></div>
+</div>
+</div>
+<div id="loginPrompt" class="admin-panel">
+<h3>🔒 Connexion requise</h3>
+<p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en tant qu'admin pour gérer.</p>
+<button class="btn btn-gold" style="width:100%" onclick="openLogin()">👤 Connexion admin</button>
+</div>
+</div>
+</div>
 </div>
 
-<!-- PHOTOS & VIDEOS -->
 <div id="page-photos" class="page">
-  <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:14px">Connectez-vous pour voir les médias selon votre grade.</p>
-  <div id="mediaList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
-    <p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>
-  </div>
+<h2 style="color:var(--bdx);margin-bottom:10px">Photos & Vidéos</h2>
+<p style="font-size:13px;color:#666;margin-bottom:14px">Connectez-vous pour voir les médias selon votre grade.</p>
+<div id="mediaList" class="m-grid"><p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p></div>
 </div>
 
-<!-- CONTACT -->
 <div id="page-contact" class="page">
-  <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
-  <div style="background:#fff;padding:20px;border-radius:8px">
-    <p><strong>Loge L'Étoile du Temple</strong><br>Fondée en 1956</p>
-    <p style="margin-top:10px">Contact : <a href="mailto:f.brl731@proton.me">f.brl731@proton.me</a></p>
-    <p>Site hébergé sur Netlify — 731archives.netlify.app</p>
-  </div>
+<h2 style="color:var(--bdx);margin-bottom:10px">Contact</h2>
+<div style="background:#fff;padding:20px;border-radius:8px">
+<p><strong>Loge L'Étoile du Temple</strong><br>Fondée en 1956</p>
+<p style="margin-top:10px">Contact : <a href="mailto:f.brl731@proton.me">f.brl731@proton.me</a></p>
+<p>731archives.netlify.app</p>
+</div>
 </div>
 
-<!-- LOGIN OVERLAY -->
 <div id="loginOverlay">
-  <div class="modal">
-    <h2>🔐 Connexion</h2>
-    <input id="loginUser" placeholder="Identifiant">
-    <input id="loginPass" type="password" placeholder="Mot de passe">
-    <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
-    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
-    <div id="loginMsg" style="margin-top:8px;font-size:13px;color:#c62828;display:none"></div>
-  </div>
+<div class="modal">
+<h2>🔐 Connexion</h2>
+<input id="loginUser" placeholder="Identifiant">
+<input id="loginPass" type="password" placeholder="Mot de passe">
+<button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
+<button class="btn btn-out" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
+<div id="loginMsg" style="margin-top:8px;font-size:13px;color:#c62828;display:none"></div>
+</div>
 </div>
 
+<div id="toast" class="toast"></div>
 <footer>731archives.netlify.app — Étoile du Temple — 1956</footer>
 
 <script>
-let currentUser = null;
-let members = JSON.parse(localStorage.getItem('rl_members')||'[]');
-let documents = JSON.parse(localStorage.getItem('rl_docs')||'[]');
-let historyText = localStorage.getItem('rl_history')||'';
+const FC = {
+  apiKey:"AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",
+  authDomain:"archives-4bf4d.firebaseapp.com",
+  projectId:"archives-4bf4d",
+  storageBucket:"archives-4bf4d.firebasestorage.app",
+  messagingSenderId:"1042447510184",
+  appId:"1:1042447510184:web:4724fcf049159b231af09d"
+};
+firebase.initializeApp(FC);
+const A=firebase.auth(), D=firebase.firestore();
+D.enablePersistence().catch(()=>{});
 
-function showPage(name,el){
+let U=null, mems=[], docs=[];
+
+function showPage(n,e){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('page-'+n).classList.add('active');
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
-  if(el) el.classList.add('active');
-  if(name==='archives') refreshDocs();
-  if(name==='photos') refreshMedia();
-  if(name==='histoire') refreshHistory();
+  if(e)e.classList.add('active');
+  if(n==='archives')refreshDocs();
+  if(n==='photos')refreshMedia();
+  if(n==='histoire')loadHist();
 }
+function $(id){return document.getElementById(id)}
 
-function openLogin(){document.getElementById('loginOverlay').classList.add('open')}
-function closeLogin(){document.getElementById('loginOverlay').classList.remove('open')}
+function toast(m,t){const o=$('toast');o.textContent=m;o.className='toast '+(t||'');o.style.display='block';setTimeout(()=>o.style.display='none',3000);}
 
-function doLogin(){
-  const user=document.getElementById('loginUser').value.trim();
-  const pass=document.getElementById('loginPass').value.trim();
-  const msg=document.getElementById('loginMsg');
-  if(user==='RL731'&&pass==='08051956'){
-    currentUser={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};
-    localStorage.setItem('rl_session',JSON.stringify(currentUser));
-    msg.style.display='none';closeLogin();afterLogin();return;
+function openLogin(){$('loginOverlay').classList.add('open')}
+function closeLogin(){$('loginOverlay').classList.remove('open')}
+
+async function doLogin(){
+  const u=$('loginUser').value.trim(), p=$('loginPass').value.trim(), msg=$('loginMsg');
+  msg.style.display='none';
+  if(!u||!p){msg.textContent='Identifiant et mot de passe requis';msg.style.display='block';return}
+  if(u==='RL731'&&p==='08051956'){
+    try{await A.signOut()}catch(e){}
+    try{await A.createUserWithEmailAndPassword('admin@731.int','ap731!')}catch(e){}
+    try{await A.signInWithEmailAndPassword('admin@731.int','ap731!')}catch(e){await A.createUserWithEmailAndPassword('admin@731.int','ap731!')}
+    U={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};
+    closeLogin();afterLogin();return;
   }
-  const m=members.find(x=>x.id===user&&x.pass===pass);
-  if(m){
-    currentUser={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};
-    localStorage.setItem('rl_session',JSON.stringify(currentUser));
-    msg.style.display='none';closeLogin();afterLogin();return;
-  }
-  msg.textContent='Identifiants incorrects';msg.style.display='block';
+  try{
+    const s=await D.collection('membres').doc(u).get();
+    if(!s.exists){msg.textContent='Identifiant inconnu';msg.style.display='block';return}
+    const d=s.data();
+    if(d.password!==p){msg.textContent='Mot de passe incorrect';msg.style.display='block';return}
+    const eu=u+'@m.731.int';
+    try{await A.createUserWithEmailAndPassword(eu,p+'!')}catch(e){}
+    try{await A.signInWithEmailAndPassword(eu,p+'!')}catch(e){await A.createUserWithEmailAndPassword(eu,p+'!')}
+    U={id:u,prenom:d.prenom,nom:d.nom,grade:d.grade,isAdmin:false};
+    closeLogin();afterLogin();
+  }catch(e){msg.textContent='Erreur: '+e.message;msg.style.display='block'}
 }
 
 function afterLogin(){
+  $('btnCnx').style.display='none';$('btnDcnx').style.display='inline-flex';
+  $('adminPanel').style.display=U.isAdmin?'block':'none';
+  $('loginPrompt').style.display=U.isAdmin?'none':'block';
+  const g=['','Apprenti','Compagnon','Maître'];
+  $('cni').innerHTML='<h3>✅ Connecté</h3><p style="font-size:13px;color:#666"><strong>'+(U.isAdmin?'Admin RL731':U.prenom+' '+U.nom)+'</strong><br>Grade : '+g[U.grade]+'</p>';
+  if(U.isAdmin){$('histAdmin').style.display='block';$('histDisp').setAttribute('contenteditable','true')}
+  loadHist();refreshDocs();refreshMedia();loadMems();
+  toast('Connecté en tant que '+(U.isAdmin?'Admin RL731':U.prenom+' '+U.nom));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-accueil').classList.add('active');
+  $('page-accueil').classList.add('active');
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
   document.querySelector('nav a').classList.add('active');
-  document.getElementById('adminPanel').style.display=currentUser.isAdmin?'block':'none';
-  document.getElementById('loginPrompt').style.display=currentUser.isAdmin?'none':'block';
-  if(currentUser.isAdmin){
-    document.getElementById('historyAdminOnly').style.display='block';
-    document.getElementById('historyDisplay').setAttribute('contenteditable','true');
-  }
-  refreshDocs();refreshMedia();refreshHistory();
-  alert('Connecté en tant que '+(currentUser.isAdmin?'Admin RL731':currentUser.prenom+' '+currentUser.nom+' ('+['','Apprenti','Compagnon','Maître'][currentUser.grade]+')'));
 }
 
-(function(){
-  const s=localStorage.getItem('rl_session');
-  if(s){
-    try{
-      currentUser=JSON.parse(s);
-      if(currentUser.isAdmin){
-        document.getElementById('adminPanel').style.display='block';
-        document.getElementById('loginPrompt').style.display='none';
-        document.getElementById('historyAdminOnly').style.display='block';
-        document.getElementById('historyDisplay').setAttribute('contenteditable','true');
-      }
-    }catch(e){}
-  }
-})();
-
-function showAdminTab(name,el){
-  document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('adminDocs').style.display=name==='docs'?'block':'none';
-  document.getElementById('adminMembres').style.display=name==='membres'?'block':'none';
-  if(name==='membres') refreshMembers();
+async function doLogout(){
+  try{await A.signOut()}catch(e){}
+  U=null;$('btnCnx').style.display='inline-flex';$('btnDcnx').style.display='none';
+  $('adminPanel').style.display='none';$('loginPrompt').style.display='block';
+  $('histAdmin').style.display='none';$('histDisp').removeAttribute('contenteditable');
+  $('cni').innerHTML='<h3>⚡ Accès rapide</h3><p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p><button class="btn btn-bdx" style="width:100%" onclick="openLogin()">👤 Se connecter</button><div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956</div>';
+  refreshDocs();refreshMedia();toast('Déconnecté');
 }
 
-function addMember(){
-  const prenom=document.getElementById('memPrenom').value.trim();
-  const nom=document.getElementById('memNom').value.trim();
-  const grade=parseInt(document.getElementById('memGrade').value);
-  const pass=document.getElementById('memPass').value.trim();
-  const msg=document.getElementById('memMsg');
-  if(!prenom||!nom){msg.textContent='Prénom et nom requis';msg.className='msg error';msg.style.display='block';return}
-  const id=(prenom+'.'+nom).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  if(members.find(m=>m.id===id)){msg.textContent='Ce membre existe déjà ('+id+')';msg.className='msg error';msg.style.display='block';return}
-  members.push({id,prenom,nom,grade,pass});
-  localStorage.setItem('rl_members',JSON.stringify(members));
-  msg.textContent='✅ Membre ajouté : '+prenom+' '+nom+' ('+['','Apprenti','Compagnon','Maître'][grade]+')';
-  msg.className='msg';msg.style.display='block';
-  document.getElementById('memPrenom').value='';
-  document.getElementById('memNom').value='';
-  refreshMembers();
+A.onAuthStateChanged(async function(u){
+  if(u&&U){try{await D.collection('sessions').doc(u.uid).set(U)}catch(e){}}
+});
+
+async function loadMems(){
+  if(!U||!U.isAdmin)return;
+  try{const s=await D.collection('membres').get();mems=[];s.forEach(d=>mems.push({id:d.id,...d.data()}));rMems()}catch(e){}
+}
+function rMems(){
+  const l=$('memList'), g=['','Apprenti','Compagnon','Maître'];
+  if(!mems.length){l.innerHTML='<p style="font-size:12px;color:#999;margin-top:6px">Aucun membre</p>';return}
+  l.innerHTML='<table><tr><th>Identifiant</th><th>Nom</th><th>Grade</th><th></th></tr>'+
+    mems.map(m=>'<tr><td>'+m.id+'</td><td>'+m.prenom+' '+m.nom+'</td><td>'+g[m.grade]+'</td><td><button class="btn btn-out btn-sm" onclick="rmMem(\''+m.id+'\')">✕</button></td></tr>').join('')+'</table>';
+}
+async function rmMem(id){
+  if(!confirm('Supprimer ce membre ?'))return;
+  try{await D.collection('membres').doc(id).delete();loadMems();toast('Membre supprimé')}catch(e){toast('Erreur: '+e.message,'bad')}
 }
 
-function removeMember(id){
-  if(!confirm('Supprimer ce membre ?')) return;
-  members=members.filter(m=>m.id!==id);
-  localStorage.setItem('rl_members',JSON.stringify(members));
-  refreshMembers();
-}
-
-function refreshMembers(){
-  const list=document.getElementById('memList');
-  if(!members.length){list.innerHTML='<p style="font-size:12px;color:#999">Aucun membre</p>';return}
-  list.innerHTML='<table><tr><th>Identifiant</th><th>Nom</th><th>Grade</th><th></th></tr>'+
-    members.map(m=>'<tr><td>'+m.id+'</td><td>'+m.prenom+' '+m.nom+'</td><td>'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td><button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="removeMember(\''+m.id+'\')">✕</button></td></tr>').join('')+
-    '</table>';
-}
-
-function addDocument(){
-  const title=document.getElementById('docTitle').value.trim();
-  const grade=parseInt(document.getElementById('docGrade').value);
-  const file=document.getElementById('docFile').files[0];
-  const msg=document.getElementById('docMsg');
-  if(!title||!file){msg.textContent='Titre et fichier requis';msg.className='msg error';msg.style.display='block';return}
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const ext=file.name.split('.').pop().toLowerCase();
-    const type=['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','gif','mp4','mov'].includes(ext)?ext:'fichier';
-    documents.push({id:Date.now(),title,grade,type,filename:file.name,data:e.target.result,date:new Date().toLocaleDateString('fr-FR')});
-    localStorage.setItem('rl_docs',JSON.stringify(documents));
-    msg.textContent='✅ Document ajouté : '+title;
+async function addMember(){
+  const p=$('mPrenom').value.trim(), n=$('mNom').value.trim(), g=parseInt($('mGrade').value), b=$('mBirth').value.trim(), msg=$('memMsg');
+  if(!p||!n){msg.textContent='Prénom et nom requis';msg.className='msg err';msg.style.display='block';return}
+  if(!b||b.length!==8||isNaN(b)){msg.textContent='Date JJMMAAAA (8 chiffres)';msg.className='msg err';msg.style.display='block';return}
+  const id=(p+'.'+n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''), pw=b;
+  try{
+    const ref=D.collection('membres').doc(id), ex=await ref.get();
+    if(ex.exists){msg.textContent='Ce membre existe déjà ('+id+')';msg.className='msg err';msg.style.display='block';return}
+    await ref.set({prenom:p,nom:n,grade:g,password:pw,dateNaissance:b,created:firebase.firestore.FieldValue.serverTimestamp()});
+    msg.textContent='✅ Ajouté : '+p+' '+n+' ('+['','Apprenti','Compagnon','Maître'][g]+') — ID: '+id+' / MDP: '+b;
     msg.className='msg';msg.style.display='block';
-    document.getElementById('docTitle').value='';
-    document.getElementById('docFile').value='';
-    refreshDocs();
+    $('mPrenom').value='';$('mNom').value='';$('mBirth').value='';
+    loadMems();toast('Membre ajouté : '+p+' '+n);
+  }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg err';msg.style.display='block'}
+}
+
+async function addDoc(){
+  const t=$('docTitre').value.trim(), g=parseInt($('docGrade').value), f=$('docFile').files[0], msg=$('docMsg');
+  if(!t||!f){msg.textContent='Titre et fichier requis';msg.className='msg err';msg.style.display='block';return}
+  const r=new FileReader();
+  r.onload=async function(e){
+    const ext=f.name.split('.').pop().toLowerCase();
+    const tp=['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','gif','mp4','mov'].includes(ext)?ext:'fichier';
+    try{
+      await D.collection('documents').add({title:t,grade:g,type:tp,filename:f.name,data:e.target.result,date:new Date().toLocaleDateString('fr-FR'),created:firebase.firestore.FieldValue.serverTimestamp()});
+      msg.textContent='✅ Document ajouté : '+t;msg.className='msg';msg.style.display='block';
+      $('docTitre').value='';$('docFile').value='';refreshDocs();toast('Document ajouté : '+t);
+    }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg err';msg.style.display='block'}
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(f);
 }
 
-function refreshDocs(){
-  const list=document.getElementById('docList');
-  if(!currentUser){list.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les documents.</p>';return}
-  const visible=documents.filter(d=>d.grade<=currentUser.grade);
-  if(!visible.length){list.innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun document disponible pour votre grade.</p>';return}
-  const icons={'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','mp4':'🎬','mov':'🎬'};
-  list.innerHTML='<p style="font-size:13px;color:#666;margin-bottom:8px">'+visible.length+' document(s) — Grade : '+['','Apprenti','Compagnon','Maître'][currentUser.grade]+'</p>'+
-    visible.map(d=>'<div class="doc-item"><div class="icon">'+(icons[d.type]||'📁')+'</div><div class="info"><strong>'+d.title+'</strong><span>'+d.date+' · <span class="badge badge-'+d.grade+'">'+['','Apprenti','Compagnon','Maître'][d.grade]+'</span></span></div><a class="btn btn-outline" style="padding:4px 10px;font-size:12px" href="'+d.data+'" download="'+d.filename+'">📥</a></div>').join('');
+async function refreshDocs(){
+  const l=$('docList');
+  if(!U){l.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return}
+  try{
+    const s=await D.collection('documents').orderBy('created','desc').get();docs=[];
+    s.forEach(d=>docs.push({id:d.id,...d.data()}));
+    const v=docs.filter(d=>d.grade<=U.grade);
+    if(!v.length){l.innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun document pour votre grade.</p>';return}
+    const ic={'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','mp4':'🎬','mov':'🎬'};
+    l.innerHTML='<p style="font-size:13px;color:#666;margin-bottom:8px">'+v.length+' document(s) — Grade: '+['','Apprenti','Compagnon','Maître'][U.grade]+'</p>'+
+      v.map(d=>'<div class="doc-item"><div class="icon">'+(ic[d.type]||'📁')+'</div><div class="info"><strong>'+d.title+'</strong><span>'+d.date+' · <span class="badge badge-'+d.grade+'">'+['','Apprenti','Compagnon','Maître'][d.grade]+'</span></span></div><a class="btn btn-out btn-sm" href="'+d.data+'" download="'+d.filename+'">📥</a></div>').join('');
+  }catch(e){l.innerHTML='<p style="color:#999;text-align:center;padding:30px">Erreur: '+e.message+'</p>'}
 }
 
-function refreshMedia(){
-  const list=document.getElementById('mediaList');
-  if(!currentUser){list.innerHTML='<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';return}
-  const visible=documents.filter(d=>['jpg','jpeg','png','gif','mp4','mov'].includes(d.type)&&d.grade<=currentUser.grade);
-  if(!visible.length){list.innerHTML='<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible pour votre grade.</p>';return}
-  list.innerHTML=visible.map(d=>{
-    if(['mp4','mov'].includes(d.type)){
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee"><video src="'+d.data+'" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">'+d.title+'</div></div>';
-    }else{
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee"><img src="'+d.data+'" style="width:100%;height:120px;object-fit:cover" alt="'+d.title+'"><div style="padding:4px 8px;font-size:12px">'+d.title+'</div></div>';
-    }
+async function refreshMedia(){
+  const l=$('mediaList');
+  if(!U){l.innerHTML='<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous.</p>';return}
+  const imgs=['jpg','jpeg','png','gif','mp4','mov'];
+  const v=docs.filter(d=>imgs.includes(d.type)&&d.grade<=U.grade);
+  if(!v.length){l.innerHTML='<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média pour votre grade.</p>';return}
+  l.innerHTML=v.map(d=>{
+    if(['mp4','mov'].includes(d.type))return '<div class="m-item"><video src="'+d.data+'" controls></video><div class="lb">'+d.title+'</div></div>';
+    return '<div class="m-item"><img src="'+d.data+'" alt="'+d.title+'"><div class="lb">'+d.title+'</div></div>';
   }).join('');
 }
 
-function refreshHistory(){
-  if(historyText) document.getElementById('historyDisplay').innerHTML=historyText;
+async function loadHist(){
+  const d=$('histDisp');
+  try{const s=await D.collection('pages').doc('histoire').get();
+    if(s.exists){d.innerHTML=s.data().content||'<p style="color:#999;font-style:italic">Contenu à rédiger...</p>'}
+    else d.innerHTML='<p style="color:#999;font-style:italic">Contenu à rédiger...</p>';
+  }catch(e){d.innerHTML='<p style="color:#999;font-style:italic">Erreur chargement</p>'}
+}
+async function saveHistory(){
+  const c=$('histDisp').innerHTML;
+  try{await D.collection('pages').doc('histoire').set({content:c});
+    const m=$('histSaveMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
+    toast('Histoire sauvegardée !');
+  }catch(e){toast('Erreur: '+e.message,'bad')}
 }
 
-document.addEventListener('DOMContentLoaded',function(){
-  const histDiv=document.getElementById('historyDisplay');
-  if(histDiv){
-    histDiv.addEventListener('blur',function(){
-      if(currentUser&&currentUser.isAdmin){historyText=this.innerHTML;localStorage.setItem('rl_history',historyText);}
-    });
-  }
-  if(historyText) document.getElementById('historyDisplay').innerHTML=historyText;
-  refreshMembers();
-});
+function showAdminTab(n,el){
+  document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  $('adminDocs').style.display=n==='docs'?'block':'none';
+  $('adminMembres').style.display=n==='membres'?'block':'none';
+  if(n==='membres')loadMems();
+}
+
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLogin()});
 </script>
 </body>
 </html>
