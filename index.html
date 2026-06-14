@@ -684,6 +684,8 @@ async function deleteDocument(id) {
 }
 
 async function addDocument() {
+  const msg = document.getElementById('docMsg');
+  msg.style.display = 'none';
   const title = document.getElementById('docTitle').value.trim();
   const grade = parseInt(document.getElementById('docGrade').value);
   const sub = document.getElementById('docSub').value;
@@ -708,10 +710,12 @@ async function addDocument() {
     };
     try {
       await db.collection('documents').doc(docData.id).set(docData);
+      docData._fireId = docData.id;
+      documents.push(docData);
       msg.textContent = '✅ Document ajouté : ' + title; msg.className = 'msg'; msg.style.display = 'block';
       document.getElementById('docTitle').value = ''; document.getElementById('docFile').value = ''; 
       document.getElementById('docDate').value = ''; document.getElementById('docAuteur').value = '';
-      refreshDocs();
+      refreshArchives();
     } catch(err) { msg.textContent = 'Erreur : ' + err.message; msg.className = 'msg error'; msg.style.display = 'block'; }
   };
   reader.readAsDataURL(file);
@@ -754,3 +758,6 @@ async function saveHistory() {
 </script>
 </body>
 </html>
+
+
+Généré par Sider Fusion
