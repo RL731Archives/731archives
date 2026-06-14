@@ -46,7 +46,100 @@
     .card.compagnon{background:var(--card2)}
     .card.maitre{background:var(--card3)}
     .card .sub-list{list-style:none;margin-top:6px}
-    .card .sub-list li{padding:5px 8px;border-radius:4px;margin-bottom:3px;font-size:12px;cursor:pointer;transition:.2s;color:var(--text);border:1px solid transparent}
+    .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  <style>
+    :root{
+      --bg:#F5F0E8;
+      --bordeaux:#800020;
+      --gold:#D4AF37;
+      --text:#2a2a2a;
+      --card1:#fffaf6;
+      --card2:#f0ece8;
+      --card3:#e7e2de;
+      --radius:8px;
+      --shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:50px;height:50px;background:linear-gradient(135deg,var(--gold),#b8942b);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700}
+    .site-title{color:var(--bordeaux);font-size:18px;font-weight:700;line-height:1.2}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;text-decoration:none;font-size:14px}
+    .btn-gold{background:var(--gold);color:#fff}
+    .btn-bdx{background:var(--bordeaux);color:#fff}
+    .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
+    nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
+    nav ul{list-style:none;display:flex}
+    nav li{flex:1}
+    nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
+    nav a:hover{color:var(--gold)}
+    nav a.active{color:var(--gold);background:rgba(0,0,0,0.1)}
+    .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
+    .banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
+    .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.0) 50%,rgba(0,0,0,0.4) 100%);display:flex;align-items:center;justify-content:center;padding:24px}
+    .banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center}
+    .page{display:none}
+    .page.active{display:block}
+    .cards{display:flex;gap:12px;margin:14px 0}
+    .card{flex:1;padding:16px;border-radius:8px;border:2px solid var(--gold);position:relative}
+    .card h3{color:var(--bordeaux);font-size:16px;margin-bottom:8px;text-align:center}
+    .card .lock{position:absolute;right:10px;top:10px;background:var(--gold);color:#fff;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px}
+    .card.apprenti{background:var(--card1)}
+    .card.compagnon{background:var(--card2)}
+    .card.maitre{background:var(--card3)}
+    .card .sub-list{list-style:none;margin-top:6px}
+    .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card .sub-list li .emoji-icon{font-size:16px;vertical-align:middle;margin-right:4px}
+    .card .sub-list li:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+    .card .sub-list li.locked{color:#bbb;cursor:not-allowed;font-style:italic}
+    .card .sub-list li.locked:hover{background:none;color:#bbb}
+    .two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+    .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
+    .admin-panel h3{color:var(--bordeaux);margin-bottom:8px}
+    .admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
+    .admin-panel label{font-size:12px;color:#777}
+    .admin-panel .row{display:flex;gap:8px;margin-bottom:8px}
+    .admin-panel .row>*{flex:1}
+    .admin-panel .mini-btn{font-size:11px;padding:2px 8px}
+    footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee}
+    th{color:var(--bordeaux)}
+    .doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
+    .doc-item .icon{font-size:24px}
+    .doc-item .info{flex:1}
+    .doc-item .info strong{display:block;font-size:14px}
+    .doc-item .info span{font-size:11px;color:#888}
+    .badge{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;display:inline-block}
+    .badge-1{background:#8B4513}
+    .badge-2{background:#4A6741}
+    .badge-3{background:var(--bordeaux)}
+    .msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
+    .msg.error{background:#ffebee;color:#c62828}
+    .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
+    .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
+    .sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
+    .sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
+    .sub-tabs button.active{background:var(--bordeaux);color:#fff}
+    .niveau-tabs{display:flex;gap:0;margin-bottom:12px;border-radius:5px;overflow:hidden;border:1px solid var(--gold)}
+    .niveau-tabs button{flex:1;padding:10px;border:none;background:var(--gold);color:#fff;cursor:pointer;font-weight:700;font-size:14px;opacity:0.6}
+    .niveau-tabs button.active{opacity:1;background:var(--bordeaux)}
+    .rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+    .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center;transition:.2s}
+    .rubrique-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+    .rubrique-card h4{color:var(--bordeaux);font-size:14px;margin-bottom:4px}
+    .rubrique-card .count{font-size:12px;color:#888}
+    .rubrique-card.active{background:var(--gold);color:#fff}
+    .rubrique-card.active h4{color:#fff}
+    #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
+    #loginOverlay.open{display:grid}
+    #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
+    #loginOverlay .modal h2{color:var(--bordeaux);margin-bottom:12px}
+    #loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
+    .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
+    @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
+  </style>
     .card .sub-list li:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
     .card .sub-list li.locked{color:#bbb;cursor:not-allowed;font-style:italic}
     .card .sub-list li.locked:hover{background:none;color:#bbb}
@@ -143,10 +236,10 @@
           <h3>APPRENTI</h3>
           <div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-sub="rituels1" data-grade="1">📜 Rituels du 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1">📝 Planches d'Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1">📝 Planches de Maîtres au 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1">🎙 Mots de l'Orateur au 1° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-sub="rituels1" data-grade="1"><span class="emoji-icon">📜</span> Rituels du 1° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1"><span class="emoji-icon">📝</span> Planches d'Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1"><span class="emoji-icon">📝</span> Planches de Maîtres au 1° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 1° degré</li>
           </ul>
         </div>
         <!-- Carte COMPAGNON -->
@@ -158,9 +251,9 @@
             <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1">📝 Planches d'Apprenti</li>
             <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1">📝 Planches de Maîtres au 1° degré</li>
             <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1">🎙 Mots de l'Orateur au 1° degré</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels2" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}">📜 Rituels du 2° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-sub="planches-compagnon" data-grade="2">📝 Planches de Compagnons</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2">🎙 Mots de l'Orateur au 2° degré</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels2" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels du 2° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-sub="planches-compagnon" data-grade="2"><span class="emoji-icon">📝</span> Planches de Compagnons</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 2° degré</li>
           </ul>
         </div>
         <!-- Carte MAITRE -->
@@ -175,9 +268,9 @@
             <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels2" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}">📜 Rituels du 2° degré</li>
             <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-sub="planches-compagnon" data-grade="2">📝 Planches de Compagnons</li>
             <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2">🎙 Mots de l'Orateur au 2° degré</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels3" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}">📜 Rituels du 3° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-sub="planches-maitres3" data-grade="3">📝 Planches de Maîtres au 3° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-sub="orateur3" data-grade="3">🎙 Mots de l'Orateur au 3° degré</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels3" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}"><span class="emoji-icon">📜</span> Rituels du 3° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-sub="planches-maitres3" data-grade="3"><span class="emoji-icon">📝</span> Planches de Maîtres au 3° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-sub="orateur3" data-grade="3"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 3° degré</li>
           </ul>
         </div>
       </div>
