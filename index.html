@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>731 Archives — Loge l'Étoile du Temple</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bordeaux: '#800020',
+                        'bordeaux-fonce': '#5c0017',
+                        or: '#C9A84C',
+                        'or-clair': '#E8D48B',
+                        'gris-temple': '#F5F0E8',
+                        'gris-fonce': '#2C2C2C',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+        }
+
+        .font-garamond {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.85), rgba(92, 0, 23, 0.9)),
+                url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23800020"/%3E%3Ccircle cx="200" cy="200" r="120" fill="none" stroke="%23C9A84C" stroke-width="1" opacity="0.15"/%3E%3Ccircle cx="200" cy="200" r="80" fill="none" stroke="%23C9A84C" stroke-width="1" opacity="0.1"/%3E%3C/svg%3E');
+            background-size: cover, 400px 400px;
+            background-position: center, center;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1545569341-9eb8b30979d9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center center / cover no-repeat;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .hero-bg>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .grade-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: default;
+        }
+        .grade-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .grade-card.locked {
+            opacity: 0.7;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+
+        .grade-card.locked:hover {
+            transform: none;
+        }
+
+        .navbar-link {
+            position: relative;
+            padding-bottom: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .navbar-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #C9A84C;
+            transition: width 0.3s ease;
+        }
+        .navbar-link:hover::after,
+        .navbar-link.active::after {
+            width: 100%;
+        }
+        .navbar-link:hover,
+        .navbar-link.active {
+            color: #C9A84C;
+        }
+
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+
+        .document-item {
+            transition: background 0.2s;
+        }
+        .document-item:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .admin-btn {
+            transition: all 0.2s;
+        }
+        .admin-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s, transform 0.4s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #2C2C2C;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #1a1a1a;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #C9A84C;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: #C9A84C;
+            color: #1a1a1a;
+        }
+        .btn-primary:hover {
+            background: #d4b85a;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(201, 168, 76, 0.4);
+            color: #C9A84C;
+        }
+        .btn-secondary:hover {
+            background: rgba(201, 168, 76, 0.1);
+        }
+        .btn-danger {
+            background: #8B0000;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #a00000;
+        }
+
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A84C' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        .admin-stat {
+            background: rgba(201, 168, 76, 0.05);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-bg {
+                min-height: 200px;
+            }
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+
+    <!-- MODAL CONNEXION -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-garamond text-[#C9A84C]">Connexion</h2>
+                <button onclick="closeModal('loginModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Identifiant</label>
+                    <input type="text" id="loginId" class="form-input" placeholder="Votre identifiant" />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Mot de passe</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="Votre mot de passe"
+                    onkeydown="if(event.key==='Enter') handleLogin()" />
+                </div>
+                <button onclick="handleLogin()" class="btn btn-primary w-full mt-2">Se connecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHANGER MDP (admin) -->
+    <div class="modal-overlay" id="changePwdModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-garamond text-[#C9A84C]">Changer le mot de passe</h2>
+                <button onclick="closeModal('changePwdModal')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Nouveau mot de passe</label>
+                    <input type="password" id="newPwd" class="form-input" placeholder="Nouveau mot de passe" />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Confirmer</label>
+                    <input type="password" id="confirmPwd" class="form-input" placeholder="Confirmer"
+                    onkeydown="if(event.key==='Enter') changePassword()" />
+                </div>
+                <button onclick="changePassword()" class="btn btn-primary w-full mt-2">Changer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-[#1a1a1a]/95 backdrop-blur-sm border-b border-[#C9A84C]/20">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('accueil')">
+                <div class="w-10 h-10 rounded-full border-2 border-[#C9A84C] flex items-center justify-center text-[#C9A84C] font-garamond text-lg font-bold">☉</div>
+                <span class="font-garamond text-xl text-white hidden sm:block">731 Archives</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm text-gray-300">
+                <span class="navbar-link active" data-page="accueil" onclick="showPage('accueil')">Accueil</span>
+                <span class="navbar-link" data-page="histoire" onclick="showPage('histoire')">Histoire</span>
+                <span class="navbar-link" data-page="archives" onclick="showPage('archives')">Archives</span>
+                <span class="navbar-link" data-page="photos" onclick="showPage('photos')">Photos & Vidéos</span>
+                <span class="navbar-link" data-page="contact" onclick="showPage('contact')">Contact</span>
+                <span id="loginBtn" class="navbar-link text-[#C9A84C]" onclick="openModal('loginModal')">Connexion</span>
+                <span id="adminBtn" class="navbar-link text-[#C9A84C] hidden" onclick="showPage('admin')">Admin</span>
+                <span id="logoutBtn" class="navbar-link text-red-400 hidden" onclick="handleLogout()">Déconnexion</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero-bg flex items-center justify-center" style="margin-top:64px;">
+        <div class="text-center py-12 px-4">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full border-2 border-[#C9A84C] flex items-center justify-center text-[#C9A84C] font-garamond text-3xl font-bold">☉</div>
+            <h1 class="text-4xl md:text-5xl font-garamond font-bold text-white mb-2">731 Archives</h1>
+            <p class="text-lg md:text-xl text-[#E8D48B] font-garamond italic">Loge « L'Étoile du Temple » — Orient de ...</p>
+            <div class="w-24 h-0.5 bg-[#C9A84C]/60 mx-auto mt-4"></div>
+        </div>
+    </div>
+      <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 py-8 text-white">
+
+        <!-- PAGE ACCUEIL -->
+        <div class="page-content active" id="page-accueil">
+            <div class="text-center mb-12">
+                <p class="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                    Bienvenue sur les archives numériques de la Loge <span class="text-[#C9A84C] font-garamond italic">L'Étoile du Temple</span>.
+                    Consultez les travaux, documents et souvenirs de notre atelier.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <!-- Apprenti -->
+                <div class="grade-card locked rounded-xl p-8 text-center border border-[#C9A84C]/20 bg-[#2C2C2C]"
+                data-grade="apprenti" onclick="handleGradeClick('apprenti')">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#800020]/30 border border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C] text-2xl">△</div>
+                <h3 class="text-2xl font-garamond text-[#C9A84C] mb-2">Apprenti</h3>
+                <p class="text-sm text-gray-400 mb-3">1er Degré</p>
+                <div class="text-xs text-gray-500">Connectez-vous pour accéder</div>
+                <div class="mt-3 text-gray-600 text-lg">🔒</div>
+            </div>
+
+            <!-- Compagnon -->
+            <div class="grade-card locked rounded-xl p-8 text-center border border-[#C9A84C]/20 bg-[#2C2C2C]"
+            data-grade="compagnon" onclick="handleGradeClick('compagnon')">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#800020]/30 border border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C] text-2xl">▽</div>
+            <h3 class="text-2xl font-garamond text-[#C9A84C] mb-2">Compagnon</h3>
+            <p class="text-sm text-gray-400 mb-3">2e Degré</p>
+            <div class="text-xs text-gray-500">Connectez-vous pour accéder</div>
+            <div class="mt-3 text-gray-600 text-lg">🔒</div>
+        </div>
+
+        <!-- Maître -->
+        <div class="grade-card locked rounded-xl p-8 text-center border border-[#C9A84C]/20 bg-[#2C2C2C]"
+        data-grade="maitre" onclick="handleGradeClick('maitre')">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#800020]/30 border border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C] text-2xl">◇</div>
+        <h3 class="text-2xl font-garamond text-[#C9A84C] mb-2">Maître</h3>
+        <p class="text-sm text-gray-400 mb-3">3e Degré</p>
+        <div class="text-xs text-gray-500">Connectez-vous pour accéder</div>
+        <div class="mt-3 text-gray-600 text-lg">🔒</div>
+    </div>
+</div>
+
+<div class="text-center text-gray-500 text-sm border-t border-[#C9A84C]/10 pt-8">
+    <p>« Un homme libre et de bonnes mœurs »</p>
+    <p class="text-xs text-gray-600 mt-1">— Ancienne devise maçonnique</p>
+</div>
+</div>
+
+<!-- PAGE HISTOIRE -->
+<div class="page-content" id="page-histoire">
+    <h2 class="text-3xl font-garamond text-[#C9A84C] mb-6 border-b border-[#C9A84C]/20 pb-3">Histoire de la Loge</h2>
+    <div class="prose prose-invert max-w-4xl">
+        <p class="text-gray-300 leading-relaxed mb-6">
+            Ici vous pourrez raconter la naissance de la Loge <span class="text-[#C9A84C] font-garamond italic">L'Étoile du Temple</span>,
+            fondée en 1956. À vous d'écrire l'histoire, les origines, les figures marquantes,
+            les orient successifs, et les grandes étapes de votre atelier.
+        </p>
+        <div class="bg-[#2C2C2C] border border-[#C9A84C]/10 rounded-xl p-6 mb-6">
+            <h3 class="text-xl font-garamond text-[#E8D48B] mb-3">1956 — Fondation</h3>
+            <p class="text-gray-400">[À compléter — racontez ici les circonstances de la fondation]</p>
+        </div>
+        <div class="bg-[#2C2C2C] border border-[#C9A84C]/10 rounded-xl p-6 mb-6">
+            <h3 class="text-xl font-garamond text-[#E8D48B] mb-3">Nos Évolutions</h3>
+            <p class="text-gray-400">[À compléter — dates clés, événements, personnalités]</p>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE ARCHIVES -->
+<div class="page-content" id="page-archives">
+    <h2 class="text-3xl font-garamond text-[#C9A84C] mb-6 border-b border-[#C9A84C]/20 pb-3">Archives</h2>
+
+    <div id="archives-connect-message" class="text-center py-12 text-gray-500">
+        <p class="text-lg">Connectez-vous pour consulter les archives.</p>
+        <button onclick="openModal('loginModal')" class="btn btn-secondary mt-4">Se connecter</button>
+    </div>
+
+    <div id="archives-content" class="hidden">
+        <div class="flex flex-wrap gap-3 mb-6">
+            <button class="btn btn-secondary text-sm" data-filter="all" onclick="filterArchives('all')">Tous</button>
+            <button class="btn btn-secondary text-sm" data-filter="apprenti" onclick="filterArchives('apprenti')">Apprenti</button>
+            <button class="btn btn-secondary text-sm" data-filter="compagnon" onclick="filterArchives('compagnon')">Compagnon</button>
+            <button class="btn btn-secondary text-sm" data-filter="maitre" onclick="filterArchives('maitre')">Maître</button>
+        </div>
+        <div id="documents-list" class="space-y-3">
+            <p class="text-gray-500 italic">Aucun document pour le moment.</p>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE PHOTOS & VIDEOS -->
+<div class="page-content" id="page-photos">
+    <h2 class="text-3xl font-garamond text-[#C9A84C] mb-6 border-b border-[#C9A84C]/20 pb-3">Photos & Vidéos</h2>
+
+    <div id="photos-connect-message" class="text-center py-12 text-gray-500">
+        <p class="text-lg">Connectez-vous pour voir les souvenirs de nos voyages.</p>
+        <button onclick="openModal('loginModal')" class="btn btn-secondary mt-4">Se connecter</button>
+    </div>
+
+    <div id="photos-content" class="hidden">
+        <div id="media-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <p class="text-gray-500 italic col-span-full">Aucune photo ou vidéo pour le moment.</p>
+        </div>
+    </div>
+</div>
+ <!-- PAGE CONTACT -->
+        <div class="page-content" id="page-contact">
+            <h2 class="text-3xl font-garamond text-[#C9A84C] mb-6 border-b border-[#C9A84C]/20 pb-3">Contact</h2>
+            <div class="max-w-xl">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-1">Votre email</label>
+                        <input type="email" class="form-input" placeholder="email@exemple.fr" />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-300 mb-1">Message</label>
+                        <textarea class="form-input" rows="5" placeholder="Votre message..."></textarea>
+                    </div>
+                    <button class="btn btn-primary">Envoyer</button>
+                </div>
+                <div class="mt-10 text-gray-400 text-sm">
+                    <p class="mb-2">📍 Orient de ...</p>
+                    <p>✉️ Contact par email via le formulaire ci-dessus</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE ADMIN (réservée) -->
+        <div class="page-content" id="page-admin">
+            <div class="flex justify-between items-center mb-6 border-b border-[#C9A84C]/20 pb-3">
+                <h2 class="text-3xl font-garamond text-[#C9A84C]">Administration</h2>
+                <button onclick="openModal('changePwdModal')" class="btn btn-secondary text-sm">Changer mot de passe</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="admin-stat text-center">
+                    <p class="text-2xl font-garamond text-[#C9A84C]" id="stat-membres">0</p>
+                    <p class="text-xs text-gray-400">Membres</p>
+                </div>
+                <div class="admin-stat text-center">
+                    <p class="text-2xl font-garamond text-[#C9A84C]" id="stat-docs">0</p>
+                    <p class="text-xs text-gray-400">Documents</p>
+                </div>
+                <div class="admin-stat text-center">
+                    <p class="text-2xl font-garamond text-[#C9A84C]" id="stat-apprentis">0</p>
+                    <p class="text-xs text-gray-400">Apprentis</p>
+                </div>
+                <div class="admin-stat text-center">
+                    <p class="text-2xl font-garamond text-[#C9A84C]" id="stat-maitres">0</p>
+                    <p class="text-xs text-gray-400">Maîtres</p>
+                </div>
+            </div>
+
+            <!-- Sections admin -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Membres -->
+                <div class="bg-[#2C2C2C] rounded-xl p-6 border border-[#C9A84C]/10">
+                    <h3 class="text-xl font-garamond text-[#E8D48B] mb-4">Membres</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newMemberName" class="form-input flex-1" placeholder="Prénom Nom" />
+                        <select id="newMemberGrade" class="form-input w-32">
+                            <option value="apprenti">Apprenti</option>
+                            <option value="compagnon">Compagnon</option>
+                            <option value="maitre">Maître</option>
+                        </select>
+                        <button onclick="addMember()" class="btn btn-primary text-sm px-4">+</button>
+                    </div>
+                    <div id="members-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- généré par JS -->
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="bg-[#2C2C2C] rounded-xl p-6 border border-[#C9A84C]/10">
+                    <h3 class="text-xl font-garamond text-[#E8D48B] mb-4">Documents</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newDocName" class="form-input flex-1" placeholder="Nom du document" />
+                    </div>
+                    <div class="flex gap-2 mb-4">
+                        <select id="newDocGrade" class="form-input flex-1">
+                            <option value="apprenti">Apprenti</option>
+                            <option value="compagnon">Compagnon</option>
+                            <option value="maitre">Maître</option>
+                        </select>
+                        <select id="newDocType" class="form-input w-24">
+                            <option value="PDF">PDF</option>
+                            <option value="DOC">DOC</option>
+                            <option value="XLS">XLS</option>
+                        </select>
+                        <button onclick="addDocument()" class="btn btn-primary text-sm px-4">+</button>
+                    </div>
+                    <div id="documents-admin-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- généré par JS -->
+                    </div>
+                </div>
+
+                <!-- Médias -->
+                <div class="bg-[#2C2C2C] rounded-xl p-6 border border-[#C9A84C]/10">
+                    <h3 class="text-xl font-garamond text-[#E8D48B] mb-4">Photos & Vidéos</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newMediaUrl" class="form-input flex-1" placeholder="Lien URL de l'image/vidéo" />
+                    </div>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newMediaTitle" class="form-input flex-1" placeholder="Titre / description" />
+                        <select id="newMediaType" class="form-input w-28">
+                            <option value="photo">Photo</option>
+                            <option value="video">Vidéo</option>
+                        </select>
+                        <button onclick="addMedia()" class="btn btn-primary text-sm px-4">+</button>
+                    </div>
+                    <div id="media-admin-list" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- généré par JS -->
+                    </div>
+                </div>
+
+                <!-- Sauvegarde -->
+                <div class="bg-[#2C2C2C] rounded-xl p-6 border border-[#C9A84C]/10">
+                    <h3 class="text-xl font-garamond text-[#E8D48B] mb-4">Sauvegarde & Export</h3>
+                    <p class="text-sm text-gray-400 mb-4">Exportez ou importez toutes les données du site.</p>
+                    <div class="flex gap-3">
+                        <button onclick="exportData()" class="btn btn-secondary text-sm">📥 Exporter</button>
+                        <button onclick="document.getElementById('importFile').click()" class="btn btn-secondary text-sm">📤 Importer</button>
+                    </div>
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)" />
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-[#C9A84C]/10 py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
+            <p class="font-garamond text-[#C9A84C] text-lg mb-2">☉ 731 Archives</p>
+            <p>Loge « L'Étoile du Temple » · Fondée en 1956</p>
+            <p class="mt-2 text-xs text-gray-600">© 2026 · Tous droits réservés</p>
+        </div>
+    </footer>
+    <!-- JAVASCRIPT -->
+    <script>
+        // ADMIN : RL731 / 08051956
+        const ADMIN_ID = 'RL731';
+        let ADMIN_PWD = localStorage.getItem('adminPwd') || '08051956';
+        let loggedInUser = null; // { name, grade } ou { isAdmin: true }
+        let members = JSON.parse(localStorage.getItem('members')) || [];
+        let documents = JSON.parse(localStorage.getItem('documents')) || [];
+        let mediaItems = JSON.parse(localStorage.getItem('mediaItems')) || [];
+
+        // Toast
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.background = type === 'success' ? '#2d6a2d' : '#8B0000';
+            t.className = 'toast show';
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+        function showPage(page) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            document.querySelectorAll('.navbar-link[data-page]').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`.navbar-link[data-page="${page}"]`);
+            if (link) link.classList.add('active');
+            if (page === 'admin' && (!loggedInUser || !loggedInUser.isAdmin)) { showPage('accueil'); return; }
+            if (page === 'admin') refreshAdmin();
+            if (page === 'archives') refreshArchives();
+            if (page === 'photos') refreshPhotos();
+        }
+
+        // Connexion
+        function handleLogin() {
+            const id = document.getElementById('loginId').value.trim();
+            const pwd = document.getElementById('loginPassword').value.trim();
+
+            // Admin
+            if (id === ADMIN_ID && pwd === ADMIN_PWD) {
+                loggedInUser = { isAdmin: true };
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                document.getElementById('adminBtn').classList.remove('hidden');
+                closeModal('loginModal');
+                showToast('Connecté en tant qu\'administrateur');
+                showPage('admin');
+                return;
+            }
+
+            // Membre
+            const member = members.find(m => m.name.toLowerCase() === id.toLowerCase());
+            if (member) {
+                // Vérifier le mot de passe du membre (stocké dans member.pwd ou par défaut "1234")
+                const memberPwd = member.pwd || '1234';
+                if (pwd !== memberPwd) {
+                    showToast('Mot de passe incorrect', 'error');
+                    return;
+                }
+                loggedInUser = { name: member.name, grade: member.grade };
+                document.getElementById('loginBtn').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                closeModal('loginModal');
+                showToast('Connecté en tant que ' + member.name + ' (' + member.grade + ')');
+                showPage('archives');
+                updateGradeCards();
+                return;
+            }
+
+            showToast('Identifiant ou mot de passe incorrect', 'error');
+        }
+
+        function handleLogout() {
+            loggedInUser = null;
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('adminBtn').classList.add('hidden');
+            showToast('Déconnecté');
+            updateGradeCards();
+            showPage('accueil');
+        }
+
+        // Changement mot de passe admin
+        function changePassword() {
+            const np = document.getElementById('newPwd').value;
+            const cp = document.getElementById('confirmPwd').value;
+            if (!np || np.length < 4) { showToast('Minimum 4 caractères', 'error'); return; }
+            if (np !== cp) { showToast('Les mots de passe ne correspondent pas', 'error'); return; }
+            ADMIN_PWD = np;
+            localStorage.setItem('adminPwd', np);
+            closeModal('changePwdModal');
+            document.getElementById('newPwd').value = '';
+            document.getElementById('confirmPwd').value = '';
+            showToast('Mot de passe modifié avec succès');
+        }
+
+        // Grades
+        function handleGradeClick(grade) {
+            if (!loggedInUser) { openModal('loginModal'); return; }
+            if (loggedInUser.isAdmin) { showPage('archives'); return; }
+            const access = getUserGradeAccess(loggedInUser.grade);
+            if (access.includes(grade)) { showPage('archives');
+                filterArchives(grade); } else { showToast('Accès non autorisé à ce grade', 'error'); }
+        }
+
+        function getUserGradeAccess(userGrade) {
+            const map = { apprenti: ['apprenti'], compagnon: ['apprenti', 'compagnon'], maitre: ['apprenti', 'compagnon',
+                    'maitre'
+                ] };
+            return map[userGrade] || [];
+        }
+
+        function updateGradeCards() {
+            document.querySelectorAll('.grade-card').forEach(c => {
+                const g = c.dataset.grade;
+                if (!loggedInUser) {
+                    c.classList.add('locked');
+                    c.querySelector('.text-xs').textContent = 'Connectez-vous pour accéder';
+                    c.querySelector('.text-gray-600').textContent = '🔒';
+                    return;
+                }
+                if (loggedInUser.isAdmin) {
+                    c.classList.remove('locked');
+                    c.querySelector('.text-xs').textContent = 'Accès administrateur';
+                    c.querySelector('.text-gray-600').textContent = '🔓';
+                    return;
+                }
+                const access = getUserGradeAccess(loggedInUser.grade);
+                if (access.includes(g)) {
+                    c.classList.remove('locked');
+                    c.querySelector('.text-xs').textContent = 'Accès autorisé';
+                    c.querySelector('.text-gray-600').textContent = '🔓';
+                } else {
+                    c.classList.add('locked');
+                    c.querySelector('.text-xs').textContent = 'Grade insuffisant';
+                    c.querySelector('.text-gray-600').textContent = '🔒';
+                }
+            });
+        }
+
+        // Membres (admin)
+        function addMember() {
+            const name = document.getElementById('newMemberName').value.trim();
+            const grade = document.getElementById('newMemberGrade').value;
+            if (!name) { showToast('Entrez un nom', 'error'); return; }
+            if (members.find(m => m.name.toLowerCase() === name.toLowerCase())) { showToast('Ce membre existe déjà',
+                    'error'); return; }
+            // Mot de passe par défaut : "1234"
+            members.push({ name, grade, pwd: '1234' });
+            localStorage.setItem('members', JSON.stringify(members));
+            document.getElementById('newMemberName').value = '';
+            refreshAdmin();
+            showToast('Membre ajouté : ' + name + ' (' + grade + ')');
+        }
+
+        function removeMember(index) {
+            const name = members[index].name;
+            members.splice(index, 1);
+            localStorage.setItem('members', JSON.stringify(members));
+            refreshAdmin();
+            showToast('Membre supprimé : ' + name);
+        }
+
+        // Documents (admin)
+        function addDocument() {
+            const name = document.getElementById('newDocName').value.trim();
+            const grade = document.getElementById('newDocGrade').value;
+            const type = document.getElementById('newDocType').value;
+            if (!name) { showToast('Entrez un nom de document', 'error'); return; }
+            documents.push({ name, grade, type, date: new Date().toLocaleDateString('fr-FR') });
+            localStorage.setItem('documents', JSON.stringify(documents));
+            document.getElementById('newDocName').value = '';
+            refreshAdmin();
+            showToast('Document ajouté');
+        }
+
+        function removeDocument(index) {
+            documents.splice(index, 1);
+            localStorage.setItem('documents', JSON.stringify(documents));
+            refreshAdmin();
+            showToast('Document supprimé');
+        }
+
+        // Médias (admin)
+        function addMedia() {
+            const url = document.getElementById('newMediaUrl').value.trim();
+            const title = document.getElementById('newMediaTitle').value.trim();
+            const type = document.getElementById('newMediaType').value;
+            if (!url) { showToast('Entrez une URL', 'error'); return; }
+            mediaItems.push({ url, title: title || 'Sans titre', type, date: new Date().toLocaleDateString('fr-FR') });
+            localStorage.setItem('mediaItems', JSON.stringify(mediaItems));
+            document.getElementById('newMediaUrl').value = '';
+            document.getElementById('newMediaTitle').value = '';
+            refreshAdmin();
+            showToast('Média ajouté');
+        }
+
+        function removeMedia(index) {
+            mediaItems.splice(index, 1);
+            localStorage.setItem('mediaItems', JSON.stringify(mediaItems));
+            refreshAdmin();
+            showToast('Média supprimé');
+        }
+
+        // Filtrage archives
+        let archiveFilter = 'all';
+
+        function filterArchives(grade) {
+            archiveFilter = grade;
+            document.querySelectorAll('[data-filter]').forEach(b => {
+                b.classList.toggle('btn-primary', b.dataset.filter === grade);
+                b.classList.toggle('btn-secondary', b.dataset.filter !== grade);
+            });
+            refreshArchives();
+        }
+
+        // Rafraîchir archives selon l'utilisateur connecté
+        function refreshArchives() {
+            const msg = document.getElementById('archives-connect-message');
+            const content = document.getElementById('archives-content');
+            if (!loggedInUser) { msg.classList.remove('hidden');
+                content.classList.add('hidden'); return; }
+            msg.classList.add('hidden');
+            content.classList.remove('hidden');
+
+            let access;
+            if (loggedInUser.isAdmin) {
+                access = ['apprenti', 'compagnon', 'maitre'];
+            } else {
+                access = getUserGradeAccess(loggedInUser.grade);
+            }
+
+            let docs = documents.filter(d => access.includes(d.grade));
+            if (archiveFilter !== 'all') docs = docs.filter(d => d.grade === archiveFilter);
+
+            const list = document.getElementById('documents-list');
+            if (docs.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 italic">Aucun document disponible pour votre grade.</p>';
+                return;
+            }
+            list.innerHTML = docs.map(d =>
+                `<div class="document-item flex items-center justify-between p-3 rounded-lg border border-[#C9A84C]/10 bg-[#2C2C2C]">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm px-2 py-0.5 rounded bg-[#800020]/40 text-[#E8D48B] text-xs">${d.type}</span>
+                            <span class="text-gray-200">${d.name}</span>
+                            <span class="text-xs text-gray-500">${d.date}</span>
+                        </div>
+                        <span class="text-xs text-[#C9A84C] capitalize">${d.grade}</span>
+                    </div>`
+            ).join('');
+        }
+
+        // Rafraîchir photos
+        function refreshPhotos() {
+            const msg = document.getElementById('photos-connect-message');
+            const content = document.getElementById('photos-content');
+            if (!loggedInUser) { msg.classList.remove('hidden');
+                content.classList.add('hidden'); return; }
+            msg.classList.add('hidden');
+            content.classList.remove('hidden');
+
+            const grid = document.getElementById('media-grid');
+            if (mediaItems.length === 0) {
+                grid.innerHTML = '<p class="text-gray-500 italic col-span-full">Aucune photo ou vidéo pour le moment.</p>';
+                return;
+            }
+            grid.innerHTML = mediaItems.map(m =>
+                `<div class="relative group rounded-lg overflow-hidden border border-[#C9A84C]/10 bg-[#2C2C2C]">
+                        ${m.type === 'video'
+                            ? `<div class="aspect-video flex items-center justify-center bg-black/50 text-4xl">▶️</div>`
+                            : `<div class="aspect-square flex items-center justify-center bg-black/30 text-4xl">🖼️</div>`}
+                        <div class="p-2 text-xs text-gray-400 truncate">${m.title}</div>
+                    </div>`
+            ).join('');
+        }
+
+        // Admin refresh
+        function refreshAdmin() {
+            // Stats
+            document.getElementById('stat-membres').textContent = members.length;
+            document.getElementById('stat-docs').textContent = documents.length;
+            document.getElementById('stat-apprentis').textContent = members.filter(m => m.grade === 'apprenti').length;
+            document.getElementById('stat-maitres').textContent = members.filter(m => m.grade === 'maitre').length;
+
+            // Liste membres
+            const ml = document.getElementById('members-list');
+            if (members.length === 0) {
+                ml.innerHTML = '<p class="text-gray-500 text-sm italic">Aucun membre inscrit.</p>';
+            } else {
+                ml.innerHTML = members.map((m, i) =>
+                    `<div class="flex items-center justify-between p-2 rounded bg-[#1a1a1a] border border-[#C9A84C]/5">
+                            <div><span class="text-gray-200 text-sm">${m.name}</span> <span class="text-xs text-[#C9A84C] capitalize">(${m.grade})</span></div>
+                            <button onclick="removeMember(${i})" class="text-red-400 text-xs hover:text-red-300">Supprimer</button>
+                        </div>`
+                ).join('');
+            }
+
+            // Liste documents admin
+            const dl = document.getElementById('documents-admin-list');
+            if (documents.length === 0) {
+                dl.innerHTML = '<p class="text-gray-500 text-sm italic">Aucun document.</p>';
+            } else {
+                dl.innerHTML = documents.map((d, i) =>
+                    `<div class="flex items-center justify-between p-2 rounded bg-[#1a1a1a] border border-[#C9A84C]/5">
+                            <div><span class="text-xs px-1.5 py-0.5 rounded bg-[#800020]/40 text-[#E8D48B]">${d.type}</span>
+                            <span class="text-gray-200 text-sm ml-2">${d.name}</span>
+                            <span class="text-xs text-[#C9A84C] capitalize ml-2">${d.grade}</span></div>
+                            <button onclick="removeDocument(${i})" class="text-red-400 text-xs hover:text-red-300">Supprimer</button>
+                        </div>`
+                ).join('');
+            }
+
+            // Liste médias admin
+            const mal = document.getElementById('media-admin-list');
+            if (mediaItems.length === 0) {
+                mal.innerHTML = '<p class="text-gray-500 text-sm italic">Aucun média.</p>';
+            } else {
+                mal.innerHTML = mediaItems.map((m, i) =>
+                    `<div class="flex items-center justify-between p-2 rounded bg-[#1a1a1a] border border-[#C9A84C]/5">
+                            <div><span class="text-gray-200 text-sm">${m.title}</span> <span class="text-xs text-gray-500">(${m.type})</span></div>
+                            <button onclick="removeMedia(${i})" class="text-red-400 text-xs hover:text-red-300">Supprimer</button>
+                        </div>`
+                ).join('');
+            }
+        }
+
+        // Export / Import
+        function exportData() {
+            const data = { members, documents, mediaItems };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = '731archives-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            showToast('Données exportées');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.members) { members = data.members;
+                        localStorage.setItem('members', JSON.stringify(members)); }
+                    if (data.documents) { documents = data.documents;
+                        localStorage.setItem('documents', JSON.stringify(documents)); }
+                    if (data.mediaItems) { mediaItems = data.mediaItems;
+                        localStorage.setItem('mediaItems', JSON.stringify(mediaItems)); }
+                    refreshAdmin();
+                    showToast('Données importées avec succès');
+                } catch (err) { showToast('Fichier invalide', 'error'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Init
+        updateGradeCards();
+        if (members.length > 0 || documents.length > 0 || mediaItems.length > 0) {
+            showToast('Bienvenue sur 731 Archives');
+        }
+    </script>
+</body>
+</html>
