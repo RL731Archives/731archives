@@ -5,17 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>731 Archives — Étoile du Temple</title>
   <style>
-    :root{
-      --bg:#F5F0E8;
-      --bordeaux:#800020;
-      --gold:#D4AF37;
-      --text:#2a2a2a;
-      --card1:#fffaf6;
-      --card2:#f0ece8;
-      --card3:#e7e2de;
-      --radius:8px;
-      --shadow:0 4px 12px rgba(0,0,0,0.08);
-    }
+    :root{--bg:#F5F0E8;--bordeaux:#800020;--gold:#D4AF37;--text:#2a2a2a;--card1:#fffaf6;--card2:#f0ece8;--card3:#e7e2de}
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
@@ -29,16 +19,14 @@
     .btn-danger{background:#c62828;color:#fff}
     .btn-green{background:#2e7d32;color:#fff}
     .btn-sort{background:transparent;border:none;cursor:pointer;color:inherit;font-weight:600;font-size:13px;padding:0 2px;display:inline-flex;align-items:center;gap:3px}
-    .btn-sort:hover{opacity:0.8}
     nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
     nav ul{list-style:none;display:flex}
     nav li{flex:1}
-    nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer;transition:.2s}
-    nav a:hover{color:var(--gold)}
-    nav a.active{color:var(--gold);background:rgba(0,0,0,0.1)}
+    nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer}
+    nav a:hover,nav a.active{color:var(--gold)}
     .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
     .banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
-    .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.0) 50%,rgba(0,0,0,0.4) 100%);display:flex;align-items:center;justify-content:center;padding:24px}
+    .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,0.4));display:flex;align-items:center;justify-content:center;padding:24px}
     .banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center}
     .page{display:none}
     .page.active{display:block}
@@ -50,48 +38,33 @@
     .card.compagnon{background:var(--card2)}
     .card.maitre{background:var(--card3)}
     .card .sub-list{list-style:none;margin-top:6px}
-    .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;transition:.2s;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .card .sub-list li .emoji-icon{font-size:16px;vertical-align:middle;margin-right:4px}
-    .card .sub-list li:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+    .card .sub-list li:hover{background:var(--gold);color:#fff}
     .two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
     .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
     .admin-panel h3{color:var(--bordeaux);margin-bottom:8px}
     .admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
     .admin-panel label{font-size:12px;color:#777}
-    .admin-panel .row{display:flex;gap:8px;margin-bottom:8px}
+    .admin-panel .row{display:flex;gap:8px}
     .admin-panel .row>*{flex:1}
-    .admin-panel .mini-btn{font-size:11px;padding:2px 8px}
     footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
     .doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
     .doc-item .icon{font-size:24px;cursor:pointer}
     .doc-item .info{flex:1}
     .doc-item .info strong{display:block;font-size:14px;cursor:pointer}
-    .doc-item .info strong:hover{color:var(--bordeaux)}
     .doc-item .info span{font-size:11px;color:#888}
-    .badge{font-size:11px;padding:2px 8px;border-radius:10px;color:#fff;display:inline-block}
-    .badge-1{background:#8B4513}
-    .badge-2{background:#4A6741}
-    .badge-3{background:var(--bordeaux)}
     .msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
     .msg.error{background:#ffebee;color:#c62828}
     .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
     .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
-    .history-link{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:5px;margin-bottom:4px;border:1px solid #eee}
-    .history-link a{flex:1;color:var(--bordeaux);text-decoration:none;font-size:13px}
-    .history-link a:hover{text-decoration:underline}
     .sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
     .sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
     .sub-tabs button.active{background:var(--bordeaux);color:#fff}
-    .niveau-tabs{display:flex;gap:0;margin-bottom:12px;border-radius:5px;overflow:hidden;border:1px solid var(--gold)}
-    .niveau-tabs button{flex:1;padding:10px;border:none;background:var(--gold);color:#fff;cursor:pointer;font-weight:700;font-size:14px;opacity:0.6}
-    .niveau-tabs button.active{opacity:1;background:var(--bordeaux)}
     .rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
-    .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center;transition:.2s}
+    .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center}
     .rubrique-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.12)}
     .rubrique-card h4{color:var(--bordeaux);font-size:14px;margin-bottom:4px}
-    .rubrique-card .count{font-size:12px;color:#888}
-    .rubrique-card.active{background:var(--gold);color:#fff}
-    .rubrique-card.active h4{color:#fff}
     #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
     #loginOverlay.open{display:grid}
     #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
@@ -103,25 +76,21 @@
     #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
     #viewerOverlay .viewer-header h3{font-size:16px}
     #viewerOverlay .viewer-header button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:14px}
-    #viewerOverlay .viewer-header button:hover{background:rgba(255,255,255,0.15)}
     #viewerOverlay .viewer-body{padding:18px;text-align:center;min-height:100px}
     #viewerOverlay .viewer-body img{max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto}
-    #viewerOverlay .viewer-body video{max-width:100%;max-height:65vh;border-radius:4px}
     #viewerOverlay .viewer-body iframe{width:100%;height:65vh;border:none;border-radius:4px}
     #viewerOverlay .viewer-body .embed-pdf{width:100%;height:65vh;border:none;border-radius:4px}
     #viewerOverlay .viewer-body .text-preview{padding:20px;background:#f9f9f9;border-radius:4px;font-size:14px;line-height:1.6;text-align:left;max-height:55vh;overflow-y:auto}
     .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
-
-    /* Styles spécifiques pour l'upload de documents Histoire */
-    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.2s}
+    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
     .upload-zone:hover{background:#f5f0e0}
     .upload-zone.dragover{background:#efe5c8;border-color:var(--bordeaux)}
     .upload-zone .icon{font-size:40px;color:var(--gold)}
     .upload-zone p{color:#888;font-size:13px;margin-top:6px}
     .upload-progress{height:6px;background:#eee;border-radius:3px;margin:8px 0;overflow:hidden;display:none}
-    .upload-progress .bar{height:100%;background:var(--gold);width:0%;border-radius:3px;transition:width .3s}
+    .upload-progress .bar{height:100%;background:var(--gold);width:0%;border-radius:3px}
     .histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-    .histo-doc .preview{width:48px;height:48px;border-radius:4px;object-fit:cover;background:#f0ece8;display:grid;place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
+    .histo-doc .preview{width:48px;height:48px;border-radius:4px;background:#f0ece8;display:grid;place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
     .histo-doc .preview img{width:100%;height:100%;object-fit:cover}
     .histo-doc .info{flex:1;min-width:0}
     .histo-doc .info strong{display:block;font-size:14px}
@@ -129,16 +98,14 @@
     .histo-doc .actions{display:flex;gap:4px;flex-shrink:0}
     .histo-doc .actions button{padding:4px 10px;font-size:11px;border-radius:4px;border:none;cursor:pointer}
     .histo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
-    .histo-gallery-item{border:1px solid #eee;border-radius:6px;overflow:hidden;background:#fff;transition:.2s}
+    .histo-gallery-item{border:1px solid #eee;border-radius:6px;overflow:hidden;background:#fff}
     .histo-gallery-item:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1)}
     .histo-gallery-item .thumb{height:140px;background:#f0ece8;display:grid;place-items:center;overflow:hidden}
     .histo-gallery-item .thumb img{width:100%;height:100%;object-fit:cover}
-    .histo-gallery-item .thumb .icon{font-size:36px;color:var(--gold)}
     .histo-gallery-item .caption{padding:8px;font-size:12px;color:var(--text)}
     .histo-gallery-item .caption strong{display:block;font-size:13px}
-    .histo-gallery-item .caption span{color:#888;font-size:10px}
+    .histo-gallery-item .caption span{color:#888;font-size:10px;display:block}
     .histo-doc-admin-section{border-top:1px solid #ddd;margin-top:16px;padding-top:14px}
-
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -146,81 +113,50 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
-
 <header>
-  <div class="brand">
-    <div class="logo">★</div>
-    <div class="site-title">Archives de l'Étoile du Temple</div>
-  </div>
-  <div>
-    <button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button>
-    <button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button>
-  </div>
+  <div class="brand"><div class="logo">★</div><div class="site-title">Archives de l'Étoile du Temple</div></div>
+  <div><button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button><button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button></div>
 </header>
-
-<nav>
-  <ul>
-    <li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li>
-    <li><a onclick="showPage('histoire',this)">Histoire</a></li>
-    <li><a onclick="showPage('archives',this)">Archives</a></li>
-    <li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li>
-    <li><a onclick="showPage('contact',this)">Contact</a></li>
-  </ul>
-</nav>
-
-<div class="banner">
-  <img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge maçonnique" />
-  <div class="overlay">
-    <div>
-      <h1>Archives de l'Étoile du Temple</h1>
-    </div>
-  </div>
-</div>
-
+<nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
+<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge" /><div class="overlay"><div><h1>Archives de l'Étoile du Temple</h1></div></div></div>
 <!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
   <div class="two-col">
     <div>
       <h2 style="color:var(--bordeaux);margin-bottom:10px">Bienvenue</h2>
-      <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple. Connectez-vous selon votre grade pour accéder aux documents.</p>
+      <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple.</p>
       <div class="cards">
-        <div class="card apprenti" data-grade-card="1">
-          <h3>APPRENTI</h3>
-          <div class="lock">🔒</div>
+        <div class="card apprenti" data-grade-card="1"><h3>APPRENTI</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-sub="rituels1" data-grade="1"><span class="emoji-icon">📜</span> Rituels du 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1"><span class="emoji-icon">📝</span> Planches d'Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1"><span class="emoji-icon">📝</span> Planches de Maîtres au 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 1° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
           </ul>
         </div>
-        <div class="card compagnon" data-grade-card="2">
-          <h3>COMPAGNON</h3>
-          <div class="lock">🔒</div>
+        <div class="card compagnon" data-grade-card="2"><h3>COMPAGNON</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-sub="rituels1" data-grade="1"><span class="emoji-icon">📜</span> Rituels du 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1"><span class="emoji-icon">📝</span> Planches d'Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1"><span class="emoji-icon">📝</span> Planches de Maîtres au 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 1° degré</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels2" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels du 2° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-sub="planches-compagnon" data-grade="2"><span class="emoji-icon">📝</span> Planches de Compagnons</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 2° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
           </ul>
         </div>
-        <div class="card maitre" data-grade-card="3">
-          <h3>MAÎTRE</h3>
-          <div class="lock">🔒</div>
+        <div class="card maitre" data-grade-card="3"><h3>MAÎTRE</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-sub="rituels1" data-grade="1"><span class="emoji-icon">📜</span> Rituels du 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-sub="planches-apprenti" data-grade="1"><span class="emoji-icon">📝</span> Planches d'Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-sub="planches-maitres1" data-grade="1"><span class="emoji-icon">📝</span> Planches de Maîtres au 1° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-sub="orateur1" data-grade="1"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 1° degré</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels2" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels du 2° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-sub="planches-compagnon" data-grade="2"><span class="emoji-icon">📝</span> Planches de Compagnons</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-sub="orateur2" data-grade="2"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 2° degré</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-sub="rituels3" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}"><span class="emoji-icon">📜</span> Rituels du 3° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-sub="planches-maitres3" data-grade="3"><span class="emoji-icon">📝</span> Planches de Maîtres au 3° degré</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-sub="orateur3" data-grade="3"><span class="emoji-icon">🎙</span> Mots de l'Orateur au 3° degré</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}"><span class="emoji-icon">📜</span> Rituels 3°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-grade="3"><span class="emoji-icon">📝</span> Planches Maîtres 3°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-grade="3"><span class="emoji-icon">🎙</span> Orateur 3°</li>
           </ul>
         </div>
       </div>
@@ -235,196 +171,113 @@
     </div>
   </div>
 </div>
-
 <!-- HISTOIRE -->
 <div id="page-histoire" class="page">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <h2 style="color:var(--bordeaux)">Histoire de l'Étoile du Temple</h2>
     <button id="saveHistoryBtn" class="btn btn-gold" style="display:none" onclick="saveHistory()">💾 Sauvegarder</button>
   </div>
-
-  <!-- Affichage du texte d'histoire (public) -->
-  <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956. Le récit de sa fondation et de son histoire sera rédigé ici.</p></div>
-
-  <!-- DOCUMENTS HISTOIRE : visibles par TOUS les visiteurs (même non connectés) -->
+  <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956.</p></div>
+  <!-- Documents histoire : PUBLIC -->
   <div id="historyDocsSection" style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
     <h4 style="color:var(--bordeaux);margin-bottom:10px">📂 Documents d'archives historiques</h4>
-    <div id="historyDocsPublic">
-      <p style="color:#999;font-size:13px;font-style:italic">Aucun document publié pour l'instant.</p>
-    </div>
+    <div id="historyDocsPublic"><p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l'instant.</p></div>
   </div>
-
-  <!-- SECTION ADMIN : Upload de documents -->
+  <!-- Upload ADMIN -->
   <div id="historyAdminUpload" style="display:none;margin-top:16px" class="histo-doc-admin-section">
-    <h4 style="color:var(--bordeaux);margin-bottom:8px">📤 Uploader un document historique</h4>
+    <h4 style="color:var(--bordeaux);margin-bottom:8px">📤 Uploader un document</h4>
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('historyFileInput').click()">
       <div class="icon">📄</div>
-      <p><strong>Cliquez ici</strong> ou glissez-déposez un fichier</p>
-      <p style="font-size:11px;color:#aaa">Formats acceptés : PDF, images (JPG, PNG, GIF), texte (TXT, DOC, ODT) — max 20 Mo</p>
+      <p><strong>Cliquez</strong> ou glissez-déposez</p>
+      <p style="font-size:11px;color:#aaa">PDF, images (JPG, PNG, GIF), texte — max 20 Mo</p>
     </div>
     <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt,.doc,.docx,.odt" style="display:none" />
     <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-      <input id="historyDocTitle" placeholder="Titre du document (ex: Procès-verbal 1960)" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+      <input id="historyDocTitle" placeholder="Titre du document" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
       <input id="historyDocDate" type="date" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
       <button class="btn btn-green" onclick="uploadHistoryDoc()" id="uploadBtn">📤 Uploader</button>
     </div>
     <div id="historyDocMsg" class="msg" style="margin-top:6px"></div>
-
-    <!-- Gestion des documents uploadés (admin uniquement) -->
     <div id="historyDocsAdmin" style="margin-top:14px">
       <h5 style="color:var(--bordeaux);margin-bottom:6px">📋 Documents uploadés</h5>
       <div id="historyDocsList"><p style="font-size:12px;color:#999">Aucun document uploadé.</p></div>
     </div>
   </div>
-
-  <!-- Ancienne section liens externes (conservée pour compatibilité) -->
-  <div id="historyLinksSection" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
-    <h4 style="color:var(--bordeaux);margin-bottom:8px">🔗 Documents externes (Google Drive, etc.)</h4>
-    <div id="historyLinksList" style="margin-bottom:8px">
-      <p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l'instant.</p>
-    </div>
-  </div>
-  <div id="historyAdminOnly" style="display:none;margin-top:10px">
-    <p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier, puis cliquez sur "💾 Sauvegarder".</p>
-    <div style="margin-top:10px;padding-top:10px">
-      <h5 style="color:var(--bordeaux);margin-bottom:6px">Ajouter un lien externe</h5>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input id="historyLinkTitle" placeholder="Titre du lien (ex: Procès-verbal 2023)" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
-        <input id="historyLinkUrl" placeholder="URL Google Drive (https://...)" style="flex:3;min-width:220px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
-        <button class="btn btn-bdx" onclick="addHistoryLink()" style="white-space:nowrap">➕ Ajouter</button>
-      </div>
-      <div id="historyLinkMsg" class="msg" style="margin-top:6px"></div>
-    </div>
-  </div>
 </div>
-
 <!-- ARCHIVES -->
 <div id="page-archives" class="page">
   <div class="two-col">
-    <div>
-      <h2 style="color:var(--bordeaux);margin-bottom:10px">Archives documentaires</h2>
-      <div id="archivesContent">
-        <div id="archivesLoginMsg" style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</div>
-      </div>
-    </div>
+    <div><h2 style="color:var(--bordeaux);margin-bottom:10px">Archives documentaires</h2><div id="archivesContent"><div id="archivesLoginMsg" style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</div></div></div>
     <div>
       <div class="admin-panel" id="adminPanel" style="display:none">
         <h3>📁 Administration</h3>
-        <div class="sub-tabs">
-          <button class="active" onclick="showAdminTab('docs',this)">Documents</button>
-          <button onclick="showAdminTab('membres',this)">Membres</button>
-        </div>
+        <div class="sub-tabs"><button class="active" onclick="showAdminTab('docs',this)">Documents</button><button onclick="showAdminTab('membres',this)">Membres</button></div>
         <div id="adminDocs">
-          <label>Titre du document</label>
-          <input id="docTitle" placeholder="Titre du document..." />
-          <label>Niveau</label>
-          <select id="docNiveau" onchange="updateSubs()">
-            <option value="1">Niveau 1</option>
-            <option value="2">Niveau 2</option>
-            <option value="3">Niveau 3</option>
-          </select>
-          <label>Sous-rubrique</label>
-          <select id="docSub"></select>
-          <label>Grade requis</label>
-          <select id="docGrade">
-            <option value="1">Apprenti (niveau 1)</option>
-            <option value="2">Compagnon (niveau 2)</option>
-            <option value="3">Maître (niveau 3)</option>
-          </select>
-          <label>Date du document (aaaa-mm-jj)</label>
-          <input id="docDate" type="date" />
-          <label>Conférencier / Auteur</label>
-          <input id="docAuteur" placeholder="Nom du conférencier ou auteur..." />
-          <label>Fichier (PDF, DOC, XLS, image, vidéo)</label>
-          <input id="docFile" type="file" />
-          <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter le document</button>
+          <label>Titre</label><input id="docTitle" />
+          <label>Niveau</label><select id="docNiveau" onchange="updateSubs()"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+          <label>Sous-rubrique</label><select id="docSub"></select>
+          <label>Grade requis</label><select id="docGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+          <label>Date</label><input id="docDate" type="date" />
+          <label>Auteur</label><input id="docAuteur" />
+          <label>Fichier</label><input id="docFile" type="file" />
+          <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter</button>
           <div id="docMsg" class="msg"></div>
         </div>
         <div id="adminMembres" style="display:none">
-          <label>Prénom</label>
-          <input id="memPrenom" placeholder="Prénom" />
-          <label>Nom</label>
-          <input id="memNom" placeholder="Nom" />
-          <label>Grade</label>
-          <select id="memGrade">
-            <option value="1">Apprenti</option>
-            <option value="2">Compagnon</option>
-            <option value="3">Maître</option>
-          </select>
-          <label>Date de naissance (JJMMAAAA — sera le mot de passe)</label>
-          <input id="memBirth" placeholder="Ex: 15031960" />
-          <div class="row">
-            <div style="flex:1"><label>&nbsp;</label><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div>
-          </div>
+          <label>Prénom</label><input id="memPrenom" /><label>Nom</label><input id="memNom" />
+          <label>Grade</label><select id="memGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+          <label>Date naissance (JJMMAAAA)</label><input id="memBirth" placeholder="15031960" />
+          <div class="row"><div><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div></div>
           <div style="margin:10px 0">
-            <select id="memChangeId" style="width:auto;display:inline-block;margin-right:4px"><option value="">Changer grade de...</option></select>
-            <select id="memChangeGrade" style="width:auto;display:inline-block;margin-right:4px">
-              <option value="1">Apprenti</option>
-              <option value="2">Compagnon</option>
-              <option value="3">Maître</option>
-            </select>
-            <button class="btn btn-gold" style="display:inline-block;padding:6px 12px" onclick="changeMemberGrade()">Appliquer</button>
+            <select id="memChangeId" style="display:inline-block;margin-right:4px"><option value="">Changer grade...</option></select>
+            <select id="memChangeGrade" style="display:inline-block;margin-right:4px"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+            <button class="btn btn-gold" style="display:inline-block;padding:6px 12px" onclick="changeMemberGrade()">OK</button>
           </div>
-          <div id="memList"></div>
-          <div id="memMsg" class="msg"></div>
+          <div id="memList"></div><div id="memMsg" class="msg"></div>
         </div>
       </div>
       <div id="loginPrompt" class="admin-panel">
         <h3>🔒 Connexion requise</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en tant qu'admin pour gérer les archives.</p>
-        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">🔓 Connexion admin</button>
+        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en admin.</p>
+        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">🔓 Connexion</button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- PHOTOS & VIDEOS -->
+<!-- PHOTOS -->
 <div id="page-photos" class="page">
   <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:14px">Connectez-vous pour voir les médias selon votre grade.</p>
-  <div id="mediaList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
-    <p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>
-  </div>
+  <p style="font-size:13px;color:#666;margin-bottom:14px">Connectez-vous pour voir les médias.</p>
+  <div id="mediaList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px"><p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous.</p></div>
 </div>
-
 <!-- CONTACT -->
 <div id="page-contact" class="page">
   <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
   <div style="background:#fff;padding:20px;border-radius:8px">
     <p><strong>Loge L'Étoile du Temple</strong><br />Fondée en 1956</p>
     <p style="margin-top:10px">Contact : <a href="mailto:f.brl731@proton.me">f.brl731@proton.me</a></p>
-    <p>Site hébergé sur Netlify — 731archives.netlify.app</p>
+    <p>731archives.netlify.app</p>
   </div>
 </div>
-
 <!-- MODAL CONNEXION -->
 <div id="loginOverlay">
   <div class="modal">
     <h2>🔐 Connexion</h2>
-    <input id="loginUser" placeholder="Identifiant" />
-    <input id="loginPass" type="password" placeholder="Mot de passe" />
+    <input id="loginUser" placeholder="Identifiant" /><input id="loginPass" type="password" placeholder="Mot de passe" />
     <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
     <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
     <div id="loginMsg" style="margin-top:8px;font-size:13px;color:#c62828;display:none"></div>
   </div>
 </div>
-
-<!-- MODAL VISUALISATEUR -->
+<!-- MODAL VIEWER -->
 <div id="viewerOverlay">
   <div class="viewer-modal">
-    <div class="viewer-header">
-      <h3 id="viewerTitle">Document</h3>
-      <button onclick="closeViewer()">✕ Fermer</button>
-    </div>
-    <div class="viewer-body" id="viewerBody">
-      <p style="color:#999">Chargement...</p>
-    </div>
+    <div class="viewer-header"><h3 id="viewerTitle">Document</h3><button onclick="closeViewer()">✕ Fermer</button></div>
+    <div class="viewer-body" id="viewerBody"><p style="color:#999">Chargement...</p></div>
   </div>
 </div>
-
 <footer>731archives.netlify.app — Étoile du Temple — 1956</footer>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",
@@ -437,790 +290,123 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
+const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches d'Apprenti",niveau:1},'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},'orateur1':{label:"Orateur 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches Compagnons',niveau:2},'orateur2':{label:'Orateur 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},'orateur3':{label:'Orateur 3°',niveau:3}};
+let cu=null, mems=[], docs=[], ht='', dl=false, cs=null, cn=1, sm='none', hd=[];
 
-const sousRubriques = {
-  'rituels1': { label: 'Rituels du 1° degré', niveau: 1 },
-  'planches-apprenti': { label: "Planches d'Apprenti", niveau: 1 },
-  'planches-maitres1': { label: 'Planches de Maîtres au 1° degré', niveau: 1 },
-  'orateur1': { label: "Mots de l'Orateur au 1° degré", niveau: 1 },
-  'rituels2': { label: 'Rituels du 2° degré', niveau: 2 },
-  'planches-compagnon': { label: 'Planches de Compagnons', niveau: 2 },
-  'orateur2': { label: "Mots de l'Orateur au 2° degré", niveau: 2 },
-  'rituels3': { label: 'Rituels du 3° degré', niveau: 3 },
-  'planches-maitres3': { label: 'Planches de Maîtres au 3° degré', niveau: 3 },
-  'orateur3': { label: "Mots de l'Orateur au 3° degré", niveau: 3 }
-};
+function sp(n,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+n).classList.add('active');document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');if(n==='archives')ra();if(n==='photos')rm();if(n==='histoire')rh();}
+function ol(){document.getElementById('loginOverlay').classList.add('open')}
+function cl(){document.getElementById('loginOverlay').classList.remove('open')}
 
-let currentUser = null;
-let members = [];
-let documents = [];
-let historyText = '';
-let dataLoaded = false;
-let currentSub = null;
-let currentNiveau = 1;
-let sortMembersBy = 'none';
-let historyLinks = [];
-let historyDocs = [];
-
-function showPage(name, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  if (el) el.classList.add('active');
-  if (name === 'archives') refreshArchives();
-  if (name === 'photos') refreshMedia();
-  if (name === 'histoire') refreshHistory();
+async function lad(){
+  try{const sm=await db.collection('membres').get();mems=sm.docs.map(d=>d.data());const sd=await db.collection('documents').get();docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));const hd=await db.collection('contenu').doc('histoire').get();if(hd.exists)ht=hd.data().texte||'';dl=true;}
+  catch(e){mems=JSON.parse(localStorage.getItem('rl_members')||'[]');docs=JSON.parse(localStorage.getItem('rl_docs')||'[]');ht=localStorage.getItem('rl_history')||'';dl=true;}
+  if(ht)document.getElementById('historyDisplay').innerHTML=ht;
 }
 
-function openLogin() { document.getElementById('loginOverlay').classList.add('open'); }
-function closeLogin() { document.getElementById('loginOverlay').classList.remove('open'); }
-
-async function loadAllData() {
-  try {
-    const snapMem = await db.collection('membres').get();
-    members = snapMem.docs.map(d => d.data());
-    const snapDocs = await db.collection('documents').get();
-    documents = snapDocs.docs.map(d => ({...d.data(), _fireId: d.id }));
-    const histDoc = await db.collection('contenu').doc('histoire').get();
-    if (histDoc.exists) historyText = histDoc.data().texte || '';
-    dataLoaded = true;
-  } catch(e) {
-    members = JSON.parse(localStorage.getItem('rl_members')||'[]');
-    documents = JSON.parse(localStorage.getItem('rl_docs')||'[]');
-    historyText = localStorage.getItem('rl_history')||'';
-    dataLoaded = true;
-  }
-  if(historyText) document.getElementById('historyDisplay').innerHTML = historyText;
-}
-
-function updateSubsForCards() {
-  document.querySelectorAll('[data-grade-card]').forEach(card => {
-    const cardGrade = parseInt(card.dataset.gradeCard);
-    if (!currentUser || currentUser.grade < cardGrade) {
-      card.style.display = 'none';
-    } else {
-      card.style.display = 'block';
-    }
-  });
-  document.querySelectorAll('.card .sub-list li').forEach(li => {
-    if (!currentUser) {
-      li.style.pointerEvents = 'none';
-      li.style.opacity = '0.5';
-      return;
-    }
-    const reqGrade = parseInt(li.getAttribute('data-grade'));
-    if (currentUser.grade >= reqGrade) {
-      li.style.pointerEvents = 'auto';
-      li.style.opacity = '1';
-      li.style.cursor = 'pointer';
-    } else {
-      li.style.pointerEvents = 'none';
-      li.style.opacity = '0.4';
-      li.style.cursor = 'not-allowed';
-    }
+function usfc(){
+  document.querySelectorAll('[data-grade-card]').forEach(c=>{const g=parseInt(c.dataset.gradeCard);c.style.display=(!cu||cu.grade<g)?'none':'block';});
+  document.querySelectorAll('.card .sub-list li').forEach(li=>{
+    if(!cu){li.style.pointerEvents='none';li.style.opacity='0.5';return;}
+    const r=parseInt(li.getAttribute('data-grade'));if(cu.grade>=r){li.style.pointerEvents='auto';li.style.opacity='1';li.style.cursor='pointer';}
+    else{li.style.pointerEvents='none';li.style.opacity='0.4';li.style.cursor='not-allowed';}
   });
 }
 
-async function doLogin() {
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  const msg = document.getElementById('loginMsg');
-  msg.style.display = 'none';
-  if (user === 'RL731' && pass === '08051956') {
-    currentUser = { id: 'RL731', prenom: 'Admin', nom: '', grade: 3, isAdmin: true };
-    localStorage.setItem('rl_session', JSON.stringify(currentUser));
-    closeLogin(); afterLogin(); return;
-  }
-  if (!dataLoaded) await loadAllData();
-  const m = members.find(x => x.id === user && x.birth === pass);
-  if (m) {
-    currentUser = { id: m.id, prenom: m.prenom, nom: m.nom, grade: m.grade, isAdmin: false };
-    localStorage.setItem('rl_session', JSON.stringify(currentUser));
-    closeLogin(); afterLogin(); return;
-  }
-  msg.textContent = 'Identifiants incorrects'; msg.style.display = 'block';
+async function dl2(){
+  const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value.trim(),msg=document.getElementById('loginMsg');
+  msg.style.display='none';
+  if(u==='RL731'&&p==='08051956'){cu={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};localStorage.setItem('rl_session',JSON.stringify(cu));cl();al();return;}
+  if(!dl)await lad();const m=mems.find(x=>x.id===u&&x.birth===p);
+  if(m){cu={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};localStorage.setItem('rl_session',JSON.stringify(cu));cl();al();return;}
+  msg.textContent='Identifiants incorrects';msg.style.display='block';
 }
 
-function afterLogin() {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-accueil').classList.add('active');
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  document.querySelector('nav a').classList.add('active');
-  document.getElementById('adminPanel').style.display = currentUser.isAdmin ? 'block' : 'none';
-  document.getElementById('loginPrompt').style.display = currentUser.isAdmin ? 'none' : 'block';
-  document.getElementById('logoutBtn').style.display = 'inline-block';
-  
-  document.getElementById('historyLinksSection').style.display = 'block';
-  document.getElementById('historyDocsSection').style.display = 'block';
-  
-  if (currentUser.isAdmin) {
-    document.getElementById('historyAdminOnly').style.display = 'block';
-    document.getElementById('historyAdminUpload').style.display = 'block';
-    document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
-    document.getElementById('saveHistoryBtn').style.display = 'inline-block';
-    updateSubs();
-    refreshMembers();
-  } else {
-    document.getElementById('historyAdminOnly').style.display = 'none';
-    document.getElementById('historyAdminUpload').style.display = 'none';
-  }
-  loadHistoryLinks();
-  loadHistoryDocs();
-  updateSubsForCards();
-  refreshDocs();
-  refreshMedia();
+function al(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-accueil').classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));document.querySelector('nav a').classList.add('active');
+  document.getElementById('adminPanel').style.display=cu.isAdmin?'block':'none';document.getElementById('loginPrompt').style.display=cu.isAdmin?'none':'block';
+  document.getElementById('logoutBtn').style.display='inline-block';
+  if(cu.isAdmin){document.getElementById('historyAdminUpload').style.display='block';document.getElementById('historyDisplay').setAttribute('contenteditable','true');document.getElementById('saveHistoryBtn').style.display='inline-block';us();rm2();}
+  lhd();usfc();rd();rm();
 }
 
-function doLogout() {
-  currentUser = null; localStorage.removeItem('rl_session');
-  document.getElementById('adminPanel').style.display = 'none';
-  document.getElementById('loginPrompt').style.display = 'block';
-  document.getElementById('logoutBtn').style.display = 'none';
-  document.getElementById('historyAdminOnly').style.display = 'none';
-  document.getElementById('historyAdminUpload').style.display = 'none';
-  document.getElementById('historyLinksSection').style.display = 'none';
-  document.getElementById('historyDisplay').setAttribute('contenteditable', 'false');
-  document.getElementById('saveHistoryBtn').style.display = 'none';
-  currentSub = null;
-  currentNiveau = 1;
-  sortMembersBy = 'none';
-  updateSubsForCards();
-  refreshDocs();
-  refreshMedia();
-  refreshArchives();
-  // Les documents Histoire restent visibles (public)
-  loadHistoryDocs();
+function dlo(){
+  cu=null;localStorage.removeItem('rl_session');
+  document.getElementById('adminPanel').style.display='none';document.getElementById('loginPrompt').style.display='block';
+  document.getElementById('logoutBtn').style.display='none';document.getElementById('historyAdminUpload').style.display='none';
+  document.getElementById('historyDisplay').setAttribute('contenteditable','false');document.getElementById('saveHistoryBtn').style.display='none';
+  cs=null;cn=1;sm='none';usfc();rd();rm();ra();lhd();
 }
 
-function selectSubDirect(key) {
-  const sub = sousRubriques[key];
-  if (!sub) return;
-  if (currentUser && currentUser.grade >= sub.niveau) {
-    currentSub = key;
-    showPage('archives', document.querySelector('nav a:nth-child(3)'));
-    refreshArchives();
-  }
+function ss(k){const s=ssR[k];if(!s||!cu||cu.grade<s.niveau)return;cs=k;sp('archives',document.querySelector('nav a:nth-child(3)'));ra();}
+
+(function(){lad().then(()=>{const s=localStorage.getItem('rl_session');if(s){try{cu=JSON.parse(s);if(cu.isAdmin){document.getElementById('adminPanel').style.display='block';document.getElementById('loginPrompt').style.display='none';document.getElementById('logoutBtn').style.display='inline-block';document.getElementById('historyAdminUpload').style.display='block';document.getElementById('historyDisplay').setAttribute('contenteditable','true');document.getElementById('saveHistoryBtn').style.display='inline-block';us();rm2();}usfc();}catch(e){usfc();}}else{usfc();}if(ht)document.getElementById('historyDisplay').innerHTML=ht;lhd();});})();
+
+function sat(n,el){document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('adminDocs').style.display=n==='docs'?'block':'none';document.getElementById('adminMembres').style.display=n==='membres'?'block':'none';if(n==='membres')rm2();if(n==='docs')us();}
+
+function us(){const n=parseInt(document.getElementById('docNiveau').value);document.getElementById('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');}
+
+function tsm(){sm=(sm==='none'||sm==='nom_desc')?'nom_asc':'nom_desc';rm2();}
+function gsm(){if(sm==='none')return mems;return[...mems].sort((a,b)=>{const na=(a.nom||'').toLowerCase();const nb=(b.nom||'').toLowerCase();return sm==='nom_asc'?na.localeCompare(nb):nb.localeCompare(na);});}
+function gsi(){return sm==='none'?' ⇅':sm==='nom_asc'?' ▲':' ▼';}
+
+async function am(){
+  const p=document.getElementById('memPrenom').value.trim(),n=document.getElementById('memNom').value.trim(),g=parseInt(document.getElementById('memGrade').value),b=document.getElementById('memBirth').value.trim(),msg=document.getElementById('memMsg');
+  if(!p||!n||!b){msg.textContent='Prénom, nom et date requis';msg.className='msg error';msg.style.display='block';return;}
+  if(b.length!==8||isNaN(b)){msg.textContent='JJMMAAAA';msg.className='msg error';msg.style.display='block';return;}
+  const id=(p+'.'+n).toLowerCase();if(!dl)await lad();if(mems.find(m=>m.id===id)){msg.textContent='Existe déjà';msg.className='msg error';msg.style.display='block';return;}
+  try{await db.collection('membres').doc(id).set({id,prenom:p,nom:n,grade:g,birth:b});msg.textContent='✅ Ajouté '+id;msg.className='msg';msg.style.display='block';document.getElementById('memPrenom').value='';document.getElementById('memNom').value='';document.getElementById('memBirth').value='';rm2();}catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
 }
 
-(function() {
-  loadAllData().then(() => {
-    const s = localStorage.getItem('rl_session');
-    if (s) {
-      try {
-        currentUser = JSON.parse(s);
-        if (currentUser.isAdmin) {
-          document.getElementById('adminPanel').style.display = 'block';
-          document.getElementById('loginPrompt').style.display = 'none';
-          document.getElementById('logoutBtn').style.display = 'inline-block';
-          document.getElementById('historyAdminOnly').style.display = 'block';
-          document.getElementById('historyAdminUpload').style.display = 'block';
-          document.getElementById('historyLinksSection').style.display = 'block';
-          document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
-          document.getElementById('saveHistoryBtn').style.display = 'inline-block';
-          updateSubs();
-          refreshMembers();
-        } else {
-          document.getElementById('historyLinksSection').style.display = 'block';
-        }
-        loadHistoryLinks();
-        updateSubsForCards();
-      } catch(e) { updateSubsForCards(); }
-    } else {
-      updateSubsForCards();
-    }
-    if (historyText) document.getElementById('historyDisplay').innerHTML = historyText;
-    // Charger les documents histoire pour tout le monde (public)
-    loadHistoryDocs();
-  });
-})();
+async function rmem(id){if(!confirm('Supprimer ?'))return;try{await db.collection('membres').doc(id).delete();rm2();}catch(e){alert(e.message);}}
 
-function showAdminTab(name, el) {
-  document.querySelectorAll('.sub-tabs button').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('adminDocs').style.display = name === 'docs' ? 'block' : 'none';
-  document.getElementById('adminMembres').style.display = name === 'membres' ? 'block' : 'none';
-  if (name === 'membres') refreshMembers();
-  if (name === 'docs') updateSubs();
+async function rm2(){
+  const l=document.getElementById('memList');try{const s=await db.collection('membres').get();mems=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){l.innerHTML='<p style="font-size:12px;color:#999">Erreur</p>';return;}
+  if(!mems.length){l.innerHTML='<p style="font-size:12px;color:#999">Aucun</p>';return;}
+  const sel=document.getElementById('memChangeId'),cv=sel.value;sel.innerHTML='<option value="">Changer...</option>'+mems.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
+  l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="tsm()">Nom'+gsi()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+gsm().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="rmem(\\''+m.id+'\\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+'</table></div>';
 }
 
-function updateSubs() {
-  const niveau = parseInt(document.getElementById('docNiveau').value);
-  const select = document.getElementById('docSub');
-  const subs = Object.entries(sousRubriques).filter(([k,v]) => v.niveau === niveau);
-  select.innerHTML = subs.map(([k,v]) => '<option value="'+k+'">'+v.label+'</option>').join('');
-}
+async function cmg(){const id=document.getElementById('memChangeId').value,ng=parseInt(document.getElementById('memChangeGrade').value),msg=document.getElementById('memMsg');if(!id){msg.textContent='Sélectionnez';msg.className='msg error';msg.style.display='block';return;}try{await db.collection('membres').doc(id).update({grade:ng});msg.textContent='✅ OK';msg.className='msg';msg.style.display='block';rm2();}catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}}
 
-// --- Fonctions de tri par Nom ---
-function toggleSortMembers() {
-  if (sortMembersBy === 'none' || sortMembersBy === 'nom_desc') {
-    sortMembersBy = 'nom_asc';
-  } else {
-    sortMembersBy = 'nom_desc';
-  }
-  refreshMembers();
-}
+function ra(){const c=document.getElementById('archivesContent');if(!cu){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}if(!cs){c.innerHTML='<div style="margin-bottom:14px">'+[1,2,3].filter(n=>n<=cu.grade).map(n=>'<button class="btn '+(n===cn?'btn-bdx':'btn-outline')+'" onclick="sn('+n+')">Niveau '+n+'</button>').join('')+'</div><div class="rubriques">'+Object.entries(ssR).filter(([k,v])=>v.niveau===cn).map(([k,v])=>'<div class="rubrique-card" onclick="sk(\\''+k+'\\')"><h4>'+v.label+'</h4></div>').join('')+'</div>';}else{sw(c);}}
+function sn(n){cn=n;ra();}function sk(k){cs=k;ra();}function bt(){cs=null;ra();}
 
-function getSortedMembers() {
-  if (sortMembersBy === 'none') return members;
-  const sorted = [...members];
-  sorted.sort((a, b) => {
-    const nomA = (a.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const nomB = (b.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const cmp = nomA.localeCompare(nomB);
-    return sortMembersBy === 'nom_asc' ? cmp : -cmp;
-  });
-  return sorted;
-}
+function ov(d){document.getElementById('viewerTitle').textContent=d.title||'Document';const b=document.getElementById('viewerBody'),da=d.data,ex=(d.type||'').toLowerCase();if(['jpg','jpeg','png','gif','webp'].includes(ex))b.innerHTML='<img src="'+da+'" alt="'+d.title+'" />';else if(ex==='pdf')b.innerHTML='<iframe src="'+da+'" class="embed-pdf"></iframe>';else if(['doc','docx'].includes(ex))b.innerHTML='<div class="text-preview"><p>Document Word</p><p><a href="'+da+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';else b.innerHTML='<div class="text-preview"><p>Type non affichable.</p><p><a href="'+da+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';document.getElementById('viewerOverlay').classList.add('open');}
+function cv2(){document.getElementById('viewerOverlay').classList.remove('open');document.getElementById('viewerBody').innerHTML='<p style="color:#999">Chargement...</p>';}
 
-function getSortIndicator() {
-  if (sortMembersBy === 'none') return ' ⇅';
-  if (sortMembersBy === 'nom_asc') return ' ▲';
-  return ' ▼';
-}
-// --- Fin tri ---
+async function sh(){const c=document.getElementById('historyDisplay').innerHTML;try{await db.collection('contenu').doc('histoire').set({texte:c});ht=c;}catch(e){localStorage.setItem('rl_history',c);ht=c;}const btn=document.getElementById('saveHistoryBtn');btn.textContent='✅ Sauvegardé';setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);}
 
-async function addMember() {
-  const prenom = document.getElementById('memPrenom').value.trim();
-  const nom = document.getElementById('memNom').value.trim();
-  const grade = parseInt(document.getElementById('memGrade').value);
-  const birth = document.getElementById('memBirth').value.trim();
-  const msg = document.getElementById('memMsg');
-  if (!prenom || !nom || !birth) { msg.textContent = 'Prénom, nom et date de naissance requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  if (birth.length !== 8 || isNaN(birth)) { msg.textContent = 'La date doit être au format JJMMAAAA (8 chiffres)'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  const id = (prenom + '.' + nom).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  if (!dataLoaded) await loadAllData();
-  if (members.find(m => m.id === id)) { msg.textContent = 'Ce membre existe déjà (' + id + ')'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  try {
-    await db.collection('membres').doc(id).set({ id, prenom, nom, grade, birth });
-    msg.textContent = '✅ Membre ajouté : ' + nom + ' ' + prenom + ' — identifiant: ' + id;
-    msg.className = 'msg'; msg.style.display = 'block';
-    document.getElementById('memPrenom').value = ''; document.getElementById('memNom').value = ''; document.getElementById('memBirth').value = '';
-    refreshMembers();
-  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
-}
+// === UPLOAD ADMIN ===
+async function uhd(){const fi=document.getElementById('historyFileInput'),t=document.getElementById('historyDocTitle').value.trim(),d=document.getElementById('historyDocDate').value,msg=document.getElementById('historyDocMsg'),ub=document.getElementById('uploadBtn'),pr=document.getElementById('uploadProgress'),br=document.getElementById('uploadProgressBar');msg.className='msg';msg.style.display='none';if(!fi.files||!fi.files[0]){msg.textContent='Sélectionnez un fichier';msg.className='msg error';msg.style.display='block';return;}if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}const f=fi.files[0];if(f.size>20*1024*1024){msg.textContent='>20 Mo';msg.className='msg error';msg.style.display='block';return;}const ex=f.name.split('.').pop().toLowerCase(),fn='histoire/'+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),ref=storage.ref(fn),task=ref.put(f);ub.disabled=true;ub.innerHTML='⏳ Upload...';pr.style.display='block';br.style.width='0%';task.on('state_changed',function(s){br.style.width=(s.bytesTransferred/s.totalBytes*100)+'%';},function(err){msg.textContent='❌ '+err.message;msg.className='msg error';msg.style.display='block';ub.disabled=false;ub.innerHTML='📤 Uploader';pr.style.display='none';br.style.width='0%';},async function(){try{const url=await ref.getDownloadURL();await db.collection('histoire_documents').add({title:t,date:d||'',fileName:f.name,type:ex,url,storagePath:fn,size:f.size,uploadedAt:new Date().toISOString()});msg.textContent='✅ Uploadé !';msg.className='msg';msg.style.display='block';fi.value='';document.getElementById('historyDocTitle').value='';document.getElementById('historyDocDate').value='';document.getElementById('uploadZone').querySelector('p').innerHTML='<strong>Cliquez</strong> ou glissez-déposez';await lhd();}catch(e){msg.textContent='❌ '+e.message;msg.className='msg error';msg.style.display='block';}ub.disabled=false;ub.innerHTML='📤 Uploader';pr.style.display='none';br.style.width='0%';});}
 
-async function removeMember(id) {
-  if (!confirm('Supprimer ce membre ?')) return;
-  try { await db.collection('membres').doc(id).delete(); refreshMembers(); } catch(e) { alert('Erreur : ' + e.message); }
-}
+// === CHARGEMENT DOCUMENTS ===
+async function lhd(){try{const s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();hd=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){hd=[];}dphd();if(cu&&cu.isAdmin)dahd();}
 
-async function refreshMembers() {
-  const list = document.getElementById('memList');
-  try {
-    const snap = await db.collection('membres').get();
-    members = snap.docs.map(d => ({...d.data(), _fireId: d.id }));
-  } catch(e) { list.innerHTML = '<p style="font-size:12px;color:#999">Erreur de chargement</p>'; return; }
-  if (!members.length) { list.innerHTML = '<p style="font-size:12px;color:#999">Aucun membre</p>'; return; }
-  const sel = document.getElementById('memChangeId');
-  const currentVal = sel.value;
-  sel.innerHTML = '<option value="">Changer grade de...</option>' +
-    members.map(m => '<option value="'+m.id+'"' + (m.id===currentVal?' selected':'') + '>'+m.nom+' '+m.prenom+' ('+['','Apprenti','Compagnon','Maître'][m.grade]+')</option>').join('');
-  const sortedMembers = getSortedMembers();
-  const sortIcon = getSortIndicator();
-  list.innerHTML = '<div style="max-height:300px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
-    '<tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px;text-align:left">Identifiant</th><th style="padding:6px;text-align:left">' +
-    '<button class="btn-sort" onclick="toggleSortMembers()">Nom' + sortIcon + '</button>' +
-    '</th><th style="padding:6px;text-align:left">Grade</th><th style="padding:6px;text-align:center">Action</th></tr>' +
-    sortedMembers.map(m => '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + m.id + '</td><td style="padding:6px">' + m.nom + ' ' + m.prenom + '</td><td style="padding:6px">' + ['','Apprenti','Compagnon','Maître'][m.grade] + '</td><td style="padding:6px;text-align:center"><button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="removeMember(\'' + m.id + '\')">✕ Supprimer</button></td></tr>').join('') + '</table></div>';
-}
+function dphd(){const c=document.getElementById('historyDocsPublic');if(!hd||!hd.length){c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';return;}const imgs=hd.filter(d=>['jpg','jpeg','png','gif','webp'].includes(d.type)),oth=hd.filter(d=>!['jpg','jpeg','png','gif','webp'].includes(d.type));let h='';if(imgs.length){h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';imgs.forEach(d=>{h+='<div class="histo-gallery-item" onclick="ohdv(\\''+d._fi+'\\')" style="cursor:pointer"><div class="thumb"><img src="'+d.url+'" alt="'+d.title+'" /></div><div class="caption"><strong>'+d.title+'</strong></div></div>';});h+='</div></div>';}if(oth.length){h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';oth.forEach(d=>{h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="ohdv(\\''+d._fi+'\\')" style="cursor:pointer">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="ohdv(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="window.open(\\''+d.url+'\\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';});h+='</div>';}c.innerHTML=h;}
 
-async function changeMemberGrade() {
-  const id = document.getElementById('memChangeId').value;
-  const newGrade = parseInt(document.getElementById('memChangeGrade').value);
-  const msg = document.getElementById('memMsg');
-  if (!id) { msg.textContent = 'Sélectionnez un membre'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  try {
-    await db.collection('membres').doc(id).update({ grade: newGrade });
-    msg.textContent = '✅ Grade changé avec succès'; msg.className = 'msg'; msg.style.display = 'block';
-    refreshMembers();
-  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
-}
+function dahd(){const c=document.getElementById('historyDocsList');if(!hd||!hd.length){c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';return;}c.innerHTML=hd.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="ohdv(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="dhd(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>').join('');}
 
-function refreshArchives() {
-  const container = document.getElementById('archivesContent');
-  if (!currentUser) {
-    container.innerHTML = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</p>';
-    return;
-  }
-  if (!currentSub) {
-    const niveaux = [1,2,3].filter(n => n <= currentUser.grade);
-    container.innerHTML = '<div style="margin-bottom:14px">' +
-      niveaux.map(n => '<button class="btn ' + (n === currentNiveau ? 'btn-bdx' : 'btn-outline') + '" style="margin-right:6px" onclick="selectNiveau('+n+')">Niveau '+n+'</button>').join('') +
-      '</div>' +
-      '<div class="rubriques">' +
-      Object.entries(sousRubriques).filter(([k,v]) => v.niveau === currentNiveau).map(([k,v]) => 
-        '<div class="rubrique-card" onclick="selectSub(\''+k+'\')"><h4>'+v.label+'</h4><div class="count">Cliquez pour voir les documents</div></div>'
-      ).join('') +
-      '</div>';
-  } else {
-    showDocumentsInSub(container);
-  }
-}
+function ohdv(id){const d=hd.find(x=>x._fi===id);if(!d)return;ov({title:d.title,data:d.url,type:d.type});}
 
-function selectNiveau(n) { currentNiveau = n; refreshArchives(); }
-function selectSub(key) { currentSub = key; refreshArchives(); }
-function backToRubriques() { currentSub = null; refreshArchives(); }
+async function dhd(id){const d=hd.find(x=>x._fi===id);if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;try{if(d.storagePath){try{await storage.ref(d.storagePath).delete();}catch(e){}}await db.collection('histoire_documents').doc(id).delete();await lhd();}catch(e){alert(e.message);}}
 
-function openViewer(doc) {
-  document.getElementById('viewerTitle').textContent = doc.title || 'Document';
-  const body = document.getElementById('viewerBody');
-  const data = doc.data;
-  const ext = (doc.type || '').toLowerCase();
-  if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
-    body.innerHTML = '<img src="' + data + '" alt="' + doc.title + '" />';
-  }
-  else if (['mp4','mov','webm','avi'].includes(ext)) {
-    body.innerHTML = '<video src="' + data + '" controls style="max-width:100%;max-height:65vh"></video>';
-  }
-  else if (ext === 'pdf') {
-    body.innerHTML = '<iframe src="' + data + '" class="embed-pdf"></iframe>';
-  }
-  else if (['doc','docx'].includes(ext)) {
-    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📝 Document Word</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
-  }
-  else if (ext === 'txt') {
-    body.innerHTML = '<div class="text-preview"><pre style="white-space:pre-wrap">' + data + '</pre></div>';
-  }
-  else {
-    body.innerHTML = '<div class="text-preview"><p>Type de fichier non affichable directement.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
-  }
-  document.getElementById('viewerOverlay').classList.add('open');
-}
+// Drag & Drop
+var uz=document.getElementById('uploadZone');
+if(uz){uz.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover');});uz.addEventListener('dragleave',function(e){e.preventDefault();this.classList.remove('dragover');});uz.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('dragover');if(e.dataTransfer.files.length)document.getElementById('historyFileInput').files=e.dataTransfer.files;});document.getElementById('historyFileInput').addEventListener('change',function(){if(this.files&&this.files[0])document.getElementById('uploadZone').querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';});}
 
-function closeViewer() {
-  document.getElementById('viewerOverlay').classList.remove('open');
-  document.getElementById('viewerBody').innerHTML = '<p style="color:#999">Chargement...</p>';
-}
+// === ARCHIVES ===
+async function ad(){const t=document.getElementById('docTitle').value.trim(),ni=parseInt(document.getElementById('docNiveau').value),sb=document.getElementById('docSub').value,gr=parseInt(document.getElementById('docGrade').value),dt=document.getElementById('docDate').value,au=document.getElementById('docAuteur').value.trim(),fi=document.getElementById('docFile'),msg=document.getElementById('docMsg');if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}if(!fi.files||!fi.files[0]){msg.textContent='Fichier requis';msg.className='msg error';msg.style.display='block';return;}const f=fi.files[0],ex=f.name.split('.').pop().toLowerCase(),fn='archives/'+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),ref=storage.ref(fn);try{await ref.put(f);const url=await ref.getDownloadURL();await db.collection('documents').add({title:t,niveau:ni,sub:sb,grade:gr,date:dt,auteur:au,type:ex,fileName:f.name,data:url,storagePath:fn,uploadedAt:new Date().toISOString()});msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';document.getElementById('docTitle').value='';document.getElementById('docDate').value='';document.getElementById('docAuteur').value='';document.getElementById('docFile').value='';rd();}catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}}
 
-async function saveHistory() {
-  const content = document.getElementById('historyDisplay').innerHTML;
-  try {
-    await db.collection('contenu').doc('histoire').set({ texte: content });
-    const msg = document.getElementById('saveHistoryBtn');
-    msg.textContent = '✅ Sauvegardé !';
-    setTimeout(() => msg.innerHTML = '💾 Sauvegarder', 2000);
-  } catch(e) {
-    localStorage.setItem('rl_history', content);
-    const msg = document.getElementById('saveHistoryBtn');
-    msg.textContent = '✅ Sauvegardé (local)';
-    setTimeout(() => msg.innerHTML = '💾 Sauvegarder', 2000);
-  }
-}
+async function rd(){try{const s=await db.collection('documents').get();docs=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){}}
 
-// =======================================================
-// GESTION DES DOCUMENTS UPLOADÉS SUR LA PAGE HISTOIRE
-// =======================================================
+async function rmd(fi){if(!confirm('Supprimer ?'))return;try{const d=docs.find(x=>x._fi===fi);if(d&&d.storagePath)try{await storage.ref(d.storagePath).delete();}catch(e){}await db.collection('documents').doc(fi).delete();rd();if(cs){sw(document.getElementById('archivesContent'));}}catch(e){alert(e.message);}}
 
-// Upload d'un fichier vers Firebase Storage
-async function uploadHistoryDoc() {
-  const fileInput = document.getElementById('historyFileInput');
-  const title = document.getElementById('historyDocTitle').value.trim();
-  const date = document.getElementById('historyDocDate').value;
-  const msg = document.getElementById('historyDocMsg');
-  const uploadBtn = document.getElementById('uploadBtn');
-  const progress = document.getElementById('uploadProgress');
-  const bar = document.getElementById('uploadProgressBar');
+function sw(c){const f=docs.filter(d=>d.sub===cs);const si=ssR[cs];c.innerHTML='<div class="back-link" onclick="bt()">← Retour</div><h3 style="color:var(--bordeaux)">'+(si?si.label:'Docs')+'</h3>';if(!f.length){c.innerHTML+='<p style="color:#999;font-size:13px;font-style:italic">Aucun.</p>';return;}f.sort((a,b)=>(b.date||'').localeCompare(a.date||''));f.forEach(d=>{let ic='📄';if(['jpg','jpeg','png','gif','webp'].includes(d.type))ic='🖼️';else if(d.type==='pdf')ic='📕';c.innerHTML+='<div class="doc-item"><div class="icon" onclick="ov({title:\\''+d.title.replace(/'/g,"\\\\'")+'\\',data:\\''+d.data+'\\',type:\\''+d.type+'\\'})">'+ic+'</div><div class="info"><strong onclick="ov({title:\\''+d.title.replace(/'/g,"\\\\'")+'\\',data:\\''+d.data+'\\',type:\\''+d.type+'\\'})">'+d.title+'</strong><span>'+(d.date||'')+(d.auteur?' · '+d.auteur:'')+'</span></div>'+(cu&&cu.isAdmin?'<button class="btn btn-outline" onclick="rmd(\\''+d._fi+'\\')" style="padding:2px 8px;font-size:11px">✕</button>':'')+'</div>';});}
 
-  if (!fileInput.files || !fileInput.files[0]) {
-    msg.textContent = 'Veuillez sélectionner un fichier'; msg.className = 'msg error'; msg.style.display = 'block'; return;
-  }
-  if (!title) {
-    msg.textContent = 'Veuillez donner un titre au document'; msg.className = 'msg error'; msg.style.display = 'block'; return;
-  }
+function rm(){const c=document.getElementById('mediaList');if(!cu){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}const m=docs.filter(d=>['jpg','jpeg','png','gif','webp','mp4','mov','webm'].includes(d.type)&&d.grade<=cu.grade);if(!m.length){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média.</p>';return;}c.innerHTML=m.map(d=>'<div onclick="ov({title:\\''+d.title.replace(/'/g,"\\\\'")+'\\',data:\\''+d.data+'\\',type:\\''+d.type+'\\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff"><div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">'+(['mp4','mov','webm'].includes(d.type)?'<span style="font-size:40px">🎬</span>':'<img src="'+d.data+'" style="width:100%;height:100%;object-fit:cover" />')+'</div><div style="padding:8px"><strong style="font-size:13px">'+d.title+'</strong></div></div>').join('');}
 
-  const file = fileInput.files[0];
-  const maxSize = 20 * 1024 * 1024; // 20 Mo
-  if (file.size > maxSize) {
-    msg.textContent = 'Le fichier dépasse 20 Mo'; msg.className = 'msg error'; msg.style.display = 'block'; return;
-  }
-
-  // Nom unique pour le storage
-  const ext = file.name.split('.').pop().toLowerCase();
-  const fileName = `histoire/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-  const ref = storage.ref(fileName);
-  const task = ref.put(file);
-
-  uploadBtn.disabled = true;
-  uploadBtn.textContent = '⏳ Upload en cours...';
-  progress.style.display = 'block';
-
-  task.on('state_changed',
-    function progress(snapshot) {
-      const pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      bar.style.width = pct + '%';
-    },
-    function error(err) {
-      msg.textContent = '❌ Erreur upload : ' + err.message; msg.className = 'msg error'; msg.style.display = 'block';
-      uploadBtn.disabled = false;
-      uploadBtn.innerHTML = '📤 Uploader';
-      progress.style.display = 'none';
-    },
-    async function complete() {
-      try {
-        const url = await ref.getDownloadURL();
-        // Sauvegarder le document dans Firestore
-        const docData = {
-          title: title,
-          date: date || '',
-          fileName: file.name,
-          type: ext,
-          url: url,
-          storagePath: fileName,
-          size: file.size,
-          uploadedAt: new Date().toISOString()
-        };
-        await db.collection('histoire_documents').add(docData);
-        
-        msg.textContent = '✅ Document uploadé avec succès !'; msg.className = 'msg'; msg.style.display = 'block';
-        fileInput.value = '';
-        document.getElementById('historyDocTitle').value = '';
-        document.getElementById('historyDocDate').value = '';
-        loadHistoryDocs();
-      } catch(e) {
-        msg.textContent = '❌ Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block';
-      }
-      uploadBtn.disabled = false;
-      uploadBtn.innerHTML = '📤 Uploader';
-      progress.style.display = 'none';
-      bar.style.width = '0%';
-    }
-  );
-}
-
-// Charger les documents histoire
-async function loadHistoryDocs() {
-  try {
-    const snap = await db.collection('histoire_documents').orderBy('uploadedAt', 'desc').get();
-    historyDocs = snap.docs.map(d => ({...d.data(), _fireId: d.id}));
-  } catch(e) {
-    historyDocs = [];
-  }
-  displayPublicHistoryDocs();
-  if (currentUser && currentUser.isAdmin) {
-    displayAdminHistoryDocs();
-  }
-}
-
-// Affichage public des documents histoire (visible par TOUS)
-function displayPublicHistoryDocs() {
-  const container = document.getElementById('historyDocsPublic');
-  if (!historyDocs.length) {
-    container.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun document publié pour l\'instant.</p>';
-    return;
-  }
-
-  // Séparer les images du reste
-  const images = historyDocs.filter(d => ['jpg','jpeg','png','gif','webp'].includes(d.type));
-  const others = historyDocs.filter(d => !['jpg','jpeg','png','gif','webp'].includes(d.type));
-
-  let html = '';
-
-  // Galerie d'images
-  if (images.length) {
-    html += '<div style="margin-bottom:14px">';
-    html += '<h5 style="color:var(--bordeaux);margin-bottom:6px;font-size:13px">🖼️ Galerie d\'images</h5>';
-    html += '<div class="histo-gallery">';
-    images.forEach(d => {
-      const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-      html += '<div class="histo-gallery-item" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="cursor:pointer">';
-      html += '<div class="thumb"><img src="' + d.url + '" alt="' + d.title + '" /></div>';
-      html += '<div class="caption"><strong>' + d.title + '</strong>';
-      if (dateStr) html += '<span>' + dateStr + '</span>';
-      html += '</div></div>';
-    });
-    html += '</div></div>';
-  }
-
-  // Liste des autres documents
-  if (others.length) {
-    html += '<div>';
-    html += '<h5 style="color:var(--bordeaux);margin-bottom:6px;font-size:13px">📄 Documents</h5>';
-    others.forEach(d => {
-      const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-      const ext = d.type.toUpperCase();
-      const isPdf = d.type === 'pdf';
-      const icon = isPdf ? '📕' : '📄';
-      html += '<div class="histo-doc">';
-      html += '<div class="preview">' + icon + '</div>';
-      html += '<div class="info">';
-      html += '<strong onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="cursor:pointer">' + d.title + '</strong>';
-      html += '<span>' + (dateStr ? dateStr + ' · ' : '') + ext + '</span>';
-      html += '</div>';
-      html += '<div class="actions">';
-      html += '<button class="btn btn-gold" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="padding:4px 10px;font-size:11px">👁️ Voir</button>';
-      html += '<button class="btn btn-bdx" onclick="window.open(\'' + d.url + '\',\'_blank\')" style="padding:4px 10px;font-size:11px">📥 Ouvrir</button>';
-      html += '</div></div>';
-    });
-    html += '</div>';
-  }
-
-  container.innerHTML = html;
-}
-
-// Affichage admin pour gérer les documents
-function displayAdminHistoryDocs() {
-  const container = document.getElementById('historyDocsList');
-  if (!historyDocs.length) {
-    container.innerHTML = '<p style="font-size:12px;color:#999">Aucun document uploadé.</p>';
-    return;
-  }
-  let html = '';
-  historyDocs.forEach(d => {
-    const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date non définie';
-    const ext = d.type.toUpperCase();
-    const icon = ['jpg','jpeg','png','gif','webp'].includes(d.type) ? '🖼️' : '📄';
-    html += '<div class="histo-doc">';
-    html += '<div class="preview">' + (['jpg','jpeg','png','gif','webp'].includes(d.type) ? '<img src="' + d.url + '" alt="" />' : icon) + '</div>';
-    html += '<div class="info">';
-    html += '<strong>' + d.title + '</strong>';
-    html += '<span>' + dateStr + ' · ' + ext + ' · ' + (d.fileName || '') + '</span>';
-    html += '</div>';
-    html += '<div class="actions">';
-    html += '<button class="btn btn-outline" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="padding:3px 8px;font-size:11px">👁️</button>';
-    html += '<button class="btn btn-danger" onclick="deleteHistoryDoc(\'' + d._fireId + '\')" style="padding:3px 8px;font-size:11px">🗑️</button>';
-    html += '</div></div>';
-  });
-  container.innerHTML = html;
-}
-
-// Visualiser un document histoire (depuis le viewer général)
-function openHistoryDocViewer(docId) {
-  const doc = historyDocs.find(d => d._fireId === docId);
-  if (!doc) return;
-  openViewer({ title: doc.title, data: doc.url, type: doc.type, filename: doc.fileName });
-}
-
-// Supprimer un document histoire (admin uniquement)
-async function deleteHistoryDoc(docId) {
-  const doc = historyDocs.find(d => d._fireId === docId);
-  if (!doc) return;
-  if (!confirm('Supprimer définitivement "' + doc.title + '" ? Le fichier sera également supprimé du serveur.')) return;
-  
-  try {
-    // Supprimer le fichier du Storage
-    if (doc.storagePath) {
-      try {
-        await storage.ref(doc.storagePath).delete();
-      } catch(e) {
-        console.warn('Fichier non trouvé dans le storage:', doc.storagePath);
-      }
-    } else {
-      // Fallback : essayer avec l'URL
-      try {
-        const ref = storage.refFromURL(doc.url);
-        await ref.delete();
-      } catch(e) {
-        console.warn('Impossible de supprimer du storage via URL');
-      }
-    }
-    // Supprimer la référence Firestore
-    await db.collection('histoire_documents').doc(docId).delete();
-    loadHistoryDocs();
-  } catch(e) {
-    alert('Erreur lors de la suppression : ' + e.message);
-  }
-}
-
-// Configuration du Drag & Drop pour l'upload
-const uploadZone = document.getElementById('uploadZone');
-if (uploadZone) {
-  uploadZone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.classList.add('dragover');
-  });
-  uploadZone.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-  });
-  uploadZone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length) {
-      document.getElementById('historyFileInput').files = files;
-    }
-  });
-  document.getElementById('historyFileInput').addEventListener('change', function() {
-    if (this.files && this.files[0]) {
-      const container = document.getElementById('uploadZone');
-      const p = container.querySelector('p');
-      p.innerHTML = '<strong>' + this.files[0].name + '</strong> (' + (this.files[0].size / 1024 / 1024).toFixed(1) + ' Mo)';
-    }
-  });
-}
-
-// =======================================================
-// FONCTIONS EXISTANTES POUR LES DOCUMENTS D'ARCHIVES
-// =======================================================
-
-async function addDocument() {
-  const title = document.getElementById('docTitle').value.trim();
-  const niveau = parseInt(document.getElementById('docNiveau').value);
-  const sub = document.getElementById('docSub').value;
-  const grade = parseInt(document.getElementById('docGrade').value);
-  const date = document.getElementById('docDate').value;
-  const auteur = document.getElementById('docAuteur').value.trim();
-  const fileInput = document.getElementById('docFile');
-  const msg = document.getElementById('docMsg');
-  
-  if (!title) { msg.textContent = 'Titre requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  if (!fileInput.files || !fileInput.files[0]) { msg.textContent = 'Fichier requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  
-  const file = fileInput.files[0];
-  const ext = file.name.split('.').pop().toLowerCase();
-  const fileName = `archives/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-  const ref = storage.ref(fileName);
-  
-  try {
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
-    
-    await db.collection('documents').add({
-      title, niveau, sub, grade, date, auteur, type: ext,
-      fileName: file.name, data: url, storagePath: fileName,
-      uploadedAt: new Date().toISOString()
-    });
-    
-    msg.textContent = '✅ Document ajouté avec succès'; msg.className = 'msg'; msg.style.display = 'block';
-    document.getElementById('docTitle').value = '';
-    document.getElementById('docDate').value = '';
-    document.getElementById('docAuteur').value = '';
-    document.getElementById('docFile').value = '';
-    refreshDocs();
-  } catch(e) {
-    msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block';
-  }
-}
-
-async function refreshDocs() {
-  try {
-    const snap = await db.collection('documents').get();
-    documents = snap.docs.map(d => ({...d.data(), _fireId: d.id }));
-  } catch(e) {}
-}
-
-async function removeDocument(fireId) {
-  if (!confirm('Supprimer ce document ?')) return;
-  try {
-    const doc = documents.find(d => d._fireId === fireId);
-    if (doc && doc.storagePath) {
-      try { await storage.ref(doc.storagePath).delete(); } catch(e) {}
-    }
-    await db.collection('documents').doc(fireId).delete();
-    refreshDocs();
-    if (currentSub) {
-      const container = document.getElementById('archivesContent');
-      showDocumentsInSub(container);
-    }
-  } catch(e) { alert('Erreur : ' + e.message); }
-}
-
-function showDocumentsInSub(container) {
-  const filtered = documents.filter(d => d.sub === currentSub);
-  const subInfo = sousRubriques[currentSub];
-  
-  container.innerHTML = '<div class="back-link" onclick="backToRubriques()">← Retour aux rubriques</div>' +
-    '<h3 style="color:var(--bordeaux);margin-bottom:10px">' + (subInfo ? subInfo.label : 'Documents') + '</h3>';
-  
-  if (!filtered.length) {
-    container.innerHTML += '<p style="color:#999;font-size:13px;font-style:italic">Aucun document dans cette rubrique.</p>';
-    return;
-  }
-  
-  filtered.sort((a,b) => (b.date||'').localeCompare(a.date||''));
-  
-  filtered.forEach(d => {
-    const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR') : '';
-    let icon = '📄';
-    if (['jpg','jpeg','png','gif','webp'].includes(d.type)) icon = '🖼️';
-    else if (d.type === 'pdf') icon = '📕';
-    else if (['mp4','mov','webm'].includes(d.type)) icon = '🎬';
-    
-    container.innerHTML += '<div class="doc-item">' +
-      '<div class="icon" onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\',filename:\'' + (d.fileName||'') + '\'})">' + icon + '</div>' +
-      '<div class="info">' +
-      '<strong onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\',filename:\'' + (d.fileName||'') + '\'})">' + d.title + '</strong>' +
-      '<span>' + (dateStr ? dateStr + ' · ' : '') + (d.auteur ? d.auteur + ' · ' : '') + d.type.toUpperCase() + '</span>' +
-      '</div>' +
-      (currentUser && currentUser.isAdmin ? '<button class="btn btn-outline mini-btn" onclick="removeDocument(\'' + d._fireId + '\')" style="padding:2px 8px;font-size:11px">✕</button>' : '') +
-      '</div>';
-  });
-}
-
-function refreshMedia() {
-  const container = document.getElementById('mediaList');
-  if (!currentUser) {
-    container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
-    return;
-  }
-  const media = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
-  if (!media.length) {
-    container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible pour votre grade.</p>';
-    return;
-  }
-  container.innerHTML = media.map(d => {
-    const isVideo = ['mp4','mov','webm','avi'].includes(d.type);
-    const subInfo = sousRubriques[d.sub] || {};
-    return '<div onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff">' +
-      '<div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">' +
-      (isVideo ? '<span style="font-size:40px">🎬</span>' : '<img src="' + d.data + '" style="width:100%;height:100%;object-fit:cover" />') +
-      '</div>' +
-      '<div style="padding:8px"><strong style="font-size:13px">' + d.title + '</strong><br /><span style="font-size:11px;color:#888">' + (subInfo.label || '') + '</span></div></div>';
-  }).join('');
-}
-
-// =======================================================
-// FONCTIONS POUR LES LIENS EXTERNES (conservées)
-// =======================================================
-
-async function loadHistoryLinks() {
-  try {
-    const snap = await db.collection('contenu').doc('histoire_liens').get();
-    historyLinks = snap.exists && snap.data().liens ? snap.data().liens : [];
-  } catch(e) { historyLinks = []; }
-  displayHistoryLinks();
-}
-
-function displayHistoryLinks() {
-  const container = document.getElementById('historyLinksList');
-  if (!historyLinks.length) {
-    container.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l\'instant.</p>';
-    return;
-  }
-  container.innerHTML = historyLinks.map((l, i) => 
-    '<div class="history-link">' +
-    '<a href="' + l.url + '" target="_blank">🔗 ' + l.title + '</a>' +
-    (currentUser && currentUser.isAdmin ? '<button class="btn btn-outline mini-btn" onclick="removeHistoryLink('+i+')" style="padding:2px 8px;font-size:11px">✕</button>' : '') +
-    '</div>'
-  ).join('');
-}
-
-async function addHistoryLink() {
-  const title = document.getElementById('historyLinkTitle').value.trim();
-  const url = document.getElementById('historyLinkUrl').value.trim();
-  const msg = document.getElementById('historyLinkMsg');
-  if (!title || !url) { msg.textContent = 'Titre et URL requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  historyLinks.push({ title, url });
-  try {
-    await db.collection('contenu').doc('histoire_liens').set({ liens: historyLinks });
-    msg.textContent = '✅ Lien ajouté'; msg.className = 'msg'; msg.style.display = 'block';
-    document.getElementById('historyLinkTitle').value = ''; document.getElementById('historyLinkUrl').value = '';
-    displayHistoryLinks();
-  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
-}
-
-async function removeHistoryLink(index) {
-  historyLinks.splice(index, 1);
-  try {
-    await db.collection('contenu').doc('histoire_liens').set({ liens: historyLinks });
-    displayHistoryLinks();
-  } catch(e) { alert('Erreur : ' + e.message); }
-}
-
-function refreshHistory() {
-  if (historyText) document.getElementById('historyDisplay').innerHTML = historyText;
-  loadHistoryDocs();
-}
+function rh(){if(ht)document.getElementById('historyDisplay').innerHTML=ht;lhd();}
 </script>
 </body>
 </html>
