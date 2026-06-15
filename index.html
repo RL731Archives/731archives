@@ -210,7 +210,22 @@
     <button id="saveHistoryBtn" class="btn btn-gold" style="display:none" onclick="saveHistory()">💾 Sauvegarder</button>
   </div>
   <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956. Le récit de sa fondation et de son histoire sera rédigé ici.</p></div>
-  <div id="historyAdminOnly" style="display:none;margin-top:10px"><p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier, puis cliquez sur "💾 Sauvegarder".</p></div>
+  <div id="historyAdminOnly" style="display:none;margin-top:10px">
+    <p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier, puis cliquez sur "💾 Sauvegarder".</p>
+    <!-- Liens externes (Google Drive, etc.) -->
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
+      <h4 style="color:var(--bordeaux);margin-bottom:8px">🔗 Documents externes (Google Drive, etc.)</h4>
+      <div id="historyLinksList" style="margin-bottom:8px">
+        <p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l'instant.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="historyLinkTitle" placeholder="Titre du lien (ex: Procès-verbal 2023)" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+        <input id="historyLinkUrl" placeholder="URL Google Drive (https://...)" style="flex:3;min-width:220px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+        <button class="btn btn-bdx" onclick="addHistoryLink()" style="white-space:nowrap">➕ Ajouter</button>
+      </div>
+      <div id="historyLinkMsg" class="msg" style="margin-top:6px"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ARCHIVES -->
@@ -467,6 +482,7 @@ function afterLogin() {
     document.getElementById('saveHistoryBtn').style.display = 'inline-block';
     updateSubs();
     refreshMembers();
+    loadHistoryLinks();
   } else {
     document.getElementById('historyAdminOnly').style.display = 'none';
   }
@@ -803,6 +819,63 @@ async function refreshHistory() {
   }
 }
 
+// --- Liens externes pour l'Histoire ---
+let historyLinks = [];
+
+async function loadHistoryLinks() {
+  try {
+    const doc = await db.collection('contenu').doc('histoire-liens').get();
+    if (doc.exists) {
+      historyLinks = doc.data().liens || [];
+    }
+  } catch(e) { historyLinks = []; }
+  const list = document.getElementById('historyLinksList');
+  if (!list) return;
+  if (!historyLinks.length) {
+    list.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l\'instant.</p>';
+    return;
+  }
+  list.innerHTML = historyLinks.map((l, i) =>
+    '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:5px;margin-bottom:4px;border:1px solid #eee">' +
+    '<span style="font-size:16px">🔗</span>' +
+    '<a href="' + l.url + '" target="_blank" rel="noopener" style="flex:1;color:var(--bordeaux);text-decoration:none;font-size:13px">' +
+    '<strong>' + l.titre + '</strong></a>' +
+    '<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="deleteHistoryLink(' + i + ')">✕</button>' +
+    '</div>'
+  ).join('');
+}
+
+async function addHistoryLink() {
+  const titre = document.getElementById('historyLinkTitle').value.trim();
+  const url = document.getElementById('historyLinkUrl').value.trim();
+  const msg = document.getElementById('historyLinkMsg');
+  if (!titre || !url) {
+    msg.textContent = 'Veuillez remplir le titre et l\'URL'; msg.className = 'msg error'; msg.style.display = 'block'; return;
+  }
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    msg.textContent = 'L\'URL doit commencer par http:// ou https://'; msg.className = 'msg error'; msg.style.display = 'block'; return;
+  }
+  historyLinks.push({ titre, url });
+  try {
+    await db.collection('contenu').doc('histoire-liens').set({ liens: historyLinks });
+    document.getElementById('historyLinkTitle').value = '';
+    document.getElementById('historyLinkUrl').value = '';
+    msg.textContent = '✅ Lien ajouté !'; msg.className = 'msg'; msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+    loadHistoryLinks();
+  } catch(e) {
+    msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block';
+  }
+}
+
+async function deleteHistoryLink(index) {
+  historyLinks.splice(index, 1);
+  try {
+    await db.collection('contenu').doc('histoire-liens').set({ liens: historyLinks });
+    loadHistoryLinks();
+  } catch(e) { alert('Erreur : ' + e.message); }
+}
+
 async function saveHistory() {
   const texte = document.getElementById('historyDisplay').innerHTML;
   try {
@@ -814,3 +887,5 @@ async function saveHistory() {
 </script>
 </body>
 </html>
+
+Généré par 
