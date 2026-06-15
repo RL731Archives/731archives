@@ -27,6 +27,8 @@
     .btn-bdx{background:var(--bordeaux);color:#fff}
     .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
     .btn-danger{background:#c62828;color:#fff}
+    .btn-sort{background:transparent;border:none;cursor:pointer;color:inherit;font-weight:600;font-size:13px;padding:0 2px;display:inline-flex;align-items:center;gap:3px}
+    .btn-sort:hover{opacity:0.8}
     nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
     nav ul{list-style:none;display:flex}
     nav li{flex:1}
@@ -118,7 +120,7 @@
     <div class="site-title">Archives de l'Étoile du Temple</div>
   </div>
   <div>
-    <button class="btn btn-gold" onclick="openLogin()">👤 Connexion</button>
+    <button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button>
     <button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button>
   </div>
 </header>
@@ -194,7 +196,7 @@
       <div class="admin-panel">
         <h3>⚡ Accès rapide</h3>
         <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
-        <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">👤 Se connecter</button>
+        <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">🔓 Se connecter</button>
         <div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956<br />Membres : mot de passe = date naissance JJMMAAAA</div>
       </div>
     </div>
@@ -285,7 +287,7 @@
       <div id="loginPrompt" class="admin-panel">
         <h3>🔒 Connexion requise</h3>
         <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en tant qu'admin pour gérer les archives.</p>
-        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">👤 Connexion admin</button>
+        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">🔓 Connexion admin</button>
       </div>
     </div>
   </div>
@@ -369,6 +371,8 @@ let historyText = '';
 let dataLoaded = false;
 let currentSub = null;
 let currentNiveau = 1;
+// --- Variable pour le tri des membres ---
+let sortMembersBy = 'none'; // 'none', 'nom_asc', 'nom_desc'
 
 function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -481,6 +485,7 @@ function doLogout() {
   document.getElementById('saveHistoryBtn').style.display = 'none';
   currentSub = null;
   currentNiveau = 1;
+  sortMembersBy = 'none'; // reset du tri à la déconnexion
   updateSubsForCards();
   refreshDocs();
   refreshMedia();
@@ -538,6 +543,35 @@ function updateSubs() {
   select.innerHTML = subs.map(([k,v]) => '<option value="'+k+'">'+v.label+'</option>').join('');
 }
 
+// --- Fonctions de tri par Nom ---
+function toggleSortMembers() {
+  if (sortMembersBy === 'none' || sortMembersBy === 'nom_desc') {
+    sortMembersBy = 'nom_asc';
+  } else {
+    sortMembersBy = 'nom_desc';
+  }
+  refreshMembers();
+}
+
+function getSortedMembers() {
+  if (sortMembersBy === 'none') return members;
+  const sorted = [...members];
+  sorted.sort((a, b) => {
+    const nomA = (a.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const nomB = (b.nom || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const cmp = nomA.localeCompare(nomB);
+    return sortMembersBy === 'nom_asc' ? cmp : -cmp;
+  });
+  return sorted;
+}
+
+function getSortIndicator() {
+  if (sortMembersBy === 'none') return ' ⇅';
+  if (sortMembersBy === 'nom_asc') return ' ▲';
+  return ' ▼';
+}
+// --- Fin tri ---
+
 async function addMember() {
   const prenom = document.getElementById('memPrenom').value.trim();
   const nom = document.getElementById('memNom').value.trim();
@@ -551,7 +585,7 @@ async function addMember() {
   if (members.find(m => m.id === id)) { msg.textContent = 'Ce membre existe déjà (' + id + ')'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
   try {
     await db.collection('membres').doc(id).set({ id, prenom, nom, grade, birth });
-    msg.textContent = '✅ Membre ajouté : ' + prenom + ' ' + nom + ' — identifiant: ' + id;
+    msg.textContent = '✅ Membre ajouté : ' + nom + ' ' + prenom + ' — identifiant: ' + id;
     msg.className = 'msg'; msg.style.display = 'block';
     document.getElementById('memPrenom').value = ''; document.getElementById('memNom').value = ''; document.getElementById('memBirth').value = '';
     refreshMembers();
@@ -574,10 +608,15 @@ async function refreshMembers() {
   const sel = document.getElementById('memChangeId');
   const currentVal = sel.value;
   sel.innerHTML = '<option value="">Changer grade de...</option>' +
-    members.map(m => '<option value="'+m.id+'"' + (m.id===currentVal?' selected':'') + '>'+m.prenom+' '+m.nom+' ('+['','Apprenti','Compagnon','Maître'][m.grade]+')</option>').join('');
+    members.map(m => '<option value="'+m.id+'"' + (m.id===currentVal?' selected':'') + '>'+m.nom+' '+m.prenom+' ('+['','Apprenti','Compagnon','Maître'][m.grade]+')</option>').join('');
+  // Appliquer le tri si actif
+  const sortedMembers = getSortedMembers();
+  const sortIcon = getSortIndicator();
   list.innerHTML = '<div style="max-height:300px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
-    '<tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px;text-align:left">Identifiant</th><th style="padding:6px;text-align:left">Nom</th><th style="padding:6px;text-align:left">Grade</th><th style="padding:6px;text-align:center">Action</th></tr>' +
-    members.map(m => '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + m.id + '</td><td style="padding:6px">' + m.prenom + ' ' + m.nom + '</td><td style="padding:6px">' + ['','Apprenti','Compagnon','Maître'][m.grade] + '</td><td style="padding:6px;text-align:center"><button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="removeMember(\'' + m.id + '\')">✕ Supprimer</button></td></tr>').join('') + '</table></div>';
+    '<tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px;text-align:left">Identifiant</th><th style="padding:6px;text-align:left">' +
+    '<button class="btn-sort" onclick="toggleSortMembers()">Nom' + sortIcon + '</button>' +
+    '</th><th style="padding:6px;text-align:left">Grade</th><th style="padding:6px;text-align:center">Action</th></tr>' +
+    sortedMembers.map(m => '<tr style="border-bottom:1px solid #eee"><td style="padding:6px">' + m.id + '</td><td style="padding:6px">' + m.nom + ' ' + m.prenom + '</td><td style="padding:6px">' + ['','Apprenti','Compagnon','Maître'][m.grade] + '</td><td style="padding:6px;text-align:center"><button class="btn btn-outline" style="padding:3px 8px;font-size:11px" onclick="removeMember(\'' + m.id + '\')">✕ Supprimer</button></td></tr>').join('') + '</table></div>';
 }
 
 async function changeMemberGrade() {
@@ -696,90 +735,81 @@ async function deleteDocument(id) {
     const doc = documents.find(d => d.id === id);
     if (doc && doc._fireId) {
       await db.collection('documents').doc(doc._fireId).delete();
-    } else {
-      const snap = await db.collection('documents').get();
-      for (const d of snap.docs) {
-        if (d.data().id === id) {
-          await d.ref.delete();
-          break;
-        }
-      }
     }
-    documents = documents.filter(d => d.id !== id);
+    refreshDocs();
     refreshArchives();
-  } catch(e) { alert('Erreur de suppression : ' + e.message); }
+  } catch(e) { alert('Erreur : ' + e.message); }
+}
+
+function refreshDocs() {
+  if (!currentUser) return;
+  if (currentUser.isAdmin) updateSubs();
 }
 
 async function addDocument() {
-  const msg = document.getElementById('docMsg');
-  msg.style.display = 'none';
   const title = document.getElementById('docTitle').value.trim();
-  const grade = parseInt(document.getElementById('docGrade').value);
   const sub = document.getElementById('docSub').value;
-  const file = document.getElementById('docFile').files[0];
-  if (!title || !file) { msg.textContent = 'Titre et fichier requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    const type = ['pdf','doc','docx','xls','xlsx','jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(ext) ? ext : 'fichier';
-    const dateChoisie = document.getElementById('docDate').value;
-    const auteurSaisi = document.getElementById('docAuteur').value.trim();
-    const docData = { 
-      id: Date.now().toString(), 
-      title, grade, sub, type, 
-      filename: file.name, 
-      data: e.target.result, 
-      date: new Date().toLocaleDateString('fr-FR'), 
-      dateDoc: dateChoisie || '', 
-      auteur: auteurSaisi || '',
-      dateUpload: new Date().toISOString()
+  const grade = parseInt(document.getElementById('docGrade').value);
+  const dateDoc = document.getElementById('docDate').value;
+  const auteur = document.getElementById('docAuteur').value.trim();
+  const fileInput = document.getElementById('docFile');
+  const msg = document.getElementById('docMsg');
+  if (!title || !fileInput.files.length) { msg.textContent = 'Titre et fichier requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  const file = fileInput.files[0];
+  const ext = file.name.split('.').pop().toLowerCase();
+  const id = 'doc_' + Date.now();
+  try {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const data = e.target.result;
+      await db.collection('documents').doc(id).set({ id, title, sub, grade, dateDoc, auteur, type: ext, data, filename: file.name });
+      msg.textContent = '✅ Document ajouté !'; msg.className = 'msg'; msg.style.display = 'block';
+      document.getElementById('docTitle').value = ''; document.getElementById('docDate').value = ''; document.getElementById('docAuteur').value = ''; document.getElementById('docFile').value = '';
+      loadAllData();
     };
-    try {
-      await db.collection('documents').doc(docData.id).set(docData);
-      docData._fireId = docData.id;
-      documents.push(docData);
-      msg.textContent = '✅ Document ajouté : ' + title; msg.className = 'msg'; msg.style.display = 'block';
-      document.getElementById('docTitle').value = ''; document.getElementById('docFile').value = ''; 
-      document.getElementById('docDate').value = ''; document.getElementById('docAuteur').value = '';
-      refreshArchives();
-    } catch(err) { msg.textContent = 'Erreur : ' + err.message; msg.className = 'msg error'; msg.style.display = 'block'; }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function refreshDocs() {
-  if (!dataLoaded) await loadAllData();
-  refreshArchives();
+    reader.readAsDataURL(file);
+  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
 }
 
 async function refreshMedia() {
   const list = document.getElementById('mediaList');
   if (!currentUser) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>'; return; }
-  if (!dataLoaded) await loadAllData();
-  const visible = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
-  if (!visible.length) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible.</p>'; return; }
-  list.innerHTML = visible.map(d => {
-    if (['mp4','mov','webm','avi'].includes(d.type)) {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewerById(\'' + d.id + '\')"><video src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" controls></video><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
-    } else {
-      return '<div style="border-radius:5px;overflow:hidden;border:1px solid #eee;cursor:pointer" onclick="openViewerById(\'' + d.id + '\')"><img src="' + d.data + '" style="width:100%;height:120px;object-fit:cover" alt="' + d.title + '" /><div style="padding:4px 8px;font-size:12px">' + d.title + '</div></div>';
-    }
+  let media = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
+  media.sort((a,b) => {
+    const dateA = a.dateDoc || '';
+    const dateB = b.dateDoc || '';
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    return dateB.localeCompare(dateA);
+  });
+  if (!media.length) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible pour votre grade.</p>'; return; }
+  list.innerHTML = media.map(d => {
+    const isVideo = ['mp4','mov','webm','avi'].includes(d.type);
+    return '<div style="background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer" onclick="openViewerById(\'' + d.id + '\')">' +
+      (isVideo ? '<div style="height:100px;background:#333;display:grid;place-items:center;font-size:40px">🎬</div>' : '<img src="' + d.data + '" style="width:100%;height:100px;object-fit:cover" />') +
+      '<div style="padding:6px"><strong style="font-size:12px">' + d.title + '</strong></div></div>';
   }).join('');
 }
 
-function refreshHistory() {
-  if (historyText) document.getElementById('historyDisplay').innerHTML = historyText;
+async function refreshHistory() {
+  if (historyText) {
+    document.getElementById('historyDisplay').innerHTML = historyText;
+  } else {
+    try {
+      const doc = await db.collection('contenu').doc('histoire').get();
+      if (doc.exists) { historyText = doc.data().texte || ''; document.getElementById('historyDisplay').innerHTML = historyText; }
+    } catch(e) {}
+  }
 }
 
 async function saveHistory() {
-  const content = document.getElementById('historyDisplay').innerHTML;
+  const texte = document.getElementById('historyDisplay').innerHTML;
   try {
-    await db.collection('contenu').doc('histoire').set({ texte: content });
-    historyText = content;
-    const btn = document.getElementById('saveHistoryBtn');
-    btn.textContent = '✅ Sauvegardé !';
-    setTimeout(() => { btn.textContent = '💾 Sauvegarder'; }, 2000);
-  } catch(e) { alert('Erreur de sauvegarde : ' + e.message); }
+    await db.collection('contenu').doc('histoire').set({ texte });
+    historyText = texte;
+    alert('✅ Histoire sauvegardée !');
+  } catch(e) { alert('Erreur : ' + e.message); }
 }
 </script>
 </body>
