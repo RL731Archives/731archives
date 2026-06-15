@@ -831,6 +831,7 @@ async function refreshHistory() {
       if (doc.exists) { historyText = doc.data().texte || ''; document.getElementById('historyDisplay').innerHTML = historyText; }
     } catch(e) {}
   }
+  loadHistoryLinks();
 }
 
 // --- Liens externes pour l'Histoire (visibles par tous les membres connectés) ---
