@@ -27,6 +27,7 @@
     .btn-bdx{background:var(--bordeaux);color:#fff}
     .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
     .btn-danger{background:#c62828;color:#fff}
+    .btn-green{background:#2e7d32;color:#fff}
     .btn-sort{background:transparent;border:none;cursor:pointer;color:inherit;font-weight:600;font-size:13px;padding:0 2px;display:inline-flex;align-items:center;gap:3px}
     .btn-sort:hover{opacity:0.8}
     nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
@@ -110,10 +111,39 @@
     #viewerOverlay .viewer-body .embed-pdf{width:100%;height:65vh;border:none;border-radius:4px}
     #viewerOverlay .viewer-body .text-preview{padding:20px;background:#f9f9f9;border-radius:4px;font-size:14px;line-height:1.6;text-align:left;max-height:55vh;overflow-y:auto}
     .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
+
+    /* Styles spécifiques pour l'upload de documents Histoire */
+    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.2s}
+    .upload-zone:hover{background:#f5f0e0}
+    .upload-zone.dragover{background:#efe5c8;border-color:var(--bordeaux)}
+    .upload-zone .icon{font-size:40px;color:var(--gold)}
+    .upload-zone p{color:#888;font-size:13px;margin-top:6px}
+    .upload-progress{height:6px;background:#eee;border-radius:3px;margin:8px 0;overflow:hidden;display:none}
+    .upload-progress .bar{height:100%;background:var(--gold);width:0%;border-radius:3px;transition:width .3s}
+    .histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
+    .histo-doc .preview{width:48px;height:48px;border-radius:4px;object-fit:cover;background:#f0ece8;display:grid;place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
+    .histo-doc .preview img{width:100%;height:100%;object-fit:cover}
+    .histo-doc .info{flex:1;min-width:0}
+    .histo-doc .info strong{display:block;font-size:14px}
+    .histo-doc .info span{font-size:11px;color:#888;display:block}
+    .histo-doc .actions{display:flex;gap:4px;flex-shrink:0}
+    .histo-doc .actions button{padding:4px 10px;font-size:11px;border-radius:4px;border:none;cursor:pointer}
+    .histo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+    .histo-gallery-item{border:1px solid #eee;border-radius:6px;overflow:hidden;background:#fff;transition:.2s}
+    .histo-gallery-item:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    .histo-gallery-item .thumb{height:140px;background:#f0ece8;display:grid;place-items:center;overflow:hidden}
+    .histo-gallery-item .thumb img{width:100%;height:100%;object-fit:cover}
+    .histo-gallery-item .thumb .icon{font-size:36px;color:var(--gold)}
+    .histo-gallery-item .caption{padding:8px;font-size:12px;color:var(--text)}
+    .histo-gallery-item .caption strong{display:block;font-size:13px}
+    .histo-gallery-item .caption span{color:#888;font-size:10px}
+    .histo-doc-admin-section{border-top:1px solid #ddd;margin-top:16px;padding-top:14px}
+
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -212,17 +242,49 @@
     <h2 style="color:var(--bordeaux)">Histoire de l'Étoile du Temple</h2>
     <button id="saveHistoryBtn" class="btn btn-gold" style="display:none" onclick="saveHistory()">💾 Sauvegarder</button>
   </div>
+
+  <!-- Affichage du texte d'histoire (public) -->
   <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956. Le récit de sa fondation et de son histoire sera rédigé ici.</p></div>
-  
-  <!-- Liens externes visibles par tous les membres connectés -->
+
+  <!-- DOCUMENTS HISTOIRE : visibles par TOUS les visiteurs (même non connectés) -->
+  <div id="historyDocsSection" style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
+    <h4 style="color:var(--bordeaux);margin-bottom:10px">📂 Documents d'archives historiques</h4>
+    <div id="historyDocsPublic">
+      <p style="color:#999;font-size:13px;font-style:italic">Aucun document publié pour l'instant.</p>
+    </div>
+  </div>
+
+  <!-- SECTION ADMIN : Upload de documents -->
+  <div id="historyAdminUpload" style="display:none;margin-top:16px" class="histo-doc-admin-section">
+    <h4 style="color:var(--bordeaux);margin-bottom:8px">📤 Uploader un document historique</h4>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('historyFileInput').click()">
+      <div class="icon">📄</div>
+      <p><strong>Cliquez ici</strong> ou glissez-déposez un fichier</p>
+      <p style="font-size:11px;color:#aaa">Formats acceptés : PDF, images (JPG, PNG, GIF), texte (TXT, DOC, ODT) — max 20 Mo</p>
+    </div>
+    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt,.doc,.docx,.odt" style="display:none" />
+    <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <input id="historyDocTitle" placeholder="Titre du document (ex: Procès-verbal 1960)" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+      <input id="historyDocDate" type="date" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+      <button class="btn btn-green" onclick="uploadHistoryDoc()" id="uploadBtn">📤 Uploader</button>
+    </div>
+    <div id="historyDocMsg" class="msg" style="margin-top:6px"></div>
+
+    <!-- Gestion des documents uploadés (admin uniquement) -->
+    <div id="historyDocsAdmin" style="margin-top:14px">
+      <h5 style="color:var(--bordeaux);margin-bottom:6px">📋 Documents uploadés</h5>
+      <div id="historyDocsList"><p style="font-size:12px;color:#999">Aucun document uploadé.</p></div>
+    </div>
+  </div>
+
+  <!-- Ancienne section liens externes (conservée pour compatibilité) -->
   <div id="historyLinksSection" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
     <h4 style="color:var(--bordeaux);margin-bottom:8px">🔗 Documents externes (Google Drive, etc.)</h4>
     <div id="historyLinksList" style="margin-bottom:8px">
       <p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l'instant.</p>
     </div>
   </div>
-  
-  <!-- Interface admin pour ajouter/supprimer des liens -->
   <div id="historyAdminOnly" style="display:none;margin-top:10px">
     <p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier, puis cliquez sur "💾 Sauvegarder".</p>
     <div style="margin-top:10px;padding-top:10px">
@@ -374,6 +436,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 const sousRubriques = {
   'rituels1': { label: 'Rituels du 1° degré', niveau: 1 },
@@ -397,6 +460,7 @@ let currentSub = null;
 let currentNiveau = 1;
 let sortMembersBy = 'none';
 let historyLinks = [];
+let historyDocs = [];
 
 function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -486,20 +550,22 @@ function afterLogin() {
   document.getElementById('loginPrompt').style.display = currentUser.isAdmin ? 'none' : 'block';
   document.getElementById('logoutBtn').style.display = 'inline-block';
   
-  // Liens d'histoire : visibles pour tous les membres connectés
   document.getElementById('historyLinksSection').style.display = 'block';
+  document.getElementById('historyDocsSection').style.display = 'block';
   
   if (currentUser.isAdmin) {
     document.getElementById('historyAdminOnly').style.display = 'block';
+    document.getElementById('historyAdminUpload').style.display = 'block';
     document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
     document.getElementById('saveHistoryBtn').style.display = 'inline-block';
     updateSubs();
     refreshMembers();
   } else {
     document.getElementById('historyAdminOnly').style.display = 'none';
+    document.getElementById('historyAdminUpload').style.display = 'none';
   }
-  // Charger les liens dans tous les cas
   loadHistoryLinks();
+  loadHistoryDocs();
   updateSubsForCards();
   refreshDocs();
   refreshMedia();
@@ -511,6 +577,7 @@ function doLogout() {
   document.getElementById('loginPrompt').style.display = 'block';
   document.getElementById('logoutBtn').style.display = 'none';
   document.getElementById('historyAdminOnly').style.display = 'none';
+  document.getElementById('historyAdminUpload').style.display = 'none';
   document.getElementById('historyLinksSection').style.display = 'none';
   document.getElementById('historyDisplay').setAttribute('contenteditable', 'false');
   document.getElementById('saveHistoryBtn').style.display = 'none';
@@ -521,6 +588,8 @@ function doLogout() {
   refreshDocs();
   refreshMedia();
   refreshArchives();
+  // Les documents Histoire restent visibles (public)
+  loadHistoryDocs();
 }
 
 function selectSubDirect(key) {
@@ -544,6 +613,7 @@ function selectSubDirect(key) {
           document.getElementById('loginPrompt').style.display = 'none';
           document.getElementById('logoutBtn').style.display = 'inline-block';
           document.getElementById('historyAdminOnly').style.display = 'block';
+          document.getElementById('historyAdminUpload').style.display = 'block';
           document.getElementById('historyLinksSection').style.display = 'block';
           document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
           document.getElementById('saveHistoryBtn').style.display = 'inline-block';
@@ -559,6 +629,8 @@ function selectSubDirect(key) {
       updateSubsForCards();
     }
     if (historyText) document.getElementById('historyDisplay').innerHTML = historyText;
+    // Charger les documents histoire pour tout le monde (public)
+    loadHistoryDocs();
   });
 })();
 
@@ -706,197 +778,448 @@ function openViewer(doc) {
   else if (['doc','docx'].includes(ext)) {
     body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📝 Document Word</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
-  else if (['xls','xlsx'].includes(ext)) {
-    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📊 Tableur Excel</p><p>Ce document ne peut pas être affiché directement dans le navigateur.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+  else if (ext === 'txt') {
+    body.innerHTML = '<div class="text-preview"><pre style="white-space:pre-wrap">' + data + '</pre></div>';
   }
   else {
-    body.innerHTML = '<div class="text-preview"><p style="font-size:16px;font-weight:600;margin-bottom:10px">📁 Document</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+    body.innerHTML = '<div class="text-preview"><p>Type de fichier non affichable directement.</p><p style="margin-top:12px"><a href="' + data + '" download="' + (doc.filename || 'document') + '" class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
   document.getElementById('viewerOverlay').classList.add('open');
 }
 
 function closeViewer() {
   document.getElementById('viewerOverlay').classList.remove('open');
+  document.getElementById('viewerBody').innerHTML = '<p style="color:#999">Chargement...</p>';
 }
 
-function showDocumentsInSub(container) {
-  const sub = sousRubriques[currentSub];
-  if (!sub) { currentSub = null; refreshArchives(); return; }
-  let visible = documents.filter(d => d.sub === currentSub && d.grade <= currentUser.grade);
-  visible.sort((a, b) => {
-    const dateA = a.dateDoc || '';
-    const dateB = b.dateDoc || '';
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
-    return dateB.localeCompare(dateA);
-  });
-  const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','webp':'🖼️','mp4':'🎬','mov':'🎬','webm':'🎬','avi':'🎬' };
-  container.innerHTML = '<a class="back-link" onclick="backToRubriques()">← Retour aux rubriques</a>' +
-    '<h3 style="color:var(--bordeaux);margin-bottom:8px">' + sub.label + '</h3>' +
-    '<p style="font-size:13px;color:#666;margin-bottom:10px">' + visible.length + ' document(s)</p>' +
-    (!visible.length ? '<p style="color:#999;padding:20px;text-align:center">Aucun document dans cette rubrique.</p>' :
-      visible.map(d => {
-        const dateAffichee = d.dateDoc || d.date || '';
-        const auteur = d.auteur ? ' · ' + d.auteur : '';
-        const adminBtns = (currentUser && currentUser.isAdmin)
-          ? '<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteDocument(\'' + d.id + '\')">✕</button>'
-          : '';
-        return '<div class="doc-item">' +
-          '<div class="icon" onclick="openViewerById(\'' + d.id + '\')">' + (icons[d.type]||'📁') + '</div>' +
-          '<div class="info">' +
-            '<strong onclick="openViewerById(\'' + d.id + '\')">' + d.title + '</strong>' +
-            '<span>' + dateAffichee + auteur + ' · <span class="badge badge-' + d.grade + '">' + ['','Apprenti','Compagnon','Maître'][d.grade] + '</span></span>' +
-          '</div>' +
-          '<button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openViewerById(\'' + d.id + '\')">👁</button>' +
-          adminBtns +
-          '</div>';
-      }).join(''));
-}
-
-function openViewerById(id) {
-  const doc = documents.find(d => d.id === id);
-  if (doc) openViewer(doc);
-}
-
-async function deleteDocument(id) {
-  if (!confirm('Supprimer ce document définitivement ?')) return;
+async function saveHistory() {
+  const content = document.getElementById('historyDisplay').innerHTML;
   try {
-    const doc = documents.find(d => d.id === id);
-    if (doc && doc._fireId) {
-      await db.collection('documents').doc(doc._fireId).delete();
-    }
-    refreshDocs();
-    refreshArchives();
-  } catch(e) { alert('Erreur : ' + e.message); }
+    await db.collection('contenu').doc('histoire').set({ texte: content });
+    const msg = document.getElementById('saveHistoryBtn');
+    msg.textContent = '✅ Sauvegardé !';
+    setTimeout(() => msg.innerHTML = '💾 Sauvegarder', 2000);
+  } catch(e) {
+    localStorage.setItem('rl_history', content);
+    const msg = document.getElementById('saveHistoryBtn');
+    msg.textContent = '✅ Sauvegardé (local)';
+    setTimeout(() => msg.innerHTML = '💾 Sauvegarder', 2000);
+  }
 }
 
-function refreshDocs() {
-  if (!currentUser) return;
-  if (currentUser.isAdmin) updateSubs();
+// =======================================================
+// GESTION DES DOCUMENTS UPLOADÉS SUR LA PAGE HISTOIRE
+// =======================================================
+
+// Upload d'un fichier vers Firebase Storage
+async function uploadHistoryDoc() {
+  const fileInput = document.getElementById('historyFileInput');
+  const title = document.getElementById('historyDocTitle').value.trim();
+  const date = document.getElementById('historyDocDate').value;
+  const msg = document.getElementById('historyDocMsg');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const progress = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadProgressBar');
+
+  if (!fileInput.files || !fileInput.files[0]) {
+    msg.textContent = 'Veuillez sélectionner un fichier'; msg.className = 'msg error'; msg.style.display = 'block'; return;
+  }
+  if (!title) {
+    msg.textContent = 'Veuillez donner un titre au document'; msg.className = 'msg error'; msg.style.display = 'block'; return;
+  }
+
+  const file = fileInput.files[0];
+  const maxSize = 20 * 1024 * 1024; // 20 Mo
+  if (file.size > maxSize) {
+    msg.textContent = 'Le fichier dépasse 20 Mo'; msg.className = 'msg error'; msg.style.display = 'block'; return;
+  }
+
+  // Nom unique pour le storage
+  const ext = file.name.split('.').pop().toLowerCase();
+  const fileName = `histoire/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const ref = storage.ref(fileName);
+  const task = ref.put(file);
+
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = '⏳ Upload en cours...';
+  progress.style.display = 'block';
+
+  task.on('state_changed',
+    function progress(snapshot) {
+      const pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      bar.style.width = pct + '%';
+    },
+    function error(err) {
+      msg.textContent = '❌ Erreur upload : ' + err.message; msg.className = 'msg error'; msg.style.display = 'block';
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = '📤 Uploader';
+      progress.style.display = 'none';
+    },
+    async function complete() {
+      try {
+        const url = await ref.getDownloadURL();
+        // Sauvegarder le document dans Firestore
+        const docData = {
+          title: title,
+          date: date || '',
+          fileName: file.name,
+          type: ext,
+          url: url,
+          storagePath: fileName,
+          size: file.size,
+          uploadedAt: new Date().toISOString()
+        };
+        await db.collection('histoire_documents').add(docData);
+        
+        msg.textContent = '✅ Document uploadé avec succès !'; msg.className = 'msg'; msg.style.display = 'block';
+        fileInput.value = '';
+        document.getElementById('historyDocTitle').value = '';
+        document.getElementById('historyDocDate').value = '';
+        loadHistoryDocs();
+      } catch(e) {
+        msg.textContent = '❌ Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block';
+      }
+      uploadBtn.disabled = false;
+      uploadBtn.innerHTML = '📤 Uploader';
+      progress.style.display = 'none';
+      bar.style.width = '0%';
+    }
+  );
 }
+
+// Charger les documents histoire
+async function loadHistoryDocs() {
+  try {
+    const snap = await db.collection('histoire_documents').orderBy('uploadedAt', 'desc').get();
+    historyDocs = snap.docs.map(d => ({...d.data(), _fireId: d.id}));
+  } catch(e) {
+    historyDocs = [];
+  }
+  displayPublicHistoryDocs();
+  if (currentUser && currentUser.isAdmin) {
+    displayAdminHistoryDocs();
+  }
+}
+
+// Affichage public des documents histoire (visible par TOUS)
+function displayPublicHistoryDocs() {
+  const container = document.getElementById('historyDocsPublic');
+  if (!historyDocs.length) {
+    container.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun document publié pour l\'instant.</p>';
+    return;
+  }
+
+  // Séparer les images du reste
+  const images = historyDocs.filter(d => ['jpg','jpeg','png','gif','webp'].includes(d.type));
+  const others = historyDocs.filter(d => !['jpg','jpeg','png','gif','webp'].includes(d.type));
+
+  let html = '';
+
+  // Galerie d'images
+  if (images.length) {
+    html += '<div style="margin-bottom:14px">';
+    html += '<h5 style="color:var(--bordeaux);margin-bottom:6px;font-size:13px">🖼️ Galerie d\'images</h5>';
+    html += '<div class="histo-gallery">';
+    images.forEach(d => {
+      const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+      html += '<div class="histo-gallery-item" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="cursor:pointer">';
+      html += '<div class="thumb"><img src="' + d.url + '" alt="' + d.title + '" /></div>';
+      html += '<div class="caption"><strong>' + d.title + '</strong>';
+      if (dateStr) html += '<span>' + dateStr + '</span>';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // Liste des autres documents
+  if (others.length) {
+    html += '<div>';
+    html += '<h5 style="color:var(--bordeaux);margin-bottom:6px;font-size:13px">📄 Documents</h5>';
+    others.forEach(d => {
+      const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+      const ext = d.type.toUpperCase();
+      const isPdf = d.type === 'pdf';
+      const icon = isPdf ? '📕' : '📄';
+      html += '<div class="histo-doc">';
+      html += '<div class="preview">' + icon + '</div>';
+      html += '<div class="info">';
+      html += '<strong onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="cursor:pointer">' + d.title + '</strong>';
+      html += '<span>' + (dateStr ? dateStr + ' · ' : '') + ext + '</span>';
+      html += '</div>';
+      html += '<div class="actions">';
+      html += '<button class="btn btn-gold" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="padding:4px 10px;font-size:11px">👁️ Voir</button>';
+      html += '<button class="btn btn-bdx" onclick="window.open(\'' + d.url + '\',\'_blank\')" style="padding:4px 10px;font-size:11px">📥 Ouvrir</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// Affichage admin pour gérer les documents
+function displayAdminHistoryDocs() {
+  const container = document.getElementById('historyDocsList');
+  if (!historyDocs.length) {
+    container.innerHTML = '<p style="font-size:12px;color:#999">Aucun document uploadé.</p>';
+    return;
+  }
+  let html = '';
+  historyDocs.forEach(d => {
+    const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Date non définie';
+    const ext = d.type.toUpperCase();
+    const icon = ['jpg','jpeg','png','gif','webp'].includes(d.type) ? '🖼️' : '📄';
+    html += '<div class="histo-doc">';
+    html += '<div class="preview">' + (['jpg','jpeg','png','gif','webp'].includes(d.type) ? '<img src="' + d.url + '" alt="" />' : icon) + '</div>';
+    html += '<div class="info">';
+    html += '<strong>' + d.title + '</strong>';
+    html += '<span>' + dateStr + ' · ' + ext + ' · ' + (d.fileName || '') + '</span>';
+    html += '</div>';
+    html += '<div class="actions">';
+    html += '<button class="btn btn-outline" onclick="openHistoryDocViewer(\'' + d._fireId + '\')" style="padding:3px 8px;font-size:11px">👁️</button>';
+    html += '<button class="btn btn-danger" onclick="deleteHistoryDoc(\'' + d._fireId + '\')" style="padding:3px 8px;font-size:11px">🗑️</button>';
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+// Visualiser un document histoire (depuis le viewer général)
+function openHistoryDocViewer(docId) {
+  const doc = historyDocs.find(d => d._fireId === docId);
+  if (!doc) return;
+  openViewer({ title: doc.title, data: doc.url, type: doc.type, filename: doc.fileName });
+}
+
+// Supprimer un document histoire (admin uniquement)
+async function deleteHistoryDoc(docId) {
+  const doc = historyDocs.find(d => d._fireId === docId);
+  if (!doc) return;
+  if (!confirm('Supprimer définitivement "' + doc.title + '" ? Le fichier sera également supprimé du serveur.')) return;
+  
+  try {
+    // Supprimer le fichier du Storage
+    if (doc.storagePath) {
+      try {
+        await storage.ref(doc.storagePath).delete();
+      } catch(e) {
+        console.warn('Fichier non trouvé dans le storage:', doc.storagePath);
+      }
+    } else {
+      // Fallback : essayer avec l'URL
+      try {
+        const ref = storage.refFromURL(doc.url);
+        await ref.delete();
+      } catch(e) {
+        console.warn('Impossible de supprimer du storage via URL');
+      }
+    }
+    // Supprimer la référence Firestore
+    await db.collection('histoire_documents').doc(docId).delete();
+    loadHistoryDocs();
+  } catch(e) {
+    alert('Erreur lors de la suppression : ' + e.message);
+  }
+}
+
+// Configuration du Drag & Drop pour l'upload
+const uploadZone = document.getElementById('uploadZone');
+if (uploadZone) {
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+  });
+  uploadZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      document.getElementById('historyFileInput').files = files;
+    }
+  });
+  document.getElementById('historyFileInput').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      const container = document.getElementById('uploadZone');
+      const p = container.querySelector('p');
+      p.innerHTML = '<strong>' + this.files[0].name + '</strong> (' + (this.files[0].size / 1024 / 1024).toFixed(1) + ' Mo)';
+    }
+  });
+}
+
+// =======================================================
+// FONCTIONS EXISTANTES POUR LES DOCUMENTS D'ARCHIVES
+// =======================================================
 
 async function addDocument() {
   const title = document.getElementById('docTitle').value.trim();
+  const niveau = parseInt(document.getElementById('docNiveau').value);
   const sub = document.getElementById('docSub').value;
   const grade = parseInt(document.getElementById('docGrade').value);
-  const dateDoc = document.getElementById('docDate').value;
+  const date = document.getElementById('docDate').value;
   const auteur = document.getElementById('docAuteur').value.trim();
   const fileInput = document.getElementById('docFile');
   const msg = document.getElementById('docMsg');
-  if (!title || !fileInput.files.length) { msg.textContent = 'Titre et fichier requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  
+  if (!title) { msg.textContent = 'Titre requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  if (!fileInput.files || !fileInput.files[0]) { msg.textContent = 'Fichier requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  
   const file = fileInput.files[0];
   const ext = file.name.split('.').pop().toLowerCase();
-  const id = 'doc_' + Date.now();
+  const fileName = `archives/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const ref = storage.ref(fileName);
+  
   try {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-      const data = e.target.result;
-      await db.collection('documents').doc(id).set({ id, title, sub, grade, dateDoc, auteur, type: ext, data, filename: file.name });
-      msg.textContent = '✅ Document ajouté !'; msg.className = 'msg'; msg.style.display = 'block';
-      document.getElementById('docTitle').value = ''; document.getElementById('docDate').value = ''; document.getElementById('docAuteur').value = ''; document.getElementById('docFile').value = '';
-      loadAllData();
-    };
-    reader.readAsDataURL(file);
-  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
-}
-
-async function refreshMedia() {
-  const list = document.getElementById('mediaList');
-  if (!currentUser) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>'; return; }
-  let media = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
-  media.sort((a,b) => {
-    const dateA = a.dateDoc || '';
-    const dateB = b.dateDoc || '';
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
-    return dateB.localeCompare(dateA);
-  });
-  if (!media.length) { list.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible pour votre grade.</p>'; return; }
-  list.innerHTML = media.map(d => {
-    const isVideo = ['mp4','mov','webm','avi'].includes(d.type);
-    return '<div style="background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);cursor:pointer" onclick="openViewerById(\'' + d.id + '\')">' +
-      (isVideo ? '<div style="height:100px;background:#333;display:grid;place-items:center;font-size:40px">🎬</div>' : '<img src="' + d.data + '" style="width:100%;height:100px;object-fit:cover" />') +
-      '<div style="padding:6px"><strong style="font-size:12px">' + d.title + '</strong></div></div>';
-  }).join('');
-}
-
-async function refreshHistory() {
-  if (historyText) {
-    document.getElementById('historyDisplay').innerHTML = historyText;
-  } else {
-    try {
-      const doc = await db.collection('contenu').doc('histoire').get();
-      if (doc.exists) { historyText = doc.data().texte || ''; document.getElementById('historyDisplay').innerHTML = historyText; }
-    } catch(e) {}
-  }
-  loadHistoryLinks();
-}
-
-// --- Liens externes pour l'Histoire (visibles par tous les membres connectés) ---
-
-async function loadHistoryLinks() {
-  try {
-    const doc = await db.collection('contenu').doc('histoire-liens').get();
-    if (doc.exists) {
-      historyLinks = doc.data().liens || [];
-    }
-  } catch(e) { historyLinks = []; }
-  const list = document.getElementById('historyLinksList');
-  if (!list) return;
-  if (!historyLinks.length) {
-    list.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l\'instant.</p>';
-    return;
-  }
-  list.innerHTML = historyLinks.map((l, i) => 
-    '<div class="history-link">' +
-    '<span style="font-size:16px">🔗</span>' +
-    '<a href="' + l.url + '" target="_blank" rel="noopener"><strong>' + l.titre + '</strong></a>' +
-    (currentUser && currentUser.isAdmin ? 
-      '<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="deleteHistoryLink(' + i + ')">✕</button>' : '') +
-    '</div>'
-  ).join('');
-}
-
-async function addHistoryLink() {
-  const titre = document.getElementById('historyLinkTitle').value.trim();
-  const url = document.getElementById('historyLinkUrl').value.trim();
-  const msg = document.getElementById('historyLinkMsg');
-  if (!titre || !url) {
-    msg.textContent = 'Veuillez remplir le titre et l\'URL'; msg.className = 'msg error'; msg.style.display = 'block'; return;
-  }
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    msg.textContent = 'L\'URL doit commencer par http:// ou https://'; msg.className = 'msg error'; msg.style.display = 'block'; return;
-  }
-  historyLinks.push({ titre, url });
-  try {
-    await db.collection('contenu').doc('histoire-liens').set({ liens: historyLinks });
-    document.getElementById('historyLinkTitle').value = '';
-    document.getElementById('historyLinkUrl').value = '';
-    msg.textContent = '✅ Lien ajouté !'; msg.className = 'msg'; msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 2000);
-    loadHistoryLinks();
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+    
+    await db.collection('documents').add({
+      title, niveau, sub, grade, date, auteur, type: ext,
+      fileName: file.name, data: url, storagePath: fileName,
+      uploadedAt: new Date().toISOString()
+    });
+    
+    msg.textContent = '✅ Document ajouté avec succès'; msg.className = 'msg'; msg.style.display = 'block';
+    document.getElementById('docTitle').value = '';
+    document.getElementById('docDate').value = '';
+    document.getElementById('docAuteur').value = '';
+    document.getElementById('docFile').value = '';
+    refreshDocs();
   } catch(e) {
     msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block';
   }
 }
 
-async function deleteHistoryLink(index) {
-  historyLinks.splice(index, 1);
+async function refreshDocs() {
   try {
-    await db.collection('contenu').doc('histoire-liens').set({ liens: historyLinks });
-    loadHistoryLinks();
+    const snap = await db.collection('documents').get();
+    documents = snap.docs.map(d => ({...d.data(), _fireId: d.id }));
+  } catch(e) {}
+}
+
+async function removeDocument(fireId) {
+  if (!confirm('Supprimer ce document ?')) return;
+  try {
+    const doc = documents.find(d => d._fireId === fireId);
+    if (doc && doc.storagePath) {
+      try { await storage.ref(doc.storagePath).delete(); } catch(e) {}
+    }
+    await db.collection('documents').doc(fireId).delete();
+    refreshDocs();
+    if (currentSub) {
+      const container = document.getElementById('archivesContent');
+      showDocumentsInSub(container);
+    }
   } catch(e) { alert('Erreur : ' + e.message); }
 }
 
-async function saveHistory() {
-  const texte = document.getElementById('historyDisplay').innerHTML;
+function showDocumentsInSub(container) {
+  const filtered = documents.filter(d => d.sub === currentSub);
+  const subInfo = sousRubriques[currentSub];
+  
+  container.innerHTML = '<div class="back-link" onclick="backToRubriques()">← Retour aux rubriques</div>' +
+    '<h3 style="color:var(--bordeaux);margin-bottom:10px">' + (subInfo ? subInfo.label : 'Documents') + '</h3>';
+  
+  if (!filtered.length) {
+    container.innerHTML += '<p style="color:#999;font-size:13px;font-style:italic">Aucun document dans cette rubrique.</p>';
+    return;
+  }
+  
+  filtered.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  
+  filtered.forEach(d => {
+    const dateStr = d.date ? new Date(d.date + 'T00:00:00').toLocaleDateString('fr-FR') : '';
+    let icon = '📄';
+    if (['jpg','jpeg','png','gif','webp'].includes(d.type)) icon = '🖼️';
+    else if (d.type === 'pdf') icon = '📕';
+    else if (['mp4','mov','webm'].includes(d.type)) icon = '🎬';
+    
+    container.innerHTML += '<div class="doc-item">' +
+      '<div class="icon" onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\',filename:\'' + (d.fileName||'') + '\'})">' + icon + '</div>' +
+      '<div class="info">' +
+      '<strong onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\',filename:\'' + (d.fileName||'') + '\'})">' + d.title + '</strong>' +
+      '<span>' + (dateStr ? dateStr + ' · ' : '') + (d.auteur ? d.auteur + ' · ' : '') + d.type.toUpperCase() + '</span>' +
+      '</div>' +
+      (currentUser && currentUser.isAdmin ? '<button class="btn btn-outline mini-btn" onclick="removeDocument(\'' + d._fireId + '\')" style="padding:2px 8px;font-size:11px">✕</button>' : '') +
+      '</div>';
+  });
+}
+
+function refreshMedia() {
+  const container = document.getElementById('mediaList');
+  if (!currentUser) {
+    container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+    return;
+  }
+  const media = documents.filter(d => ['jpg','jpeg','png','gif','webp','mp4','mov','webm','avi'].includes(d.type) && d.grade <= currentUser.grade);
+  if (!media.length) {
+    container.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;padding:30px">Aucun média disponible pour votre grade.</p>';
+    return;
+  }
+  container.innerHTML = media.map(d => {
+    const isVideo = ['mp4','mov','webm','avi'].includes(d.type);
+    const subInfo = sousRubriques[d.sub] || {};
+    return '<div onclick="openViewer({title:\'' + d.title.replace(/'/g, "\\'") + '\',data:\'' + d.data + '\',type:\'' + d.type + '\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff">' +
+      '<div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">' +
+      (isVideo ? '<span style="font-size:40px">🎬</span>' : '<img src="' + d.data + '" style="width:100%;height:100%;object-fit:cover" />') +
+      '</div>' +
+      '<div style="padding:8px"><strong style="font-size:13px">' + d.title + '</strong><br /><span style="font-size:11px;color:#888">' + (subInfo.label || '') + '</span></div></div>';
+  }).join('');
+}
+
+// =======================================================
+// FONCTIONS POUR LES LIENS EXTERNES (conservées)
+// =======================================================
+
+async function loadHistoryLinks() {
   try {
-    await db.collection('contenu').doc('histoire').set({ texte });
-    historyText = texte;
-    alert('✅ Histoire sauvegardée !');
+    const snap = await db.collection('contenu').doc('histoire_liens').get();
+    historyLinks = snap.exists && snap.data().liens ? snap.data().liens : [];
+  } catch(e) { historyLinks = []; }
+  displayHistoryLinks();
+}
+
+function displayHistoryLinks() {
+  const container = document.getElementById('historyLinksList');
+  if (!historyLinks.length) {
+    container.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l\'instant.</p>';
+    return;
+  }
+  container.innerHTML = historyLinks.map((l, i) => 
+    '<div class="history-link">' +
+    '<a href="' + l.url + '" target="_blank">🔗 ' + l.title + '</a>' +
+    (currentUser && currentUser.isAdmin ? '<button class="btn btn-outline mini-btn" onclick="removeHistoryLink('+i+')" style="padding:2px 8px;font-size:11px">✕</button>' : '') +
+    '</div>'
+  ).join('');
+}
+
+async function addHistoryLink() {
+  const title = document.getElementById('historyLinkTitle').value.trim();
+  const url = document.getElementById('historyLinkUrl').value.trim();
+  const msg = document.getElementById('historyLinkMsg');
+  if (!title || !url) { msg.textContent = 'Titre et URL requis'; msg.className = 'msg error'; msg.style.display = 'block'; return; }
+  historyLinks.push({ title, url });
+  try {
+    await db.collection('contenu').doc('histoire_liens').set({ liens: historyLinks });
+    msg.textContent = '✅ Lien ajouté'; msg.className = 'msg'; msg.style.display = 'block';
+    document.getElementById('historyLinkTitle').value = ''; document.getElementById('historyLinkUrl').value = '';
+    displayHistoryLinks();
+  } catch(e) { msg.textContent = 'Erreur : ' + e.message; msg.className = 'msg error'; msg.style.display = 'block'; }
+}
+
+async function removeHistoryLink(index) {
+  historyLinks.splice(index, 1);
+  try {
+    await db.collection('contenu').doc('histoire_liens').set({ liens: historyLinks });
+    displayHistoryLinks();
   } catch(e) { alert('Erreur : ' + e.message); }
+}
+
+function refreshHistory() {
+  if (historyText) document.getElementById('historyDisplay').innerHTML = historyText;
+  loadHistoryDocs();
 }
 </script>
 </body>
