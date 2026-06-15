@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>731 Archives — Étoile du Temple</title>
   <style>
     :root{--bg:#F5F0E8;--bordeaux:#800020;--gold:#D4AF37;--text:#2a2a2a;--card1:#fffaf6;--card2:#f0ece8;--card3:#e7e2de}
@@ -49,11 +49,6 @@
     .admin-panel .row{display:flex;gap:8px}
     .admin-panel .row>*{flex:1}
     footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
-    .doc-item{display:flex;align-items:center;gap:10px;padding:8px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-    .doc-item .icon{font-size:24px;cursor:pointer}
-    .doc-item .info{flex:1}
-    .doc-item .info strong{display:block;font-size:14px;cursor:pointer}
-    .doc-item .info span{font-size:11px;color:#888}
     .msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
     .msg.error{background:#ffebee;color:#c62828}
     .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
@@ -114,15 +109,17 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
+
 <header>
   <div class="brand"><div class="logo">★</div><div class="site-title">Archives de l'Étoile du Temple</div></div>
   <div><button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button><button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button></div>
 </header>
+
 <nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
-<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge" /><div class="overlay"><div><h1>Archives de l'Étoile du Temple</h1></div></div></div>
+
+<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"><div><h1>Archives de l'Étoile du Temple</h1></div></div></div>
 
 <!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
@@ -171,7 +168,7 @@
         <h3>⚡ Accès rapide</h3>
         <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
         <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">🔓 Se connecter</button>
-        <div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956<br />Membres : mot de passe = date naissance JJMMAAAA</div>
+        <div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956<br>Membres : mot de passe = date naissance JJMMAAAA</div>
       </div>
     </div>
   </div>
@@ -199,11 +196,11 @@
       <p><strong>Cliquez</strong> ou glissez-déposez un fichier</p>
       <p style="font-size:11px;color:#aaa">PDF, images (JPG, PNG, GIF), texte — max 20 Mo</p>
     </div>
-    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt" style="display:none" />
+    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt" style="display:none">
     <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-      <input id="historyDocTitle" placeholder="Titre du document" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
-      <input id="historyDocDate" type="date" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
+      <input id="historyDocTitle" placeholder="Titre du document" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px">
+      <input id="historyDocDate" type="date" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px">
       <button class="btn btn-green" onclick="uploadHistoryDoc()" id="uploadBtn">📤 Uploader</button>
     </div>
     <div id="uploadAdminMsg" class="admin-msg"></div>
@@ -224,20 +221,20 @@
         <h3>📁 Administration</h3>
         <div class="sub-tabs"><button class="active" onclick="showAdminTab('docs',this)">Documents</button><button onclick="showAdminTab('membres',this)">Membres</button></div>
         <div id="adminDocs">
-          <label>Titre</label><input id="docTitle" />
+          <label>Titre</label><input id="docTitle">
           <label>Niveau</label><select id="docNiveau" onchange="updateSubs()"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
           <label>Sous-rubrique</label><select id="docSub"></select>
           <label>Grade requis</label><select id="docGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
-          <label>Date</label><input id="docDate" type="date" />
-          <label>Auteur</label><input id="docAuteur" />
-          <label>Fichier</label><input id="docFile" type="file" />
+          <label>Date</label><input id="docDate" type="date">
+          <label>Auteur</label><input id="docAuteur">
+          <label>Fichier</label><input id="docFile" type="file">
           <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter</button>
           <div id="docMsg" class="msg"></div>
         </div>
         <div id="adminMembres" style="display:none">
-          <label>Prénom</label><input id="memPrenom" /><label>Nom</label><input id="memNom" />
+          <label>Prénom</label><input id="memPrenom"><label>Nom</label><input id="memNom">
           <label>Grade</label><select id="memGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
-          <label>Date naissance (JJMMAAAA)</label><input id="memBirth" placeholder="15031960" />
+          <label>Date naissance (JJMMAAAA)</label><input id="memBirth" placeholder="15031960">
           <div class="row"><div><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div></div>
           <div style="margin:10px 0">
             <select id="memChangeId"><option value="">Changer grade...</option></select>
@@ -267,7 +264,7 @@
 <div id="page-contact" class="page">
   <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
   <div style="background:#fff;padding:20px;border-radius:8px">
-    <p><strong>Loge L'Étoile du Temple</strong><br />Fondée en 1956</p>
+    <p><strong>Loge L'Étoile du Temple</strong><br>Fondée en 1956</p>
     <p style="margin-top:10px">Contact : <a href="mailto:f.brl731@proton.me">f.brl731@proton.me</a></p>
     <p>731archives.netlify.app</p>
   </div>
@@ -277,7 +274,7 @@
 <div id="loginOverlay">
   <div class="modal">
     <h2>🔐 Connexion</h2>
-    <input id="loginUser" placeholder="Identifiant" /><input id="loginPass" type="password" placeholder="Mot de passe" />
+    <input id="loginUser" placeholder="Identifiant"><input id="loginPass" type="password" placeholder="Mot de passe">
     <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
     <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
     <div id="loginMsg" style="margin-top:8px;display:none;color:#c62828;font-size:13px"></div>
@@ -305,343 +302,546 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
-const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches d'Apprenti",niveau:1},'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},'orateur1':{label:"Orateur 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches Compagnons',niveau:2},'orateur2':{label:'Orateur 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},'orateur3':{label:'Orateur 3°',niveau:3}};
-let cu=null, mems=[], docs=[], ht='', dl=false, cs=null, cn=1, sm='none', hd=[];
-const $=id=>document.getElementById(id);
 
-function sp(n,el){
+const ssR = {
+  'rituels1':{label:'Rituels 1°',niveau:1},
+  'planches-apprenti':{label:"Planches d'Apprenti",niveau:1},
+  'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},
+  'orateur1':{label:"Orateur 1°",niveau:1},
+  'rituels2':{label:'Rituels 2°',niveau:2},
+  'planches-compagnon':{label:'Planches Compagnons',niveau:2},
+  'orateur2':{label:'Orateur 2°',niveau:2},
+  'rituels3':{label:'Rituels 3°',niveau:3},
+  'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},
+  'orateur3':{label:'Orateur 3°',niveau:3}
+};
+
+let currentUser=null;
+let members=[];
+let docs=[];
+let historyText='';
+let dataLoaded=false;
+let currentSub=null;
+let currentNiveau=1;
+let sortMode='none';
+let historyDocs=[];
+
+function $(id){return document.getElementById(id);}
+
+function showPage(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-'+n).classList.add('active');
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
   if(el)el.classList.add('active');
-  if(n==='archives')ra();
-  if(n==='photos')rm();
-  if(n==='histoire'){if(ht)$('historyDisplay').innerHTML=ht;lhd();}
+  if(n==='archives')renderArchives();
+  if(n==='photos')renderMedia();
+  if(n==='histoire'){
+    if(historyText)$('historyDisplay').innerHTML=historyText;
+    loadHistoryDocs();
+  }
 }
 
-function ol(){$('loginOverlay').classList.add('open');}
-function cl(){$('loginOverlay').classList.remove('open');$('loginMsg').style.display='none';}
+function openLogin(){$('loginOverlay').classList.add('open');}
+function closeLogin(){$('loginOverlay').classList.remove('open');$('loginMsg').style.display='none';}
 
-async function lad(){
+async function loadAllData(){
   try{
     const sm=await db.collection('membres').get();
-    mems=sm.docs.map(d=>d.data());
+    members=sm.docs.map(d=>d.data());
     const sd=await db.collection('documents').get();
     docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
     const hd2=await db.collection('contenu').doc('histoire').get();
-    if(hd2.exists)ht=hd2.data().texte||'';
-    dl=true;
+    if(hd2.exists)historyText=hd2.data().texte||'';
+    dataLoaded=true;
   }catch(e){
-    mems=JSON.parse(localStorage.getItem('rl_members')||'[]');
+    members=JSON.parse(localStorage.getItem('rl_members')||'[]');
     docs=JSON.parse(localStorage.getItem('rl_docs')||'[]');
-    ht=localStorage.getItem('rl_history')||'';
-    dl=true;
+    historyText=localStorage.getItem('rl_history')||'';
+    dataLoaded=true;
   }
-  if(ht)$('historyDisplay').innerHTML=ht;
+  if(historyText)$('historyDisplay').innerHTML=historyText;
 }
 
-function usfc(){
+function updateSubFolderCards(){
   document.querySelectorAll('[data-grade-card]').forEach(c=>{
     const g=parseInt(c.dataset.gradeCard);
-    c.style.display=(!cu||cu.grade<g)?'none':'block';
+    c.style.display=(!currentUser||currentUser.grade<g)?'none':'block';
   });
   document.querySelectorAll('.card .sub-list li').forEach(li=>{
-    if(!cu){li.style.pointerEvents='none';li.style.opacity='0.5';return;}
+    if(!currentUser){li.style.pointerEvents='none';li.style.opacity='0.5';return;}
     const r=parseInt(li.getAttribute('data-grade'));
-    if(cu.grade>=r){li.style.pointerEvents='auto';li.style.opacity='1';li.style.cursor='pointer';}
+    if(currentUser.grade>=r){li.style.pointerEvents='auto';li.style.opacity='1';li.style.cursor='pointer';}
     else{li.style.pointerEvents='none';li.style.opacity='0.4';li.style.cursor='not-allowed';}
   });
 }
 
-async function dl2(){
-  const u=$('loginUser').value.trim(), p=$('loginPass').value.trim(), msg=$('loginMsg');
+async function doLogin(){
+  const u=$('loginUser').value.trim();
+  const p=$('loginPass').value.trim();
+  const msg=$('loginMsg');
   msg.style.display='none';
-  if(u==='RL731'&&p==='08051956'){
-    cu={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};
-    localStorage.setItem('rl_session',JSON.stringify(cu));
-    cl();al();return;
+  
+  if(u==='RL731' && p==='08051956'){
+    currentUser={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};
+    localStorage.setItem('rl_session',JSON.stringify(currentUser));
+    closeLogin();
+    applyLogin();
+    return;
   }
-  if(!dl)await lad();
-  const m=mems.find(x=>x.id===u&&x.birth===p);
+  if(!dataLoaded)await loadAllData();
+  const m=members.find(x=>x.id===u && x.birth===p);
   if(m){
-    cu={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};
-    localStorage.setItem('rl_session',JSON.stringify(cu));
-    cl();al();return;
+    currentUser={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};
+    localStorage.setItem('rl_session',JSON.stringify(currentUser));
+    closeLogin();
+    applyLogin();
+    return;
   }
-  msg.textContent='Identifiants incorrects';msg.style.display='block';
+  msg.textContent='Identifiants incorrects';
+  msg.style.display='block';
 }
 
-function al(){
+function applyLogin(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-accueil').classList.add('active');
   document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
   document.querySelector('nav a').classList.add('active');
-  $('adminPanel').style.display=cu.isAdmin?'block':'none';
-  $('loginPrompt').style.display=cu.isAdmin?'none':'block';
+  
   $('logoutBtn').style.display='inline-block';
-  if(cu.isAdmin){
+  
+  if(currentUser.isAdmin){
+    $('adminPanel').style.display='block';
+    $('loginPrompt').style.display='none';
     $('historyAdminUpload').style.display='block';
     $('historyDisplay').setAttribute('contenteditable','true');
     $('saveHistoryBtn').style.display='inline-block';
-    us();rm2();
+    updateSubs();
+    renderMembersList();
+  } else {
+    $('adminPanel').style.display='none';
+    $('loginPrompt').style.display='block';
   }
-  lhd();usfc();rd();rm();
+  loadHistoryDocs();
+  updateSubFolderCards();
+  renderDocs();
+  renderMedia();
 }
 
-function dlo(){
-  cu=null;localStorage.removeItem('rl_session');
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('rl_session');
   $('adminPanel').style.display='none';
   $('loginPrompt').style.display='block';
   $('logoutBtn').style.display='none';
   $('historyAdminUpload').style.display='none';
   $('historyDisplay').setAttribute('contenteditable','false');
   $('saveHistoryBtn').style.display='none';
-  cs=null;cn=1;sm='none';usfc();rd();rm();ra();lhd();
+  currentSub=null;
+  currentNiveau=1;
+  sortMode='none';
+  updateSubFolderCards();
+  renderDocs();
+  renderMedia();
+  renderArchives();
+  loadHistoryDocs();
 }
 
-function ss(k){
+function selectSubDirect(k){
   const s=ssR[k];
-  if(!s||!cu||cu.grade<s.niveau)return;
-  cs=k;sp('archives',document.querySelector('nav a:nth-child(3)'));ra();
+  if(!s || !currentUser || currentUser.grade<s.niveau)return;
+  currentSub=k;
+  showPage('archives',document.querySelector('nav a:nth-child(3)'));
+  renderArchives();
 }
 
 (function(){
-  lad().then(()=>{
+  loadAllData().then(()=>{
     const s=localStorage.getItem('rl_session');
     if(s){
       try{
-        cu=JSON.parse(s);
-        if(cu.isAdmin){
+        currentUser=JSON.parse(s);
+        if(currentUser.isAdmin){
           $('adminPanel').style.display='block';
           $('loginPrompt').style.display='none';
           $('logoutBtn').style.display='inline-block';
           $('historyAdminUpload').style.display='block';
           $('historyDisplay').setAttribute('contenteditable','true');
           $('saveHistoryBtn').style.display='inline-block';
-          us();rm2();
+          updateSubs();
+          renderMembersList();
         }
-        usfc();
-      }catch(e){usfc();}
-    }else{usfc();}
-    if(ht)$('historyDisplay').innerHTML=ht;
-    lhd();
+        updateSubFolderCards();
+      }catch(e){updateSubFolderCards();}
+    }else{updateSubFolderCards();}
+    if(historyText)$('historyDisplay').innerHTML=historyText;
+    loadHistoryDocs();
   });
 })();
 
-function sat(n,el){
+function showAdminTab(n,el){
   document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   $('adminDocs').style.display=n==='docs'?'block':'none';
   $('adminMembres').style.display=n==='membres'?'block':'none';
-  if(n==='membres')rm2();
-  if(n==='docs')us();
+  if(n==='membres')renderMembersList();
+  if(n==='docs')updateSubs();
 }
 
-function us(){
+function updateSubs(){
   const n=parseInt($('docNiveau').value);
-  $('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
+  $('docSub').innerHTML=Object.entries(ssR)
+    .filter(([k,v])=>v.niveau===n)
+    .map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
 }
 
-function tsm(){sm=(sm==='none'||sm==='nom_desc')?'nom_asc':'nom_desc';rm2();}
-function gsm(){if(sm==='none')return mems;return[...mems].sort((a,b)=>{const na=(a.nom||'').toLowerCase(),nb=(b.nom||'').toLowerCase();return sm==='nom_asc'?na.localeCompare(nb):nb.localeCompare(na);});}
-function gsi(){return sm==='none'?' ⇅':sm==='nom_asc'?' ▲':' ▼';}
+// === MEMBRES ===
+function toggleSortMode(){
+  sortMode=(sortMode==='none'||sortMode==='nom_desc')?'nom_asc':'nom_desc';
+  renderMembersList();
+}
+function getSortedMembres(){
+  if(sortMode==='none')return members;
+  return[...members].sort((a,b)=>{
+    const na=(a.nom||'').toLowerCase(),nb=(b.nom||'').toLowerCase();
+    return sortMode==='nom_asc'?na.localeCompare(nb):nb.localeCompare(na);
+  });
+}
+function getSortIcon(){return sortMode==='none'?' ⇅':sortMode==='nom_asc'?' ▲':' ▼';}
 
-async function am(){
+async function addMember(){
   const p=$('memPrenom').value.trim(),n=$('memNom').value.trim(),g=parseInt($('memGrade').value),b=$('memBirth').value.trim(),msg=$('memMsg');
   if(!p||!n||!b){msg.textContent='Prénom, nom et date requis';msg.className='msg error';msg.style.display='block';return;}
   if(b.length!==8||isNaN(b)){msg.textContent='JJMMAAAA';msg.className='msg error';msg.style.display='block';return;}
   const id=(p+'.'+n).toLowerCase();
-  if(!dl)await lad();
-  if(mems.find(m=>m.id===id)){msg.textContent='Existe déjà';msg.className='msg error';msg.style.display='block';return;}
+  if(!dataLoaded)await loadAllData();
+  if(members.find(m=>m.id===id)){msg.textContent='Existe déjà';msg.className='msg error';msg.style.display='block';return;}
   try{
     await db.collection('membres').doc(id).set({id,prenom:p,nom:n,grade:g,birth:b});
     msg.textContent='✅ Ajouté '+id;msg.className='msg';msg.style.display='block';
-    $('memPrenom').value='';$('memNom').value='';$('memBirth').value='';rm2();
-  }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
+    $('memPrenom').value='';$('memNom').value='';$('memBirth').value='';
+    renderMembersList();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';
+  }
 }
 
-async function rmem(id){if(!confirm('Supprimer ?'))return;try{await db.collection('membres').doc(id).delete();rm2();}catch(e){alert(e.message);}}
+async function removeMember(id){
+  if(!confirm('Supprimer ?'))return;
+  try{
+    await db.collection('membres').doc(id).delete();
+    renderMembersList();
+  }catch(e){alert(e.message);}
+}
 
-async function rm2(){
+async function renderMembersList(){
   const l=$('memList');
-  try{const s=await db.collection('membres').get();mems=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){l.innerHTML='<p style="font-size:12px;color:#999">Erreur</p>';return;}
-  if(!mems.length){l.innerHTML='<p style="font-size:12px;color:#999">Aucun</p>';return;}
-  const sel=$('memChangeId'),cv=sel.value;
-  sel.innerHTML='<option value="">Changer...</option>'+mems.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
-  l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="tsm()">Nom'+gsi()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+gsm().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="rmem(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+'</table></div>';
+  try{
+    const s=await db.collection('membres').get();
+    members=s.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){
+    l.innerHTML='<p style="font-size:12px;color:#999">Erreur</p>';
+    return;
+  }
+  if(!members.length){l.innerHTML='<p style="font-size:12px;color:#999">Aucun</p>';return;}
+  
+  const sel=$('memChangeId');
+  const cv=sel.value;
+  sel.innerHTML='<option value="">Changer...</option>'+members.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
+  
+  l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="toggleSortMode()">Nom'+getSortIcon()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+
+    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
+    '</table></div>';
 }
 
-async function cmg(){
+async function changeMemberGrade(){
   const id=$('memChangeId').value,ng=parseInt($('memChangeGrade').value),msg=$('memMsg');
   if(!id){msg.textContent='Sélectionnez';msg.className='msg error';msg.style.display='block';return;}
-  try{await db.collection('membres').doc(id).update({grade:ng});msg.textContent='✅ OK';msg.className='msg';msg.style.display='block';rm2();}catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
+  try{
+    await db.collection('membres').doc(id).update({grade:ng});
+    msg.textContent='✅ OK';msg.className='msg';msg.style.display='block';
+    renderMembersList();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';
+  }
 }
 
-function ra(){
-  const c=$('archivesContent');
-  if(!cu){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}
-  if(!cs){
-    c.innerHTML='<div style="margin-bottom:14px">'+[1,2,3].filter(n=>n<=cu.grade).map(n=>'<button class="btn '+(n===cn?'btn-bdx':'btn-outline')+'" onclick="sn('+n+')">Niveau '+n+'</button>').join('')+'</div><div class="rubriques">'+Object.entries(ssR).filter(([k,v])=>v.niveau===cn).map(([k,v])=>'<div class="rubrique-card" onclick="sk(\''+k+'\')"><h4>'+v.label+'</h4></div>').join('')+'</div>';
-  }else{sw(c);}
-}
-function sn(n){cn=n;ra();}
-function sk(k){cs=k;ra();}
-function bt(){cs=null;ra();}
-
-function ov(d){
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody'),ex=(d.type||'').toLowerCase();
-  if(['jpg','jpeg','png','gif','webp'].includes(ex))b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" />';
-  else if(ex==='pdf')b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
-  else b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
-  $('viewerOverlay').classList.add('open');
-}
-function cv2(){$('viewerOverlay').classList.remove('open');$('viewerBody').innerHTML='<p style="color:#999">Chargement...</p>';}
-
-async function sh(){
+// === HISTOIRE ===
+async function saveHistory(){
   const c=$('historyDisplay').innerHTML;
-  try{await db.collection('contenu').doc('histoire').set({texte:c});ht=c;}catch(e){localStorage.setItem('rl_history',c);ht=c;}
-  const btn=$('saveHistoryBtn');btn.textContent='✅ Sauvegardé';setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);
+  try{
+    await db.collection('contenu').doc('histoire').set({texte:c});
+    historyText=c;
+  }catch(e){
+    localStorage.setItem('rl_history',c);
+    historyText=c;
+  }
+  const btn=$('saveHistoryBtn');
+  btn.textContent='✅ Sauvegardé';
+  setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);
 }
 
-// === UPLOAD DOCUMENT HISTOIRE ===
-async function uhd(){
-  const fi=$('historyFileInput'), t=$('historyDocTitle').value.trim(), d=$('historyDocDate').value;
-  const msg=$('uploadAdminMsg'), ub=$('uploadBtn'), pr=$('uploadProgress'), br=$('uploadProgressBar');
+// === UPLOAD DOCUMENT HISTOIRE vers FIRESTORE (base64) ===
+async function uploadHistoryDoc(){
+  const fi=$('historyFileInput');
+  const t=$('historyDocTitle').value.trim();
+  const d=$('historyDocDate').value;
+  const msg=$('uploadAdminMsg');
+  const ub=$('uploadBtn');
+  const pr=$('uploadProgress');
+  const br=$('uploadProgressBar');
   
-  msg.className='admin-msg';msg.style.display='none';
-  if(!fi.files||!fi.files[0]){msg.textContent='❌ Sélectionnez un fichier';msg.className='admin-msg error';msg.style.display='block';return;}
-  if(!t){msg.textContent='❌ Titre requis';msg.className='admin-msg error';msg.style.display='block';return;}
+  msg.className='admin-msg';
+  msg.style.display='none';
+  
+  if(!fi.files || !fi.files[0]){
+    msg.textContent='❌ Sélectionnez un fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  if(!t){
+    msg.textContent='❌ Titre requis';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
   const f=fi.files[0];
-  if(f.size>20*1024*1024){msg.textContent='❌ Fichier > 20 Mo';msg.className='admin-msg error';msg.style.display='block';return;}
+  if(f.size>20*1024*1024){
+    msg.textContent='❌ Fichier > 20 Mo';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
   
   const ext=f.name.split('.').pop().toLowerCase();
-  const path='histoire/'+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  const ref=storage.ref(path);
-  const task=ref.put(f);
   
-  ub.disabled=true;ub.innerHTML='⏳ Upload...';
-  pr.style.display='block';br.style.width='0%';
-  msg.className='admin-msg info';msg.textContent='⏳ Upload en cours...';msg.style.display='block';
+  ub.disabled=true;
+  ub.innerHTML='⏳ Upload...';
+  pr.style.display='block';
+  br.style.width='0%';
+  msg.className='admin-msg info';
+  msg.textContent='⏳ Conversion du fichier...';
+  msg.style.display='block';
   
-  task.on('state_changed',
-    function(s){br.style.width=(s.bytesTransferred/s.totalBytes*100)+'%';},
-    function(err){
-      msg.textContent='❌ Erreur: '+err.message;msg.className='admin-msg error';msg.style.display='block';
-      ub.disabled=false;ub.innerHTML='📤 Uploader';pr.style.display='none';br.style.width='0%';
-    },
-    async function(){
-      try{
-        const url=await ref.getDownloadURL();
-        // La collection histoire_documents se crée automatiquement au premier add()
-        await db.collection('histoire_documents').add({
-          title:t, date:d||'', fileName:f.name, type:ext, url:url,
-          storagePath:path, size:f.size, uploadedAt:new Date().toISOString()
-        });
-        msg.textContent='✅ Upload réussi !';msg.className='admin-msg success';msg.style.display='block';
-        fi.value='';$('historyDocTitle').value='';$('historyDocDate').value='';
-        $('uploadZone').querySelector('p').innerHTML='<strong>Cliquez</strong> ou glissez-déposez un fichier';
-        await lhd();
-      }catch(e){
-        msg.textContent='❌ Erreur: '+e.message;msg.className='admin-msg error';msg.style.display='block';
-      }
-      ub.disabled=false;ub.innerHTML='📤 Uploader';pr.style.display='none';br.style.width='0%';
+  // Lire le fichier en base64
+  const reader=new FileReader();
+  reader.onprogress=function(e){
+    if(e.lengthComputable){
+      br.style.width=(e.loaded/e.total*50)+'%';
     }
-  );
+  };
+  reader.onload=async function(e){
+    br.style.width='60%';
+    msg.textContent='⏳ Enregistrement dans Firestore...';
+    try{
+      const base64=e.target.result;
+      await db.collection('histoire_documents').add({
+        title:t,
+        date:d||'',
+        fileName:f.name,
+        type:ext,
+        data:base64,
+        size:f.size,
+        uploadedAt:new Date().toISOString()
+      });
+      br.style.width='100%';
+      msg.textContent='✅ Upload réussi !';
+      msg.className='admin-msg success';
+      msg.style.display='block';
+      fi.value='';
+      $('historyDocTitle').value='';
+      $('historyDocDate').value='';
+      $('uploadZone').querySelector('p').innerHTML='<strong>Cliquez</strong> ou glissez-déposez un fichier';
+      setTimeout(function(){
+        pr.style.display='none';
+        br.style.width='0%';
+      },800);
+      await loadHistoryDocs();
+    }catch(er){
+      msg.textContent='❌ Erreur: '+er.message;
+      msg.className='admin-msg error';
+      msg.style.display='block';
+      pr.style.display='none';
+      br.style.width='0%';
+    }
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+  };
+  reader.onerror=function(){
+    msg.textContent='❌ Erreur lors de la lecture du fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+    pr.style.display='none';
+    br.style.width='0%';
+  };
+  reader.readAsDataURL(f);
 }
 
 // === CHARGER DOCUMENTS HISTOIRE ===
-async function lhd(){
+async function loadHistoryDocs(){
   try{
-    const s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
-    hd=s.docs.map(d=>({...d.data(),_fi:d.id}));
+    var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
+    historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
   }catch(e){
-    console.log('histoire_documents:', e.message);
-    hd=[];
+    console.log('histoire_documents status:', e.message);
+    historyDocs=[];
   }
-  dphd();
-  if(cu&&cu.isAdmin)dahd();
+  displayPublicHistoryDocs();
+  if(currentUser && currentUser.isAdmin) displayAdminHistoryDocs();
 }
 
-function dphd(){
-  const c=$('historyDocsPublic');
-  if(!hd||!hd.length){c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';return;}
-  const imgs=hd.filter(d=>['jpg','jpeg','png','gif','webp'].includes(d.type));
-  const oth=hd.filter(d=>!['jpg','jpeg','png','gif','webp'].includes(d.type));
-  let h='';
+function displayPublicHistoryDocs(){
+  var c=$('historyDocsPublic');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';
+    return;
+  }
+  var imgs=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;});
+  var oth=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)<0;});
+  var h='';
+  
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
-    imgs.forEach(d=>{h+='<div class="histo-gallery-item" onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.url+'\',type:\''+d.type+'\'})"><div class="thumb"><img src="'+d.url+'" alt="'+d.title+'" /></div><div class="caption"><strong>'+d.title+'</strong></div></div>';});
+    imgs.forEach(function(d){
+      h+='<div class="histo-gallery-item" onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong></div></div>';
+    });
     h+='</div></div>';
   }
+  
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
-    oth.forEach(d=>{
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.url+'\',type:\''+d.type+'\'})" style="cursor:pointer">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.url+'\',type:\''+d.type+'\'})" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="window.open(\''+d.url+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+    oth.forEach(function(d){
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="cursor:pointer">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="window.open(\''+d.data+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
     });
     h+='</div>';
   }
+  
   c.innerHTML=h;
 }
 
-function dahd(){
-  const c=$('historyDocsList');
-  if(!hd||!hd.length){c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';return;}
-  c.innerHTML=hd.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.url+'\',type:\''+d.type+'\'})" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="dhd(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>').join('');
+function displayAdminHistoryDocs(){
+  var c=$('historyDocsList');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';
+    return;
+  }
+  c.innerHTML=historyDocs.map(function(d){
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+  }).join('');
 }
 
-async function dhd(id){
-  const d=hd.find(x=>x._fi===id);
+async function deleteHistoryDoc(id){
+  var d=historyDocs.find(function(x){return x._fi===id;});
   if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
   try{
-    if(d.storagePath){try{await storage.ref(d.storagePath).delete();}catch(e){}}
     await db.collection('histoire_documents').doc(id).delete();
-    await lhd();
+    await loadHistoryDocs();
   }catch(e){alert(e.message);}
 }
 
 // Drag & Drop
-const uz=$('uploadZone');
+var uz=$('uploadZone');
 if(uz){
   uz.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover');});
   uz.addEventListener('dragleave',function(e){e.preventDefault();this.classList.remove('dragover');});
-  uz.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('dragover');if(e.dataTransfer.files.length){$('historyFileInput').files=e.dataTransfer.files;const f=e.dataTransfer.files[0];this.querySelector('p').innerHTML='<strong>'+f.name+'</strong> ('+(f.size/1024/1024).toFixed(1)+' Mo)';}});
-  $('historyFileInput').addEventListener('change',function(){if(this.files&&this.files[0]){$('uploadZone').querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';};});
-}
-
-// === ARCHIVES ===
-async function ad(){
-  const t=$('docTitle').value.trim(),ni=parseInt($('docNiveau').value),sb=$('docSub').value,gr=parseInt($('docGrade').value),dt=$('docDate').value,au=$('docAuteur').value.trim(),fi=$('docFile'),msg=$('docMsg');
-  if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}
-  if(!fi.files||!fi.files[0]){msg.textContent='Fichier requis';msg.className='msg error';msg.style.display='block';return;}
-  const f=fi.files[0],ex=f.name.split('.').pop().toLowerCase(),fn='archives/'+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),ref=storage.ref(fn);
-  try{await ref.put(f);const url=await ref.getDownloadURL();await db.collection('documents').add({title:t,niveau:ni,sub:sb,grade:gr,date:dt,auteur:au,type:ex,fileName:f.name,data:url,storagePath:fn,uploadedAt:new Date().toISOString()});msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';$('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';rd();}catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
-}
-
-async function rd(){try{const s=await db.collection('documents').get();docs=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){}}
-
-async function rmd(fi){if(!confirm('Supprimer ?'))return;try{const d=docs.find(x=>x._fi===fi);if(d&&d.storagePath)try{await storage.ref(d.storagePath).delete();}catch(e){}await db.collection('documents').doc(fi).delete();rd();if(cs){sw($('archivesContent'));}}catch(e){alert(e.message);}}
-
-function sw(c){
-  const f=docs.filter(d=>d.sub===cs),si=ssR[cs];
-  c.innerHTML='<div class="back-link" onclick="bt()">← Retour</div><h3 style="color:var(--bordeaux)">'+(si?si.label:'Docs')+'</h3>';
-  if(!f.length){c.innerHTML+='<p style="color:#999;font-size:13px;font-style:italic">Aucun.</p>';return;}
-  f.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  f.forEach(d=>{
-    let ic='📄';
-    if(['jpg','jpeg','png','gif','webp'].includes(d.type))ic='🖼️';
-    else if(d.type==='pdf')ic='📕';
-    c.innerHTML+='<div class="doc-item"><div class="icon" onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+ic+'</div><div class="info"><strong onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+d.title+'</strong><span>'+(d.date||'')+(d.auteur?' · '+d.auteur:'')+'</span></div>'+(cu&&cu.isAdmin?'<button class="btn btn-outline" onclick="rmd(\''+d._fi+'\')" style="padding:2px 8px;font-size:11px">✕</button>':'')+'</div>';
+  uz.addEventListener('drop',function(e){
+    e.preventDefault();
+    this.classList.remove('dragover');
+    if(e.dataTransfer.files.length){
+      $('historyFileInput').files=e.dataTransfer.files;
+      var f=e.dataTransfer.files[0];
+      this.querySelector('p').innerHTML='<strong>'+f.name+'</strong> ('+(f.size/1024/1024).toFixed(1)+' Mo)';
+    }
+  });
+  $('historyFileInput').addEventListener('change',function(){
+    if(this.files&&this.files[0]){
+      $('uploadZone').querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';
+    }
   });
 }
 
-function rm(){
-  const c=$('mediaList');
-  if(!cu){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
-  const m=docs.filter(d=>['jpg','jpeg','png','gif','webp','mp4','mov','webm'].includes(d.type)&&d.grade<=cu.grade);
+// === ARCHIVES ===
+async function addDocument(){
+  var t=$('docTitle').value.trim(),ni=parseInt($('docNiveau').value),sb=$('docSub').value,gr=parseInt($('docGrade').value),dt=$('docDate').value,au=$('docAuteur').value.trim(),fi=$('docFile'),msg=$('docMsg');
+  if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}
+  if(!fi.files||!fi.files[0]){msg.textContent='Fichier requis';msg.className='msg error';msg.style.display='block';return;}
+  var f=fi.files[0],ex=f.name.split('.').pop().toLowerCase();
+  
+  msg.textContent='⏳ Conversion...';msg.className='msg';msg.style.display='block';
+  
+  var reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      await db.collection('documents').add({title:t,niveau:ni,sub:sb,grade:gr,date:dt,auteur:au,type:ex,fileName:f.name,data:e.target.result,size:f.size,uploadedAt:new Date().toISOString()});
+      msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
+      $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';
+      renderDocs();
+    }catch(er){msg.textContent='Erreur: '+er.message;msg.className='msg error';msg.style.display='block';}
+  };
+  reader.onerror=function(){msg.textContent='Erreur lecture';msg.className='msg error';msg.style.display='block';};
+  reader.readAsDataURL(f);
+}
+
+async function renderDocs(){
+  try{var s=await db.collection('documents').get();docs=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){}
+}
+
+async function removeDoc(fi){
+  if(!confirm('Supprimer ?'))return;
+  try{
+    await db.collection('documents').doc(fi).delete();
+    renderDocs();
+    if(currentSub){showSubWorks(currentSub);}
+  }catch(e){alert(e.message);}
+}
+
+function showSubWorks(sub){
+  var c=$('archivesContent');
+  var f=docs.filter(function(d){return d.sub===sub;});
+  var si=ssR[sub];
+  c.innerHTML='<div class="back-link" onclick="backToSubs()">← Retour</div><h3 style="color:var(--bordeaux)">'+(si?si.label:'Docs')+'</h3>';
+  if(!f.length){c.innerHTML+='<p style="color:#999;font-size:13px;font-style:italic">Aucun.</p>';return;}
+  f.sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  f.forEach(function(d){
+    var ic='📄';
+    if(['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0)ic='🖼️';
+    else if(d.type==='pdf')ic='📕';
+    c.innerHTML+='<div class="doc-item"><div class="icon" onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+ic+'</div><div class="info"><strong onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+d.title+'</strong><span>'+(d.date||'')+(d.auteur?' · '+d.auteur:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<button class="btn btn-outline" onclick="removeDoc(\''+d._fi+'\')" style="padding:2px 8px;font-size:11px">✕</button>':'')+'</div>';
+  });
+}
+
+function renderMedia(){
+  var c=$('mediaList');
+  if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
+  var m=docs.filter(function(d){return ['jpg','jpeg','png','gif','webp','mp4','mov','webm'].indexOf(d.type)>=0&&d.grade<=currentUser.grade;});
   if(!m.length){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média.</p>';return;}
-  c.innerHTML=m.map(d=>'<div onclick="ov({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff"><div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">'+(['mp4','mov','webm'].includes(d.type)?'<span style="font-size:40px">🎬</span>':'<img src="'+d.data+'" style="width:100%;height:100%;object-fit:cover" />')+'</div><div style="padding:8px"><strong style="font-size:13px">'+d.title+'</strong></div></div>').join('');
+  c.innerHTML=m.map(function(d){
+    return '<div onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff"><div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">'+
+      (['mp4','mov','webm'].indexOf(d.type)>=0?'<span style="font-size:40px">🎬</span>':'<img src="'+d.data+'" style="width:100%;height:100%;object-fit:cover">')+
+      '</div><div style="padding:8px"><strong style="font-size:13px">'+d.title+'</strong></div></div>';
+  }).join('');
+}
+
+// === VIEWER (adapté pour base64) ===
+function openViewer(d){
+  $('viewerTitle').textContent=d.title||'Document';
+  const b=$('viewerBody');
+  const ex=(d.type||'').toLowerCase();
+  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
+    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ex==='pdf'){
+    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
+  } else {
+    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+function closeViewer(){
+  $('viewerOverlay').classList.remove('open');
+  $('viewerBody').innerHTML='<p style="color:#999">Chargement...</p>';
 }
 </script>
 </body>
