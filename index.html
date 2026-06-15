@@ -65,17 +65,18 @@
     #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
     #loginOverlay .modal h2{color:var(--bordeaux);margin-bottom:12px}
     #loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
-    #viewerOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;place-items:center;padding:20px}
+    /* --- VIEWER FORMAT A4 --- */
+    #viewerOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;place-items:center;padding:30px}
     #viewerOverlay.open{display:grid}
-    #viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:90vw;max-width:900px;max-height:90vh;overflow-y:auto;position:relative}
-    #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
+    #viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:210mm;max-width:95vw;max-height:95vh;overflow-y:auto;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.3)}
+    #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #eee;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
     #viewerOverlay .viewer-header h3{font-size:16px}
-    #viewerOverlay .viewer-header button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:14px}
-    #viewerOverlay .viewer-body{padding:18px;text-align:center;min-height:100px}
-    #viewerOverlay .viewer-body img{max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto}
-    #viewerOverlay .viewer-body iframe{width:100%;height:65vh;border:none;border-radius:4px}
-    #viewerOverlay .viewer-body .embed-pdf{width:100%;height:65vh;border:none;border-radius:4px}
-    #viewerOverlay .viewer-body .text-preview{padding:20px;background:#f9f9f9;border-radius:4px;font-size:14px;line-height:1.6;text-align:left;max-height:55vh;overflow-y:auto}
+    #viewerOverlay .viewer-header button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:14px}
+    #viewerOverlay .viewer-body{padding:20px;text-align:center;min-height:100px}
+    #viewerOverlay .viewer-body img{max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto}
+    #viewerOverlay .viewer-body iframe{width:100%;height:80vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .embed-pdf{width:100%;height:80vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .text-preview{padding:24px;background:#f9f9f9;border-radius:4px;font-size:15px;line-height:1.8;text-align:left;max-height:70vh;overflow-y:auto}
     .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
     .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
     .upload-zone:hover{background:#f5f0e0}
@@ -107,6 +108,7 @@
     .admin-msg.error{display:block;background:#ffebee;color:#c62828}
     .admin-msg.info{display:block;background:#e3f2fd;color:#1565c0}
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
+    @media(max-width:800px){#viewerOverlay .viewer-modal{width:95vw}#viewerOverlay .viewer-body img{max-height:70vh}#viewerOverlay .viewer-body iframe{height:60vh}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -638,7 +640,7 @@ async function uploadHistoryDoc(){
         title:t,
         date:d||'',
         fileName:f.name,
-        type:ext,
+        type:f.name.split('.').pop().toLowerCase(),
         data:base64,
         size:f.size,
         uploadedAt:new Date().toISOString()
@@ -738,7 +740,7 @@ function openViewerById(docId){
   const b=$('viewerBody');
   const ex=(d.type||'').toLowerCase();
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto">';
+    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
     b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
   } else if(ex==='txt'){
@@ -755,136 +757,80 @@ async function deleteHistoryDoc(id){
   try{
     await db.collection('histoire_documents').doc(id).delete();
     await loadHistoryDocs();
-  }catch(e){alert(e.message);}
+  }catch(e){alert('Erreur: '+e.message);}
 }
 
-// Drag & Drop
-var uz=$('uploadZone');
-if(uz){
-  uz.addEventListener('dragover',function(e){e.preventDefault();this.classList.add('dragover');});
-  uz.addEventListener('dragleave',function(e){e.preventDefault();this.classList.remove('dragover');});
-  uz.addEventListener('drop',function(e){
+function closeViewer(){
+  $('viewerOverlay').classList.remove('open');
+}
+
+// ===== ARCHIVES =====
+function renderArchives(){
+  if(!currentSub){
+    $('archivesContent').innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';
+    return;
+  }
+  const s=ssR[currentSub];
+  if(!s){$('archivesContent').innerHTML='<p>Rubrique inconnue</p>';return;}
+  const f=docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade);
+  if(!f.length){
+    $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux)">'+s.label+'</h4><p style="color:#999;font-size:13px;padding:10px 0">Aucun document.</p>';
+    return;
+  }
+  $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>'+
+    f.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><a class="btn btn-gold" style="padding:4px 10px;font-size:11px" href="'+d.url+'" target="_blank">📥</a></div></div>').join('');
+}
+
+// ===== MEDIA =====
+function renderMedia(){
+  if(!currentUser){
+    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+    return;
+  }
+  const m=docs.filter(d=>['photos','videos'].includes(d.sub));
+  if(!m.length){
+    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média pour l\'instant.</p>';
+    return;
+  }
+  $('mediaList').innerHTML=m.map(d=>'<div class="histo-doc"><div class="preview">'+((d.sub==='videos')?'🎬':'📷')+'</div><div class="info"><strong><a href="'+d.url+'" target="_blank" style="text-decoration:none;color:inherit">'+d.title+'</a></strong><span>'+(d.auteur||'')+'</span></div></div>').join('');
+}
+
+// ===== DOCUMENTS ADMIN =====
+async function addDocument(){
+  const t=$('docTitle').value.trim(),n=parseInt($('docNiveau').value),sub=$('docSub').value,g=parseInt($('docGrade').value),dt=$('docDate').value,a=$('docAuteur').value.trim(),fi=$('docFile').files[0],msg=$('docMsg');
+  if(!t||!a||!fi){msg.textContent='Titre, auteur et fichier requis';msg.className='msg error';msg.style.display='block';return;}
+  try{
+    const reader=new FileReader();
+    reader.onload=async function(e){
+      const url=e.target.result;
+      await db.collection('documents').add({title:t,niveau:n,sub:sub,grade:g,date:dt,auteur:a,url:url,fileName:fi.name,type:fi.type,uploadedAt:new Date().toISOString()});
+      msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
+      $('docTitle').value='';$('docAuteur').value='';$('docFile').value='';
+      const sd=await db.collection('documents').get();docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    };
+    reader.readAsDataURL(fi);
+  }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
+}
+
+// ===== DRAG & DROP UPLOAD ZONE =====
+(function(){
+  const z=$('uploadZone');
+  if(!z)return;
+  z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('dragover');});
+  z.addEventListener('dragleave',function(){z.classList.remove('dragover');});
+  z.addEventListener('drop',function(e){
     e.preventDefault();
-    this.classList.remove('dragover');
-    if(e.dataTransfer.files.length){
-      $('historyFileInput').files=e.dataTransfer.files;
-      var f=e.dataTransfer.files[0];
-      this.querySelector('p').innerHTML='<strong>'+f.name+'</strong> ('+(f.size/1024/1024).toFixed(1)+' Mo)';
+    z.classList.remove('dragover');
+    const files=e.dataTransfer.files;
+    if(files.length){
+      $('historyFileInput').files=files;
+      z.querySelector('p').innerHTML='<strong>'+files[0].name+'</strong> ('+(files[0].size/1024/1024).toFixed(1)+' Mo)';
     }
   });
   $('historyFileInput').addEventListener('change',function(){
-    if(this.files&&this.files[0]){
-      $('uploadZone').querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';
-    }
+    if(this.files&&this.files[0])z.querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';
   });
-}
-
-// === ARCHIVES ===
-async function addDocument(){
-  var t=$('docTitle').value.trim(),ni=parseInt($('docNiveau').value),sb=$('docSub').value,gr=parseInt($('docGrade').value),dt=$('docDate').value,au=$('docAuteur').value.trim(),fi=$('docFile'),msg=$('docMsg');
-  if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}
-  if(!fi.files||!fi.files[0]){msg.textContent='Fichier requis';msg.className='msg error';msg.style.display='block';return;}
-  var f=fi.files[0],ex=f.name.split('.').pop().toLowerCase();
-  
-  msg.textContent='⏳ Conversion...';msg.className='msg';msg.style.display='block';
-  
-  var reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      await db.collection('documents').add({title:t,niveau:ni,sub:sb,grade:gr,date:dt,auteur:au,type:ex,fileName:f.name,data:e.target.result,size:f.size,uploadedAt:new Date().toISOString()});
-      msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
-      $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';
-      renderDocs();
-    }catch(er){msg.textContent='Erreur: '+er.message;msg.className='msg error';msg.style.display='block';}
-  };
-  reader.onerror=function(){msg.textContent='Erreur lecture';msg.className='msg error';msg.style.display='block';};
-  reader.readAsDataURL(f);
-}
-
-async function renderDocs(){
-  try{var s=await db.collection('documents').get();docs=s.docs.map(d=>({...d.data(),_fi:d.id}));}catch(e){}
-}
-
-async function removeDoc(fi){
-  if(!confirm('Supprimer ?'))return;
-  try{
-    await db.collection('documents').doc(fi).delete();
-    renderDocs();
-    if(currentSub){showSubWorks(currentSub);}
-  }catch(e){alert(e.message);}
-}
-
-function showSubWorks(sub){
-  var c=$('archivesContent');
-  var f=docs.filter(function(d){return d.sub===sub;});
-  var si=ssR[sub];
-  c.innerHTML='<div class="back-link" onclick="backToSubs()">← Retour</div><h3 style="color:var(--bordeaux)">'+(si?si.label:'Docs')+'</h3>';
-  if(!f.length){c.innerHTML+='<p style="color:#999;font-size:13px;font-style:italic">Aucun.</p>';return;}
-  f.sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
-  f.forEach(function(d){
-    var ic='📄';
-    if(['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0)ic='🖼️';
-    else if(d.type==='pdf')ic='📕';
-    c.innerHTML+='<div class="doc-item"><div class="icon" onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+ic+'</div><div class="info"><strong onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})">'+d.title+'</strong><span>'+(d.date||'')+(d.auteur?' · '+d.auteur:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<button class="btn btn-outline" onclick="removeDoc(\''+d._fi+'\')" style="padding:2px 8px;font-size:11px">✕</button>':'')+'</div>';
-  });
-}
-
-function backToSubs(){
-  currentSub=null;
-  renderArchives();
-}
-
-function renderArchives(){
-  var c=$('archivesContent');
-  if(!currentSub){
-    c.innerHTML='<div class="rubriques">'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'rituels1\')"><h4>📜 Rituels 1°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'planches-apprenti\')"><h4>📝 Planches d\'Apprenti</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'planches-maitres1\')"><h4>📝 Planches Maîtres 1°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'orateur1\')"><h4>🎙 Orateur 1°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'rituels2\')"><h4>📜 Rituels 2°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'planches-compagnon\')"><h4>📝 Planches Compagnon</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'orateur2\')"><h4>🎙 Orateur 2°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'rituels3\')"><h4>📜 Rituels 3°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'planches-maitres3\')"><h4>📝 Planches Maîtres 3°</h4></div>'+
-      '<div class="rubrique-card" onclick="selectSubDirect(\'orateur3\')"><h4>🎙 Orateur 3°</h4></div></div>';
-    return;
-  }
-  showSubWorks(currentSub);
-}
-
-function renderMedia(){
-  var c=$('mediaList');
-  if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
-  var m=docs.filter(function(d){return ['jpg','jpeg','png','gif','webp','mp4','mov','webm'].indexOf(d.type)>=0&&d.grade<=currentUser.grade;});
-  if(!m.length){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média.</p>';return;}
-  c.innerHTML=m.map(function(d){
-    return '<div onclick="openViewer({title:\''+d.title.replace(/'/g,"\\'")+'\',data:\''+d.data+'\',type:\''+d.type+'\'})" style="border:1px solid #eee;border-radius:6px;overflow:hidden;cursor:pointer;background:#fff"><div style="height:130px;background:#f0ece8;display:grid;place-items:center;overflow:hidden">'+
-      (['mp4','mov','webm'].indexOf(d.type)>=0?'<span style="font-size:40px">🎬</span>':'<img src="'+d.data+'" style="width:100%;height:100%;object-fit:cover">')+
-      '</div><div style="padding:8px"><strong style="font-size:13px">'+d.title+'</strong></div></div>';
-  }).join('');
-}
-
-// === VIEWER ===
-function openViewer(d){
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody');
-  const ex=(d.type||'').toLowerCase();
-  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:65vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
-  } else if(ex==='txt'){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
-  } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
-  }
-  $('viewerOverlay').classList.add('open');
-}
-function closeViewer(){
-  $('viewerOverlay').classList.remove('open');
-  $('viewerBody').innerHTML='<p style="color:#999">Chargement...</p>';
-}
+})();
 </script>
 </body>
 </html>
