@@ -75,6 +75,9 @@
     .msg.error{background:#ffebee;color:#c62828}
     .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
     .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
+    .history-link{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:5px;margin-bottom:4px;border:1px solid #eee}
+    .history-link a{flex:1;color:var(--bordeaux);text-decoration:none;font-size:13px}
+    .history-link a:hover{text-decoration:underline}
     .sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
     .sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
     .sub-tabs button.active{background:var(--bordeaux);color:#fff}
@@ -210,14 +213,20 @@
     <button id="saveHistoryBtn" class="btn btn-gold" style="display:none" onclick="saveHistory()">💾 Sauvegarder</button>
   </div>
   <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956. Le récit de sa fondation et de son histoire sera rédigé ici.</p></div>
+  
+  <!-- Liens externes visibles par tous les membres connectés -->
+  <div id="historyLinksSection" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
+    <h4 style="color:var(--bordeaux);margin-bottom:8px">🔗 Documents externes (Google Drive, etc.)</h4>
+    <div id="historyLinksList" style="margin-bottom:8px">
+      <p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l'instant.</p>
+    </div>
+  </div>
+  
+  <!-- Interface admin pour ajouter/supprimer des liens -->
   <div id="historyAdminOnly" style="display:none;margin-top:10px">
     <p style="font-size:13px;color:#666">✏️ Cliquez sur le texte ci-dessus pour le modifier, puis cliquez sur "💾 Sauvegarder".</p>
-    <!-- Liens externes (Google Drive, etc.) -->
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
-      <h4 style="color:var(--bordeaux);margin-bottom:8px">🔗 Documents externes (Google Drive, etc.)</h4>
-      <div id="historyLinksList" style="margin-bottom:8px">
-        <p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l'instant.</p>
-      </div>
+    <div style="margin-top:10px;padding-top:10px">
+      <h5 style="color:var(--bordeaux);margin-bottom:6px">Ajouter un lien externe</h5>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input id="historyLinkTitle" placeholder="Titre du lien (ex: Procès-verbal 2023)" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
         <input id="historyLinkUrl" placeholder="URL Google Drive (https://...)" style="flex:3;min-width:220px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px" />
@@ -386,8 +395,8 @@ let historyText = '';
 let dataLoaded = false;
 let currentSub = null;
 let currentNiveau = 1;
-// --- Variable pour le tri des membres ---
-let sortMembersBy = 'none'; // 'none', 'nom_asc', 'nom_desc'
+let sortMembersBy = 'none';
+let historyLinks = [];
 
 function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -476,16 +485,21 @@ function afterLogin() {
   document.getElementById('adminPanel').style.display = currentUser.isAdmin ? 'block' : 'none';
   document.getElementById('loginPrompt').style.display = currentUser.isAdmin ? 'none' : 'block';
   document.getElementById('logoutBtn').style.display = 'inline-block';
+  
+  // Liens d'histoire : visibles pour tous les membres connectés
+  document.getElementById('historyLinksSection').style.display = 'block';
+  
   if (currentUser.isAdmin) {
     document.getElementById('historyAdminOnly').style.display = 'block';
     document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
     document.getElementById('saveHistoryBtn').style.display = 'inline-block';
     updateSubs();
     refreshMembers();
-    loadHistoryLinks();
   } else {
     document.getElementById('historyAdminOnly').style.display = 'none';
   }
+  // Charger les liens dans tous les cas
+  loadHistoryLinks();
   updateSubsForCards();
   refreshDocs();
   refreshMedia();
@@ -497,11 +511,12 @@ function doLogout() {
   document.getElementById('loginPrompt').style.display = 'block';
   document.getElementById('logoutBtn').style.display = 'none';
   document.getElementById('historyAdminOnly').style.display = 'none';
+  document.getElementById('historyLinksSection').style.display = 'none';
   document.getElementById('historyDisplay').setAttribute('contenteditable', 'false');
   document.getElementById('saveHistoryBtn').style.display = 'none';
   currentSub = null;
   currentNiveau = 1;
-  sortMembersBy = 'none'; // reset du tri à la déconnexion
+  sortMembersBy = 'none';
   updateSubsForCards();
   refreshDocs();
   refreshMedia();
@@ -529,13 +544,17 @@ function selectSubDirect(key) {
           document.getElementById('loginPrompt').style.display = 'none';
           document.getElementById('logoutBtn').style.display = 'inline-block';
           document.getElementById('historyAdminOnly').style.display = 'block';
+          document.getElementById('historyLinksSection').style.display = 'block';
           document.getElementById('historyDisplay').setAttribute('contenteditable', 'true');
           document.getElementById('saveHistoryBtn').style.display = 'inline-block';
           updateSubs();
           refreshMembers();
+        } else {
+          document.getElementById('historyLinksSection').style.display = 'block';
         }
+        loadHistoryLinks();
         updateSubsForCards();
-      } catch(e) {}
+      } catch(e) { updateSubsForCards(); }
     } else {
       updateSubsForCards();
     }
@@ -620,12 +639,10 @@ async function refreshMembers() {
     members = snap.docs.map(d => ({...d.data(), _fireId: d.id }));
   } catch(e) { list.innerHTML = '<p style="font-size:12px;color:#999">Erreur de chargement</p>'; return; }
   if (!members.length) { list.innerHTML = '<p style="font-size:12px;color:#999">Aucun membre</p>'; return; }
-  // Remplir select changement grade
   const sel = document.getElementById('memChangeId');
   const currentVal = sel.value;
   sel.innerHTML = '<option value="">Changer grade de...</option>' +
     members.map(m => '<option value="'+m.id+'"' + (m.id===currentVal?' selected':'') + '>'+m.nom+' '+m.prenom+' ('+['','Apprenti','Compagnon','Maître'][m.grade]+')</option>').join('');
-  // Appliquer le tri si actif
   const sortedMembers = getSortedMembers();
   const sortIcon = getSortIndicator();
   list.innerHTML = '<div style="max-height:300px;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
@@ -706,17 +723,14 @@ function showDocumentsInSub(container) {
   const sub = sousRubriques[currentSub];
   if (!sub) { currentSub = null; refreshArchives(); return; }
   let visible = documents.filter(d => d.sub === currentSub && d.grade <= currentUser.grade);
-  
-  // TRI PAR DATE DÉCROISSANTE (aaaa-mm-jj) : du plus récent au plus ancien
   visible.sort((a, b) => {
     const dateA = a.dateDoc || '';
     const dateB = b.dateDoc || '';
     if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;  // les documents sans date passent à la fin
+    if (!dateA) return 1;
     if (!dateB) return -1;
-    return dateB.localeCompare(dateA); // ordre décroissant
+    return dateB.localeCompare(dateA);
   });
-  
   const icons = { 'pdf':'📄','doc':'📝','docx':'📝','xls':'📊','xlsx':'📊','jpg':'🖼️','jpeg':'🖼️','png':'🖼️','gif':'🖼️','webp':'🖼️','mp4':'🎬','mov':'🎬','webm':'🎬','avi':'🎬' };
   container.innerHTML = '<a class="back-link" onclick="backToRubriques()">← Retour aux rubriques</a>' +
     '<h3 style="color:var(--bordeaux);margin-bottom:8px">' + sub.label + '</h3>' +
@@ -819,8 +833,7 @@ async function refreshHistory() {
   }
 }
 
-// --- Liens externes pour l'Histoire ---
-let historyLinks = [];
+// --- Liens externes pour l'Histoire (visibles par tous les membres connectés) ---
 
 async function loadHistoryLinks() {
   try {
@@ -835,12 +848,12 @@ async function loadHistoryLinks() {
     list.innerHTML = '<p style="color:#999;font-size:13px;font-style:italic">Aucun lien ajouté pour l\'instant.</p>';
     return;
   }
-  list.innerHTML = historyLinks.map((l, i) =>
-    '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border-radius:5px;margin-bottom:4px;border:1px solid #eee">' +
+  list.innerHTML = historyLinks.map((l, i) => 
+    '<div class="history-link">' +
     '<span style="font-size:16px">🔗</span>' +
-    '<a href="' + l.url + '" target="_blank" rel="noopener" style="flex:1;color:var(--bordeaux);text-decoration:none;font-size:13px">' +
-    '<strong>' + l.titre + '</strong></a>' +
-    '<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="deleteHistoryLink(' + i + ')">✕</button>' +
+    '<a href="' + l.url + '" target="_blank" rel="noopener"><strong>' + l.titre + '</strong></a>' +
+    (currentUser && currentUser.isAdmin ? 
+      '<button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="deleteHistoryLink(' + i + ')">✕</button>' : '') +
     '</div>'
   ).join('');
 }
