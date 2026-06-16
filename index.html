@@ -185,13 +185,13 @@
   </div>
   <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956.</p></div>
 
-  <!-- Documents histoire : partie publique (visible par tout le monde) -->
+  <!-- Documents histoire : partie publique -->
   <div style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
     <h4 style="color:var(--bordeaux);margin-bottom:10px">📂 Documents d'archives historiques</h4>
     <div id="historyDocsPublic"><p style="color:#999;font-size:13px;font-style:italic">Chargement...</p></div>
   </div>
 
-  <!-- Upload ADMIN (visible seulement pour l'admin connecté) -->
+  <!-- Upload ADMIN -->
   <div id="historyAdminUpload" style="display:none;margin-top:16px" class="histo-doc-admin-section">
     <h4 style="color:var(--bordeaux);margin-bottom:8px">📤 Ajouter un document</h4>
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('historyFileInput').click()">
@@ -207,7 +207,6 @@
       <button class="btn btn-green" onclick="uploadHistoryDoc()" id="uploadBtn">📤 Uploader</button>
     </div>
     <div id="uploadAdminMsg" class="admin-msg"></div>
-
     <div style="margin-top:14px">
       <h5 style="color:var(--bordeaux);margin-bottom:6px">📋 Documents uploadés</h5>
       <div id="historyDocsList"><p style="font-size:12px;color:#999">Chargement...</p></div>
@@ -731,7 +730,6 @@ async function loadHistoryDocs(){
   try{
     var s=await db.collection('histoire_documents').get();
     historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
-    // Tri par date décroissante (gère les documents avec ou sans uploadedAt)
     historyDocs.sort(function(a,b){
       var da=a.uploadedAt||a.date||'';
       var db2=b.uploadedAt||b.date||'';
@@ -766,45 +764,226 @@ function displayPublicHistoryDocs(){
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
     oth.forEach(function(d){
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button></div></div>';
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
     });
     h+='</div>';
   }
-  
   c.innerHTML=h;
 }
 
 function displayAdminHistoryDocs(){
   var c=$('historyDocsList');
   if(!historyDocs || !historyDocs.length){
-    c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun document uploadé.</p>';
     return;
   }
-  c.innerHTML=historyDocs.map(function(d){
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
-  }).join('');
+  var h='';
+  historyDocs.forEach(function(d){
+    h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.date||'')+'</span></div><div class="actions"><button class="btn btn-outline" style="padding:4px 8px;font-size:11px" onclick="deleteHistoryDoc(\''+d._fi+'\')">🗑️</button></div></div>';
+  });
+  c.innerHTML=h;
 }
 
+// === VIEWER ===
 function openViewerById(docId){
-  var d=historyDocs.find(function(x){return x._fi===docId;});
-  if(!d){alert('Document introuvable');return;}
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody');
-  const ex=(d.type||'').toLowerCase();
-  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
-  } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  var doc = historyDocs.find(function(d){ return d._fi === docId; });
+  if(!doc){ 
+    doc = docs.find(function(d){ return d._fi === docId; });
   }
+  if(!doc){ alert('Document introuvable'); return; }
+  
+  $('viewerTitle').textContent = doc.title || 'Document';
+  var body = $('viewerBody');
+  
+  if(doc.type === 'pdf'){
+    body.innerHTML = '<iframe class="embed-pdf" src="'+doc.data+'"></iframe>';
+  } else if(['jpg','jpeg','png','gif','webp'].indexOf(doc.type) >= 0){
+    body.innerHTML = '<img src="'+doc.data+'" alt="'+doc.title+'">';
+  } else if(doc.type === 'txt' || doc.type === 'text'){
+    body.innerHTML = '<div class="text-preview"><pre style="white-space:pre-wrap;font-family:inherit">'+doc.data+'</pre></div>';
+  } else {
+    body.innerHTML = '<div class="text-preview"><p>Type de fichier non supporté pour l\'aperçu.</p><p style="font-size:12px;color:#888;margin-top:8px">'+doc.fileName+'</p></div>';
+  }
+  
   $('viewerOverlay').classList.add('open');
 }
 
 function closeViewer(){
   $('viewerOverlay').classList.remove('open');
+  $('viewerBody').innerHTML = '<p style="color:#999">Chargement...</p>';
+}
+
+// === RENDER ARCHIVES (collection "documents") ===
+function renderArchives(){
+  var c = $('archivesContent');
+  if(!currentUser){
+    c.innerHTML = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</p>';
+    return;
+  }
+  
+  if(currentSub){
+    renderDocs();
+    return;
+  }
+  
+  // Afficher les rubriques (sous-rubriques) par niveau
+  var niveaux = [
+    {n:1, label:'1er Degré — Apprenti', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
+    {n:2, label:'2e Degré — Compagnon', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
+    {n:3, label:'3e Degré — Maître', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
+  ];
+  
+  var h = '';
+  for(var ii=0; ii<niveaux.length; ii++){
+    var niv = niveaux[ii];
+    if(currentUser.grade < niv.n) continue;
+    h += '<h3 style="color:var(--bordeaux);font-size:15px;margin:14px 0 8px">'+niv.label+'</h3><div class="rubriques">';
+    for(var jj=0; jj<niv.subs.length; jj++){
+      var k = niv.subs[jj];
+      var info = ssR[k];
+      if(!info) continue;
+      var count = docs.filter(function(d){ return d.sub === k; }).length;
+      h += '<div class="rubrique-card" onclick="selectSubDirect(\''+k+'\')"><h4>'+info.label+'</h4><p style="font-size:12px;color:#888">'+count+' document'+(count>1?'s':'')+'</p></div>';
+    }
+    h += '</div>';
+  }
+  if(!h) h = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Aucune rubrique disponible pour votre grade.</p>';
+  c.innerHTML = h;
+}
+
+// === RENDER DOCS (documents filtrés par sous-rubrique) ===
+function renderDocs(){
+  var c = $('archivesContent');
+  if(!currentUser){
+    c.innerHTML = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';
+    return;
+  }
+  
+  if(!currentSub){
+    renderArchives();
+    return;
+  }
+  
+  var info = ssR[currentSub];
+  if(!info){
+    c.innerHTML = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Rubrique inconnue.</p>';
+    return;
+  }
+  
+  // Filtrer les documents de cette sous-rubrique
+  var filtered = docs.filter(function(d){ return d.sub === currentSub; });
+  
+  var h = '';
+  h += '<div class="back-link" onclick="currentSub=null;renderArchives();return false;">← Retour aux rubriques</div>';
+  h += '<h3 style="color:var(--bordeaux);margin-bottom:10px">'+info.label+'</h3>';
+  
+  if(!filtered.length){
+    h += '<p style="color:#999;font-size:13px;font-style:italic">Aucun document dans cette rubrique pour l\'instant.</p>';
+    c.innerHTML = h;
+    return;
+  }
+  
+  // Trier par date décroissante
+  filtered.sort(function(a,b){
+    var da = a.date || '';
+    var db2 = b.date || '';
+    return da>db2?-1:(da<db2?1:0);
+  });
+  
+  h += '<div id="docsList">';
+  filtered.forEach(function(d){
+    var dateStr = d.date || '';
+    var auteurStr = d.auteur ? ' — '+d.auteur : '';
+    var isImg = ['jpg','jpeg','png','gif','webp'].indexOf(d.type) >= 0;
+    
+    h += '<div class="histo-doc">';
+    h += '<div class="preview">';
+    if(isImg && d.data){
+      h += '<img src="'+d.data+'" alt="'+d.title+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="openViewerById(\''+d._fi+'\')">';
+    } else {
+      h += '📄';
+    }
+    h += '</div>';
+    h += '<div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+(dateStr + auteurStr)+'</span></div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  
+  c.innerHTML = h;
+}
+
+// === RENDER MEDIA ===
+function renderMedia(){
+  var c = $('mediaList');
+  if(!currentUser){
+    c.innerHTML = '<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+    return;
+  }
+  // Filtrer les documents de type image pour la galerie
+  var imgs = docs.filter(function(d){ return d.sub && ['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0 && d.data; });
+  
+  if(!imgs.length){
+    c.innerHTML = '<p style="color:#999;text-align:center;padding:30px">Aucune image ou vidéo pour l\'instant.</p>';
+    return;
+  }
+  
+  var h = '<div class="histo-gallery">';
+  imgs.forEach(function(d){
+    h += '<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+ssR[d.sub]?.label||d.sub+'</span></div></div>';
+  });
+  h += '</div>';
+  c.innerHTML = h;
+}
+
+// === ADD DOCUMENT (admin) ===
+async function addDocument(){
+  var title = $('docTitle').value.trim();
+  var niveau = parseInt($('docNiveau').value);
+  var sub = $('docSub').value;
+  var grade = parseInt($('docGrade').value);
+  var date = $('docDate').value;
+  var auteur = $('docAuteur').value.trim();
+  var fileInput = $('docFile');
+  var msg = $('docMsg');
+  
+  msg.style.display = 'none';
+  if(!title){ msg.textContent = 'Titre requis'; msg.className='msg error'; msg.style.display='block'; return; }
+  if(!fileInput.files || !fileInput.files[0]){ msg.textContent = 'Fichier requis'; msg.className='msg error'; msg.style.display='block'; return; }
+  
+  var f = fileInput.files[0];
+  var ext = f.name.split('.').pop().toLowerCase();
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    try {
+      await db.collection('documents').add({
+        title: title,
+        sub: sub,
+        niveau: niveau,
+        grade: grade,
+        date: date,
+        auteur: auteur,
+        fileName: f.name,
+        type: ext,
+        data: e.target.result,
+        size: f.size,
+        uploadedAt: new Date().toISOString()
+      });
+      msg.textContent = '✅ Document ajouté !';
+      msg.className = 'msg';
+      msg.style.display = 'block';
+      $('docTitle').value=''; $('docDate').value=''; $('docAuteur').value=''; $('docFile').value='';
+      // Recharger les données
+      var sd = await db.collection('documents').get();
+      docs = sd.docs.map(function(d){ return {...d.data(),_fi:d.id}; });
+      renderDocs();
+    } catch(er) {
+      msg.textContent = '❌ Erreur: '+er.message;
+      msg.className = 'msg error';
+      msg.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(f);
 }
 </script>
-
 </body>
 </html>
