@@ -329,21 +329,7 @@ let currentNiveau=1;
 let sortMode='none';
 let historyDocs=[];
 
-// Cache les documents de la collection 'documents' pour les avoir sous la main
-let allDocs = []; // {id, data}
-
 function $(id){return document.getElementById(id);}
-
-// Recharge les documents depuis Firestore
-async function reloadDocs() {
-  try {
-    const snap = await db.collection('documents').get();
-    allDocs = snap.docs.map(function(d) { return {id: d.id, data: d.data()}; });
-    docs = allDocs.map(function(d) { return { ...d.data, _fi: d.id }; });
-  } catch(e) {
-    console.log('reloadDocs error:', e);
-  }
-}
 
 function showPage(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -366,7 +352,6 @@ async function loadAllData(){
     const sm=await db.collection('membres').get();
     members=sm.docs.map(d=>d.data());
     const sd=await db.collection('documents').get();
-    allDocs = sd.docs.map(function(d) { return {id: d.id, data: d.data()}; });
     docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
     const hd2=await db.collection('contenu').doc('histoire').get();
     if(hd2.exists)historyText=hd2.data().texte||'';
@@ -792,46 +777,41 @@ function renderArchives(){
     $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux)">'+s.label+'</h4><p style="color:#999;font-size:13px;padding:10px 0">Aucun document.</p>';
     return;
   }
-  var isAdmin = currentUser && currentUser.isAdmin;
   $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>'+
     f.map(function(d){
-      var html='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openArchDoc(\''+d._fi+'\')" style="cursor:pointer">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openArchDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
-      if(isAdmin) html+='<button class="btn btn-danger" onclick="deleteArchDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
-      html+='</div></div>';
-      return html;
+      var delBtn='';
+      if(currentUser && currentUser.isAdmin){
+        delBtn='<button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
+      }
+      return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>'+delBtn+'</div></div>';
     }).join('');
 }
 
-// Ouvrir un document des archives dans le viewer
-function openArchDoc(docId){
+// === NOUVEAU : viewer pour les documents des archives ===
+function openDocViewer(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
-  if(!d.url){alert('Pas de contenu');return;}
   $('viewerTitle').textContent=d.title||'Document';
   const b=$('viewerBody');
-  var ext='';
-  if(d.fileName) ext=d.fileName.split('.').pop().toLowerCase();
-  else if(d.type) ext=d.type.split('/').pop().split('.').pop().toLowerCase();
-  
-  if(ext==='pdf'){
-    b.innerHTML='<iframe src="'+d.url+'" class="embed-pdf"></iframe>';
-  } else if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0){
-    b.innerHTML='<img src="'+d.url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ext==='txt'){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.url+'</pre></div>';
+  const url=d.url;
+  const isImg=['jpg','jpeg','png','gif','webp'].some(function(ext){return d.type && d.type.indexOf(ext)>=0;}) || (d.fileName && ['jpg','jpeg','png','gif','webp'].some(function(ext){return d.fileName.toLowerCase().indexOf(ext)>=0;}));
+  if(isImg){
+    b.innerHTML='<img src="'+url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(d.fileName && d.fileName.toLowerCase().indexOf('pdf')>=0){
+    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
   } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+d.url+'" download class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+    b.innerHTML='<div class="text-preview"><p>Aperçu non disponible.</p><p style="margin-top:8px"><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-// Supprimer un document des archives (admin seulement)
-async function deleteArchDoc(docId){
+// === NOUVEAU : suppression d'un document des archives ===
+async function deleteDoc(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
   try{
     await db.collection('documents').doc(docId).delete();
-    await reloadDocs();
+    docs=docs.filter(function(x){return x._fi!==docId;});
     renderArchives();
   }catch(e){alert('Erreur: '+e.message);}
 }
@@ -861,7 +841,7 @@ async function addDocument(){
       await db.collection('documents').add({title:t,niveau:n,sub:sub,grade:g,date:dt,auteur:a,url:url,fileName:fi.name,type:fi.type,uploadedAt:new Date().toISOString()});
       msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
       $('docTitle').value='';$('docAuteur').value='';$('docFile').value='';
-      await reloadDocs();
+      const sd=await db.collection('documents').get();docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
     };
     reader.readAsDataURL(fi);
   }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
