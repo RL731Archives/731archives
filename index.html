@@ -233,12 +233,6 @@
           <label>Fichier</label><input id="docFile" type="file">
           <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter</button>
           <div id="docMsg" class="msg"></div>
-          
-          <!-- Liste des documents existants pour admin -->
-          <div style="margin-top:14px;border-top:1px solid #ddd;padding-top:12px">
-            <h5 style="color:var(--bordeaux);margin-bottom:6px">📋 Documents existants</h5>
-            <div id="adminDocsList" style="max-height:300px;overflow-y:auto"><p style="font-size:12px;color:#999">Charge...</p></div>
-          </div>
         </div>
         <div id="adminMembres" style="display:none">
           <label>Prénom</label><input id="memPrenom"><label>Nom</label><input id="memNom">
@@ -335,7 +329,21 @@ let currentNiveau=1;
 let sortMode='none';
 let historyDocs=[];
 
+// Cache les documents de la collection 'documents' pour les avoir sous la main
+let allDocs = []; // {id, data}
+
 function $(id){return document.getElementById(id);}
+
+// Recharge les documents depuis Firestore
+async function reloadDocs() {
+  try {
+    const snap = await db.collection('documents').get();
+    allDocs = snap.docs.map(function(d) { return {id: d.id, data: d.data()}; });
+    docs = allDocs.map(function(d) { return { ...d.data, _fi: d.id }; });
+  } catch(e) {
+    console.log('reloadDocs error:', e);
+  }
+}
 
 function showPage(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -358,6 +366,7 @@ async function loadAllData(){
     const sm=await db.collection('membres').get();
     members=sm.docs.map(d=>d.data());
     const sd=await db.collection('documents').get();
+    allDocs = sd.docs.map(function(d) { return {id: d.id, data: d.data()}; });
     docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
     const hd2=await db.collection('contenu').doc('histoire').get();
     if(hd2.exists)historyText=hd2.data().texte||'';
@@ -369,14 +378,6 @@ async function loadAllData(){
     dataLoaded=true;
   }
   if(historyText)$('historyDisplay').innerHTML=historyText;
-}
-
-// Recharger docs depuis Firestore (utile après ajout/suppression)
-async function reloadDocs(){
-  try{
-    const sd=await db.collection('documents').get();
-    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-  }catch(e){}
 }
 
 function updateSubFolderCards(){
@@ -434,7 +435,6 @@ function applyLogin(){
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
-    reloadDocs().then(function(){renderAdminDocsList();});
   } else {
     $('adminPanel').style.display='none';
     $('loginPrompt').style.display='block';
@@ -487,7 +487,6 @@ function selectSubDirect(k){
           $('saveHistoryBtn').style.display='inline-block';
           updateSubs();
           renderMembersList();
-          reloadDocs().then(function(){renderAdminDocsList();});
         }
         updateSubFolderCards();
       }catch(e){updateSubFolderCards();}
@@ -502,8 +501,8 @@ function showAdminTab(n,el){
   el.classList.add('active');
   $('adminDocs').style.display=n==='docs'?'block':'none';
   $('adminMembres').style.display=n==='membres'?'block':'none';
-  if(n==='membres'){renderMembersList();}
-  if(n==='docs'){updateSubs();reloadDocs().then(function(){renderAdminDocsList();});}
+  if(n==='membres')renderMembersList();
+  if(n==='docs')updateSubs();
 }
 
 function updateSubs(){
@@ -702,6 +701,7 @@ async function loadHistoryDocs(){
     var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
     historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
   }catch(e){
+    console.log('histoire_documents status:', e.message);
     historyDocs=[];
   }
   displayPublicHistoryDocs();
@@ -721,7 +721,7 @@ function displayPublicHistoryDocs(){
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
     imgs.forEach(function(d){
-      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"><div class="caption"><strong>'+d.title+'</strong></div></div></div>';
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong></div></div>';
     });
     h+='</div></div>';
   }
@@ -779,7 +779,7 @@ function closeViewer(){
   $('viewerOverlay').classList.remove('open');
 }
 
-// ===== ARCHIVES (rubriques par grade) =====
+// ===== ARCHIVES =====
 function renderArchives(){
   if(!currentSub){
     $('archivesContent').innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';
@@ -792,71 +792,100 @@ function renderArchives(){
     $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux)">'+s.label+'</h4><p style="color:#999;font-size:13px;padding:10px 0">Aucun document.</p>';
     return;
   }
-  var h='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>';
-  f.forEach(function(d){
-    h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')" title="Cliquer pour voir" style="cursor:pointer">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
-    if(currentUser && currentUser.isAdmin){
-      h+='<button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
-    }
-    h+='</div></div>';
-  });
-  $('archivesContent').innerHTML=h;
+  var isAdmin = currentUser && currentUser.isAdmin;
+  $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>'+
+    f.map(function(d){
+      var html='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openArchDoc(\''+d._fi+'\')" style="cursor:pointer">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openArchDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
+      if(isAdmin) html+='<button class="btn btn-danger" onclick="deleteArchDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
+      html+='</div></div>';
+      return html;
+    }).join('');
 }
 
-// ===== Viewer pour les documents des archives (rubriques) =====
-function openDocViewer(docId){
+// Ouvrir un document des archives dans le viewer
+function openArchDoc(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
+  if(!d.url){alert('Pas de contenu');return;}
   $('viewerTitle').textContent=d.title||'Document';
   const b=$('viewerBody');
-  const url=d.url;
-  if(!url){b.innerHTML='<p>Document inaccessible</p>';$('viewerOverlay').classList.add('open');return;}
-  // Détecter le type
-  var ex='';
-  if(d.fileName){ex=d.fileName.split('.').pop().toLowerCase();}
-  else if(d.type){ex=d.type.split('/').pop().toLowerCase();}
-  if(!ex && url.indexOf('data:')===0){ex=url.split(';')[0].split('/').pop();}
+  var ext='';
+  if(d.fileName) ext=d.fileName.split('.').pop().toLowerCase();
+  else if(d.type) ext=d.type.split('/').pop().split('.').pop().toLowerCase();
   
-  if(['jpg','jpeg','png','gif','webp','bmp','svg'].indexOf(ex)>=0){
-    b.innerHTML='<img src="'+url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-  } else if(['txt','text'].indexOf(ex)>=0){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+url+'</pre></div><p style="margin-top:8px"><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+  if(ext==='pdf'){
+    b.innerHTML='<iframe src="'+d.url+'" class="embed-pdf"></iframe>';
+  } else if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0){
+    b.innerHTML='<img src="'+d.url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ext==='txt'){
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.url+'</pre></div>';
   } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
+    b.innerHTML='<div class="text-preview"><p><a href="'+d.url+'" download class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-// ===== Supprimer un document des archives =====
-async function deleteDoc(docId){
-  if(!confirm('Supprimer ce document ?'))return;
+// Supprimer un document des archives (admin seulement)
+async function deleteArchDoc(docId){
+  var d=docs.find(function(x){return x._fi===docId;});
+  if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
   try{
     await db.collection('documents').doc(docId).delete();
-    // Recharger docs depuis Firestore
     await reloadDocs();
     renderArchives();
-    renderAdminDocsList();
   }catch(e){alert('Erreur: '+e.message);}
 }
 
-// ===== Liste admin des documents existants =====
-async function renderAdminDocsList(){
-  var c=$('adminDocsList');
-  if(!c)return;
+// ===== MEDIA =====
+function renderMedia(){
+  if(!currentUser){
+    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+    return;
+  }
+  const m=docs.filter(d=>['photos','videos'].includes(d.sub));
+  if(!m.length){
+    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média pour l\'instant.</p>';
+    return;
+  }
+  $('mediaList').innerHTML=m.map(d=>'<div class="histo-doc"><div class="preview">'+((d.sub==='videos')?'🎬':'📷')+'</div><div class="info"><strong><a href="'+d.url+'" target="_blank" style="text-decoration:none;color:inherit">'+d.title+'</a></strong><span>'+(d.auteur||'')+'</span></div></div>').join('');
+}
+
+// ===== DOCUMENTS ADMIN =====
+async function addDocument(){
+  const t=$('docTitle').value.trim(),n=parseInt($('docNiveau').value),sub=$('docSub').value,g=parseInt($('docGrade').value),dt=$('docDate').value,a=$('docAuteur').value.trim(),fi=$('docFile').files[0],msg=$('docMsg');
+  if(!t||!a||!fi){msg.textContent='Titre, auteur et fichier requis';msg.className='msg error';msg.style.display='block';return;}
   try{
-    var sd=await db.collection('documents').get();
-    docs=sd.docs.map(function(d){return {...d.data(),_fi:d.id};});
-  }catch(e){
-    c.innerHTML='<p style="font-size:12px;color:#999">Erreur chargement</p>';
-    return;
-  }
-  if(!docs.length){
-    c.innerHTML='<p style="font-size:12px;color:#999">Aucun document.</p>';
-    return;
-  }
-  c.innerHTML=docs.map(function(d){
-    var rub=(ssR[d.sub]||{}).label||d.sub||'?';
-    var grades=['','Apprenti','Compagnon','Maître'];
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+rub+' · '+grades[d.grade||1]+' · '+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openDocViewer(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:3px
+    const reader=new FileReader();
+    reader.onload=async function(e){
+      const url=e.target.result;
+      await db.collection('documents').add({title:t,niveau:n,sub:sub,grade:g,date:dt,auteur:a,url:url,fileName:fi.name,type:fi.type,uploadedAt:new Date().toISOString()});
+      msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
+      $('docTitle').value='';$('docAuteur').value='';$('docFile').value='';
+      await reloadDocs();
+    };
+    reader.readAsDataURL(fi);
+  }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
+}
+
+// ===== DRAG & DROP UPLOAD ZONE =====
+(function(){
+  const z=$('uploadZone');
+  if(!z)return;
+  z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('dragover');});
+  z.addEventListener('dragleave',function(){z.classList.remove('dragover');});
+  z.addEventListener('drop',function(e){
+    e.preventDefault();
+    z.classList.remove('dragover');
+    const files=e.dataTransfer.files;
+    if(files.length){
+      $('historyFileInput').files=files;
+      z.querySelector('p').innerHTML='<strong>'+files[0].name+'</strong> ('+(files[0].size/1024/1024).toFixed(1)+' Mo)';
+    }
+  });
+  $('historyFileInput').addEventListener('change',function(){
+    if(this.files&&this.files[0])z.querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';
+  });
+})();
+</script>
+</body>
+</html>
