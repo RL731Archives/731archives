@@ -826,55 +826,61 @@ function renderArchives(){
     return;
   }
   
-  // Icônes par sous-rubrique
-  var icons = {
-    'rituels1':'📜','planches-apprenti':'📝','planches-maitres1':'📝','orateur1':'🎙',
-    'rituels2':'📜','planches-compagnon':'📝','orateur2':'🎙',
-    'rituels3':'📜','planches-maitres3':'📝','orateur3':'🎙'
-  };
-  
-  // Libellés courts pour l'affichage
-  var labels = {
-    'rituels1':'Rituels 1°','planches-apprenti':'Planches Apprenti','planches-maitres1':'Planches Maîtres 1°','orateur1':'Orateur 1°',
-    'rituels2':'Rituels 2°','planches-compagnon':'Planches Compagnon','orateur2':'Orateur 2°',
-    'rituels3':'Rituels 3°','planches-maitres3':'Planches Maîtres 3°','orateur3':'Orateur 3°'
-  };
-  
-  // Structure des 3 degrés
+  // Afficher les rubriques comme sur la page d'accueil (3 cartes avec listes)
   var niveaux = [
-    {n:1, label:'APPRENTI', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
-    {n:2, label:'COMPAGNON', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
-    {n:3, label:'MAÎTRE', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
+    {n:1, label:'APPRENTI', cl:'apprenti', subs:[
+      {k:'rituels1', icone:'📜', label:'Rituels 1°', g:1},
+      {k:'planches-apprenti', icone:'📝', label:'Planches Apprenti', g:1},
+      {k:'planches-maitres1', icone:'📝', label:'Planches Maîtres 1°', g:1},
+      {k:'orateur1', icone:'🎙', label:'Orateur 1°', g:1}
+    ]},
+    {n:2, label:'COMPAGNON', cl:'compagnon', subs:[
+      {k:'rituels1', icone:'📜', label:'Rituels 1°', g:1},
+      {k:'planches-apprenti', icone:'📝', label:'Planches Apprenti', g:1},
+      {k:'planches-maitres1', icone:'📝', label:'Planches Maîtres 1°', g:1},
+      {k:'orateur1', icone:'🎙', label:'Orateur 1°', g:1},
+      {k:'rituels2', icone:'📜', label:'Rituels 2°', g:2},
+      {k:'planches-compagnon', icone:'📝', label:'Planches Compagnon', g:2},
+      {k:'orateur2', icone:'🎙', label:'Orateur 2°', g:2}
+    ]},
+    {n:3, label:'MAÎTRE', cl:'maitre', subs:[
+      {k:'rituels1', icone:'📜', label:'Rituels 1°', g:1},
+      {k:'planches-apprenti', icone:'📝', label:'Planches Apprenti', g:1},
+      {k:'planches-maitres1', icone:'📝', label:'Planches Maîtres 1°', g:1},
+      {k:'orateur1', icone:'🎙', label:'Orateur 1°', g:1},
+      {k:'rituels2', icone:'📜', label:'Rituels 2°', g:2},
+      {k:'planches-compagnon', icone:'📝', label:'Planches Compagnon', g:2},
+      {k:'orateur2', icone:'🎙', label:'Orateur 2°', g:2},
+      {k:'rituels3', icone:'📜', label:'Rituels 3°', g:3},
+      {k:'planches-maitres3', icone:'📝', label:'Planches Maîtres 3°', g:3},
+      {k:'orateur3', icone:'🎙', label:'Orateur 3°', g:3}
+    ]}
   ];
   
   var h = '<div class="cards">';
   for(var ii=0; ii<niveaux.length; ii++){
     var niv = niveaux[ii];
     if(currentUser.grade < niv.n) continue;
-    var cardClass = ['','apprenti','compagnon','maitre'][niv.n];
-    h += '<div class="card '+cardClass+'" data-grade-card="'+niv.n+'">';
-    h += '<h3>'+niv.label+'</h3><div class="lock">🔒</div>';
+    h += '<div class="card ' + niv.cl + '" data-grade-card="' + niv.n + '">';
+    h += '<h3>' + niv.label + '</h3>';
+    h += '<div class="lock">🔒</div>';
     h += '<ul class="sub-list">';
     for(var jj=0; jj<niv.subs.length; jj++){
-      var k = niv.subs[jj];
-      var info = ssR[k];
-      if(!info) continue;
-      var count = docs.filter(function(d){ return d.sub === k; }).length;
-      h += '<li onclick="selectSubDirect(\''+k+'\')" style="cursor:pointer">';
-      h += '<span class="emoji-icon">'+(icons[k]||'📄')+'</span> '+labels[k];
-      h += ' <span style="font-size:10px;color:#999;float:right">('+count+')</span>';
-      h += '</li>';
+      var s = niv.subs[jj];
+      var access = (currentUser.grade >= s.g);
+      h += '<li onclick="if(' + (access ? 'true' : 'false') + '){selectSubDirect(\''+s.k+'\')}" class="js-sub" data-grade="'+s.g+'"';
+      if(!access) h += ' style="pointer-events:none;opacity:0.4;cursor:not-allowed"';
+      h += '><span class="emoji-icon">'+s.icone+'</span> '+s.label+'</li>';
     }
     h += '</ul></div>';
   }
   h += '</div>';
   
-  if(!h || h==='<div class="cards"></div>'){
+  if(!h || h === '<div class="cards"></div>'){
     h = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Aucune rubrique disponible pour votre grade.</p>';
   }
   c.innerHTML = h;
 }
-
 // === RENDER DOCS (documents filtrés par sous-rubrique) ===
 function renderDocs(){
   var c = $('archivesContent');
