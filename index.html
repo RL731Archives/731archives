@@ -233,6 +233,11 @@
           <label>Fichier</label><input id="docFile" type="file">
           <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter</button>
           <div id="docMsg" class="msg"></div>
+          <!-- Liste des documents existants avec suppression -->
+          <div id="adminDocsList" style="margin-top:14px;border-top:1px solid #ddd;padding-top:10px">
+            <h5 style="color:var(--bordeaux);margin-bottom:6px;font-size:13px">📋 Documents existants</h5>
+            <div id="adminDocsListContent"><p style="font-size:12px;color:#999">Chargement...</p></div>
+          </div>
         </div>
         <div id="adminMembres" style="display:none">
           <label>Prénom</label><input id="memPrenom"><label>Nom</label><input id="memNom">
@@ -420,6 +425,7 @@ function applyLogin(){
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
+    renderAdminDocsList();
   } else {
     $('adminPanel').style.display='none';
     $('loginPrompt').style.display='block';
@@ -472,6 +478,7 @@ function selectSubDirect(k){
           $('saveHistoryBtn').style.display='inline-block';
           updateSubs();
           renderMembersList();
+          renderAdminDocsList();
         }
         updateSubFolderCards();
       }catch(e){updateSubFolderCards();}
@@ -487,7 +494,7 @@ function showAdminTab(n,el){
   $('adminDocs').style.display=n==='docs'?'block':'none';
   $('adminMembres').style.display=n==='membres'?'block':'none';
   if(n==='membres')renderMembersList();
-  if(n==='docs')updateSubs();
+  if(n==='docs'){updateSubs();renderAdminDocsList();}
 }
 
 function updateSubs(){
@@ -764,6 +771,25 @@ function closeViewer(){
   $('viewerOverlay').classList.remove('open');
 }
 
+// ===== VISIONNEUSE POUR DOCUMENTS ARCHIVES =====
+function openDocViewer(doc){
+  $('viewerTitle').textContent=doc.title||'Document';
+  const b=$('viewerBody');
+  const url=doc.url||'';
+  const type=doc.type||'';
+  const ext=doc.fileName?(doc.fileName.split('.').pop().toLowerCase()):'pdf';
+  if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0||type.indexOf('image')>=0){
+    b.innerHTML='<img src="'+url+'" alt="'+doc.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ext==='pdf'||type.indexOf('pdf')>=0){
+    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
+  } else if(ext==='txt'||type.indexOf('text')>=0){
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+url+'</pre></div><p style="margin-top:8px"><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+  } else {
+    b.innerHTML='<div class="text-preview"><p><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+
 // ===== ARCHIVES =====
 function renderArchives(){
   if(!currentSub){
@@ -777,8 +803,47 @@ function renderArchives(){
     $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux)">'+s.label+'</h4><p style="color:#999;font-size:13px;padding:10px 0">Aucun document.</p>';
     return;
   }
+  // Ajout bouton visualisation + suppression si admin
+  const isAdmin=currentUser && currentUser.isAdmin;
   $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>'+
-    f.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><a class="btn btn-gold" style="padding:4px 10px;font-size:11px" href="'+d.url+'" target="_blank">📥</a></div></div>').join('');
+    f.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer('+JSON.stringify(d).replace(/'/g,"\\'")+')" title="Cliquer pour ouvrir">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer('+JSON.stringify(d).replace(/'/g,"\\'")+')" style="padding:4px 10px;font-size:11px">👁️</button>'+
+    (isAdmin?'<button class="btn btn-danger" onclick="deleteDocument(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>':'')+
+    '</div></div>').join('');
+}
+
+// ===== SUPPRIMER UN DOCUMENT DES ARCHIVES =====
+async function deleteDocument(id){
+  if(!confirm('Supprimer ce document définitivement ?'))return;
+  try{
+    await db.collection('documents').doc(id).delete();
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    renderArchives();
+    if(currentUser && currentUser.isAdmin) renderAdminDocsList();
+  }catch(e){
+    alert('Erreur: '+e.message);
+  }
+}
+
+// ===== LISTE DES DOCUMENTS ADMIN + SUPPRESSION =====
+async function renderAdminDocsList(){
+  const c=$('adminDocsListContent');
+  try{
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){
+    c.innerHTML='<p style="font-size:12px;color:#999">Erreur chargement</p>';
+    return;
+  }
+  if(!docs.length){
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun document.</p>';
+    return;
+  }
+  c.innerHTML='<div style="max-height:300px;overflow-y:auto">'+
+    docs.map(d=>{
+      const rubrique=ssR[d.sub]?ssR[d.sub].label:d.sub;
+      return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(rubrique)+'</span></div><div class="actions"><button class="btn btn-danger" onclick="deleteDocument(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+    }).join('')+'</div>';
 }
 
 // ===== MEDIA =====
@@ -807,6 +872,7 @@ async function addDocument(){
       msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
       $('docTitle').value='';$('docAuteur').value='';$('docFile').value='';
       const sd=await db.collection('documents').get();docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+      if(currentUser && currentUser.isAdmin) renderAdminDocsList();
     };
     reader.readAsDataURL(fi);
   }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
