@@ -826,28 +826,52 @@ function renderArchives(){
     return;
   }
   
-  // Afficher les rubriques (sous-rubriques) par niveau
+  // Icônes par sous-rubrique
+  var icons = {
+    'rituels1':'📜','planches-apprenti':'📝','planches-maitres1':'📝','orateur1':'🎙',
+    'rituels2':'📜','planches-compagnon':'📝','orateur2':'🎙',
+    'rituels3':'📜','planches-maitres3':'📝','orateur3':'🎙'
+  };
+  
+  // Libellés courts pour l'affichage
+  var labels = {
+    'rituels1':'Rituels 1°','planches-apprenti':'Planches Apprenti','planches-maitres1':'Planches Maîtres 1°','orateur1':'Orateur 1°',
+    'rituels2':'Rituels 2°','planches-compagnon':'Planches Compagnon','orateur2':'Orateur 2°',
+    'rituels3':'Rituels 3°','planches-maitres3':'Planches Maîtres 3°','orateur3':'Orateur 3°'
+  };
+  
+  // Structure des 3 degrés
   var niveaux = [
-    {n:1, label:'1er Degré — Apprenti', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
-    {n:2, label:'2e Degré — Compagnon', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
-    {n:3, label:'3e Degré — Maître', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
+    {n:1, label:'APPRENTI', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
+    {n:2, label:'COMPAGNON', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
+    {n:3, label:'MAÎTRE', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
   ];
   
-  var h = '';
+  var h = '<div class="cards">';
   for(var ii=0; ii<niveaux.length; ii++){
     var niv = niveaux[ii];
     if(currentUser.grade < niv.n) continue;
-    h += '<h3 style="color:var(--bordeaux);font-size:15px;margin:14px 0 8px">'+niv.label+'</h3><div class="rubriques">';
+    var cardClass = ['','apprenti','compagnon','maitre'][niv.n];
+    h += '<div class="card '+cardClass+'" data-grade-card="'+niv.n+'">';
+    h += '<h3>'+niv.label+'</h3><div class="lock">🔒</div>';
+    h += '<ul class="sub-list">';
     for(var jj=0; jj<niv.subs.length; jj++){
       var k = niv.subs[jj];
       var info = ssR[k];
       if(!info) continue;
       var count = docs.filter(function(d){ return d.sub === k; }).length;
-      h += '<div class="rubrique-card" onclick="selectSubDirect(\''+k+'\')"><h4>'+info.label+'</h4><p style="font-size:12px;color:#888">'+count+' document'+(count>1?'s':'')+'</p></div>';
+      h += '<li onclick="selectSubDirect(\''+k+'\')" style="cursor:pointer">';
+      h += '<span class="emoji-icon">'+(icons[k]||'📄')+'</span> '+labels[k];
+      h += ' <span style="font-size:10px;color:#999;float:right">('+count+')</span>';
+      h += '</li>';
     }
-    h += '</div>';
+    h += '</ul></div>';
   }
-  if(!h) h = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Aucune rubrique disponible pour votre grade.</p>';
+  h += '</div>';
+  
+  if(!h || h==='<div class="cards"></div>'){
+    h = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Aucune rubrique disponible pour votre grade.</p>';
+  }
   c.innerHTML = h;
 }
 
