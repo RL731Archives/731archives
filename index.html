@@ -78,7 +78,7 @@
     #viewerOverlay .viewer-body .embed-pdf{width:100%;height:80vh;border:none;border-radius:4px}
     #viewerOverlay .viewer-body .text-preview{padding:24px;background:#f9f9f9;border-radius:4px;font-size:15px;line-height:1.8;text-align:left;max-height:70vh;overflow-y:auto}
     .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
-    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
+    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.3s}
     .upload-zone:hover{background:#f5f0e0}
     .upload-zone.dragover{background:#efe5c8;border-color:var(--bordeaux)}
     .upload-zone .icon{font-size:40px;color:var(--gold)}
@@ -197,9 +197,9 @@
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('historyFileInput').click()">
       <div class="icon">📄</div>
       <p><strong>Cliquez</strong> ou glissez-déposez un fichier</p>
-      <p style="font-size:11px;color:#aaa">PDF, images (JPG, PNG, GIF), texte — max 20 Mo</p>
+      <p style="font-size:11px;color:#aaa">PDF, images (JPG, PNG, GIF) — max 20 Mo</p>
     </div>
-    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt" style="display:none">
+    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" style="display:none">
     <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
       <input id="historyDocTitle" placeholder="Titre du document" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px">
@@ -583,6 +583,26 @@ async function saveHistory(){
   setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);
 }
 
+// === SUPPRIMER UN DOCUMENT HISTOIRE ===
+async function deleteHistoryDoc(docId){
+  if(!confirm('Supprimer ce document définitivement ?')) return;
+  const msg = document.getElementById('uploadAdminMsg');
+  msg.className = 'admin-msg info';
+  msg.textContent = '⏳ Suppression...';
+  msg.style.display = 'block';
+  try {
+    await db.collection('histoire_documents').doc(docId).delete();
+    msg.textContent = '✅ Document supprimé';
+    msg.className = 'admin-msg success';
+    msg.style.display = 'block';
+    await loadHistoryDocs();
+  } catch(er) {
+    msg.textContent = '❌ Erreur: ' + er.message;
+    msg.className = 'admin-msg error';
+    msg.style.display = 'block';
+  }
+}
+
 // === UPLOAD DOCUMENT HISTOIRE vers FIRESTORE (base64) ===
 async function uploadHistoryDoc(){
   const fi=$('historyFileInput');
@@ -680,11 +700,43 @@ async function uploadHistoryDoc(){
   reader.readAsDataURL(f);
 }
 
+// === DRAG & DROP ===
+document.addEventListener('DOMContentLoaded', function() {
+  const z = document.getElementById('uploadZone');
+  if(z){
+    z.addEventListener('dragover', function(e) { e.preventDefault(); z.classList.add('dragover'); });
+    z.addEventListener('dragleave', function(e) { e.preventDefault(); z.classList.remove('dragover'); });
+    z.addEventListener('drop', function(e) {
+      e.preventDefault();
+      z.classList.remove('dragover');
+      if(e.dataTransfer.files && e.dataTransfer.files.length){
+        const fi = document.getElementById('historyFileInput');
+        fi.files = e.dataTransfer.files;
+        z.querySelector('p').innerHTML = '📄 <strong>' + e.dataTransfer.files[0].name + '</strong>';
+      }
+    });
+  }
+  const inp = document.getElementById('historyFileInput');
+  if(inp){
+    inp.addEventListener('change', function() {
+      if(this.files && this.files[0]){
+        document.getElementById('uploadZone').querySelector('p').innerHTML = '📄 <strong>' + this.files[0].name + '</strong>';
+      }
+    });
+  }
+});
+
 // === CHARGER DOCUMENTS HISTOIRE ===
 async function loadHistoryDocs(){
   try{
-    var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
+    var s=await db.collection('histoire_documents').get();
     historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
+    // Tri par date décroissante (gère les documents avec ou sans uploadedAt)
+    historyDocs.sort(function(a,b){
+      var da=a.uploadedAt||a.date||'';
+      var db2=b.uploadedAt||b.date||'';
+      return da>db2?-1:(da<db2?1:0);
+    });
   }catch(e){
     console.log('histoire_documents status:', e.message);
     historyDocs=[];
@@ -714,7 +766,7 @@ function displayPublicHistoryDocs(){
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
     oth.forEach(function(d){
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button></div></div>';
     });
     h+='</div>';
   }
@@ -743,129 +795,16 @@ function openViewerById(docId){
     b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
     b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
-  } else if(ex==='txt'){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
   } else {
     b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-async function deleteHistoryDoc(id){
-  var d=historyDocs.find(function(x){return x._fi===id;});
-  if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
-  try{
-    await db.collection('histoire_documents').doc(id).delete();
-    await loadHistoryDocs();
-  }catch(e){alert('Erreur: '+e.message);}
-}
-
 function closeViewer(){
   $('viewerOverlay').classList.remove('open');
 }
-
-// ===== ARCHIVES =====
-function renderArchives(){
-  if(!currentSub){
-    $('archivesContent').innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';
-    return;
-  }
-  const s=ssR[currentSub];
-  if(!s){$('archivesContent').innerHTML='<p>Rubrique inconnue</p>';return;}
-  const f=docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade);
-  if(!f.length){
-    $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux)">'+s.label+'</h4><p style="color:#999;font-size:13px;padding:10px 0">Aucun document.</p>';
-    return;
-  }
-  $('archivesContent').innerHTML='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>'+
-    f.map(function(d){
-      var delBtn='';
-      if(currentUser && currentUser.isAdmin){
-        delBtn='<button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
-      }
-      return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>'+delBtn+'</div></div>';
-    }).join('');
-}
-
-// === NOUVEAU : viewer pour les documents des archives ===
-function openDocViewer(docId){
-  var d=docs.find(function(x){return x._fi===docId;});
-  if(!d){alert('Document introuvable');return;}
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody');
-  const url=d.url;
-  const isImg=['jpg','jpeg','png','gif','webp'].some(function(ext){return d.type && d.type.indexOf(ext)>=0;}) || (d.fileName && ['jpg','jpeg','png','gif','webp'].some(function(ext){return d.fileName.toLowerCase().indexOf(ext)>=0;}));
-  if(isImg){
-    b.innerHTML='<img src="'+url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(d.fileName && d.fileName.toLowerCase().indexOf('pdf')>=0){
-    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-  } else {
-    b.innerHTML='<div class="text-preview"><p>Aperçu non disponible.</p><p style="margin-top:8px"><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
-  }
-  $('viewerOverlay').classList.add('open');
-}
-
-// === NOUVEAU : suppression d'un document des archives ===
-async function deleteDoc(docId){
-  var d=docs.find(function(x){return x._fi===docId;});
-  if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
-  try{
-    await db.collection('documents').doc(docId).delete();
-    docs=docs.filter(function(x){return x._fi!==docId;});
-    renderArchives();
-  }catch(e){alert('Erreur: '+e.message);}
-}
-
-// ===== MEDIA =====
-function renderMedia(){
-  if(!currentUser){
-    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
-    return;
-  }
-  const m=docs.filter(d=>['photos','videos'].includes(d.sub));
-  if(!m.length){
-    $('mediaList').innerHTML='<p style="color:#999;text-align:center;padding:30px">Aucun média pour l\'instant.</p>';
-    return;
-  }
-  $('mediaList').innerHTML=m.map(d=>'<div class="histo-doc"><div class="preview">'+((d.sub==='videos')?'🎬':'📷')+'</div><div class="info"><strong><a href="'+d.url+'" target="_blank" style="text-decoration:none;color:inherit">'+d.title+'</a></strong><span>'+(d.auteur||'')+'</span></div></div>').join('');
-}
-
-// ===== DOCUMENTS ADMIN =====
-async function addDocument(){
-  const t=$('docTitle').value.trim(),n=parseInt($('docNiveau').value),sub=$('docSub').value,g=parseInt($('docGrade').value),dt=$('docDate').value,a=$('docAuteur').value.trim(),fi=$('docFile').files[0],msg=$('docMsg');
-  if(!t||!a||!fi){msg.textContent='Titre, auteur et fichier requis';msg.className='msg error';msg.style.display='block';return;}
-  try{
-    const reader=new FileReader();
-    reader.onload=async function(e){
-      const url=e.target.result;
-      await db.collection('documents').add({title:t,niveau:n,sub:sub,grade:g,date:dt,auteur:a,url:url,fileName:fi.name,type:fi.type,uploadedAt:new Date().toISOString()});
-      msg.textContent='✅ Ajouté';msg.className='msg';msg.style.display='block';
-      $('docTitle').value='';$('docAuteur').value='';$('docFile').value='';
-      const sd=await db.collection('documents').get();docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-    };
-    reader.readAsDataURL(fi);
-  }catch(e){msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';}
-}
-
-// ===== DRAG & DROP UPLOAD ZONE =====
-(function(){
-  const z=$('uploadZone');
-  if(!z)return;
-  z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('dragover');});
-  z.addEventListener('dragleave',function(){z.classList.remove('dragover');});
-  z.addEventListener('drop',function(e){
-    e.preventDefault();
-    z.classList.remove('dragover');
-    const files=e.dataTransfer.files;
-    if(files.length){
-      $('historyFileInput').files=files;
-      z.querySelector('p').innerHTML='<strong>'+files[0].name+'</strong> ('+(files[0].size/1024/1024).toFixed(1)+' Mo)';
-    }
-  });
-  $('historyFileInput').addEventListener('change',function(){
-    if(this.files&&this.files[0])z.querySelector('p').innerHTML='<strong>'+this.files[0].name+'</strong> ('+(this.files[0].size/1024/1024).toFixed(1)+' Mo)';
-  });
-})();
 </script>
+
 </body>
 </html>
