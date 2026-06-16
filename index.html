@@ -371,6 +371,14 @@ async function loadAllData(){
   if(historyText)$('historyDisplay').innerHTML=historyText;
 }
 
+// Recharger docs depuis Firestore (utile après ajout/suppression)
+async function reloadDocs(){
+  try{
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){}
+}
+
 function updateSubFolderCards(){
   document.querySelectorAll('[data-grade-card]').forEach(c=>{
     const g=parseInt(c.dataset.gradeCard);
@@ -426,7 +434,7 @@ function applyLogin(){
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
-    renderAdminDocsList();
+    reloadDocs().then(function(){renderAdminDocsList();});
   } else {
     $('adminPanel').style.display='none';
     $('loginPrompt').style.display='block';
@@ -479,7 +487,7 @@ function selectSubDirect(k){
           $('saveHistoryBtn').style.display='inline-block';
           updateSubs();
           renderMembersList();
-          renderAdminDocsList();
+          reloadDocs().then(function(){renderAdminDocsList();});
         }
         updateSubFolderCards();
       }catch(e){updateSubFolderCards();}
@@ -495,7 +503,7 @@ function showAdminTab(n,el){
   $('adminDocs').style.display=n==='docs'?'block':'none';
   $('adminMembres').style.display=n==='membres'?'block':'none';
   if(n==='membres'){renderMembersList();}
-  if(n==='docs'){updateSubs();renderAdminDocsList();}
+  if(n==='docs'){updateSubs();reloadDocs().then(function(){renderAdminDocsList();});}
 }
 
 function updateSubs(){
@@ -694,7 +702,6 @@ async function loadHistoryDocs(){
     var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
     historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
   }catch(e){
-    console.log('histoire_documents status:', e.message);
     historyDocs=[];
   }
   displayPublicHistoryDocs();
@@ -714,7 +721,7 @@ function displayPublicHistoryDocs(){
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
     imgs.forEach(function(d){
-      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong></div></div>';
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"><div class="caption"><strong>'+d.title+'</strong></div></div></div>';
     });
     h+='</div></div>';
   }
@@ -787,7 +794,7 @@ function renderArchives(){
   }
   var h='<h4 style="color:var(--bordeaux);margin-bottom:10px">'+s.label+'</h4>';
   f.forEach(function(d){
-    h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')" title="Cliquer pour voir">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
+    h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')" title="Cliquer pour voir" style="cursor:pointer">'+d.title+'</strong><span>'+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
     if(currentUser && currentUser.isAdmin){
       h+='<button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
     }
@@ -796,7 +803,7 @@ function renderArchives(){
   $('archivesContent').innerHTML=h;
 }
 
-// ===== Viewre pour les documents des archives (rubriques) =====
+// ===== Viewer pour les documents des archives (rubriques) =====
 function openDocViewer(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
@@ -804,7 +811,7 @@ function openDocViewer(docId){
   const b=$('viewerBody');
   const url=d.url;
   if(!url){b.innerHTML='<p>Document inaccessible</p>';$('viewerOverlay').classList.add('open');return;}
-  // Détecter le type via fileName ou type
+  // Détecter le type
   var ex='';
   if(d.fileName){ex=d.fileName.split('.').pop().toLowerCase();}
   else if(d.type){ex=d.type.split('/').pop().toLowerCase();}
@@ -814,7 +821,7 @@ function openDocViewer(docId){
     b.innerHTML='<img src="'+url+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
     b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-  } else if(ex==='txt'){
+  } else if(['txt','text'].indexOf(ex)>=0){
     b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+url+'</pre></div><p style="margin-top:8px"><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
   } else {
     b.innerHTML='<div class="text-preview"><p><a href="'+url+'" download class="btn btn-bdx">📥 Télécharger le fichier</a></p></div>';
@@ -824,11 +831,11 @@ function openDocViewer(docId){
 
 // ===== Supprimer un document des archives =====
 async function deleteDoc(docId){
-  var d=docs.find(function(x){return x._fi===docId;});
-  if(!d||!confirm('Supprimer "'+d.title+'" ?'))return;
+  if(!confirm('Supprimer ce document ?'))return;
   try{
     await db.collection('documents').doc(docId).delete();
-    docs=docs.filter(function(x){return x._fi!==docId;});
+    // Recharger docs depuis Firestore
+    await reloadDocs();
     renderArchives();
     renderAdminDocsList();
   }catch(e){alert('Erreur: '+e.message);}
@@ -852,11 +859,4 @@ async function renderAdminDocsList(){
   c.innerHTML=docs.map(function(d){
     var rub=(ssR[d.sub]||{}).label||d.sub||'?';
     var grades=['','Apprenti','Compagnon','Maître'];
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+rub+' · '+grades[d.grade||1]+' · '+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openDocViewer(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
-  }).join('');
-}
-
-// ===== MEDIA =====
-function renderMedia(){
-  if(!currentUser){
-    $('mediaList').innerHTML='
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+rub+' · '+grades[d.grade||1]+' · '+(d.auteur||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openDocViewer(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteDoc(\''+d._fi+'\')" style="padding:3px
