@@ -1,1074 +1,1330 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>731 Archives - Étoile du Temple</title>
-  <link rel="icon" type="image/png" href="https://rl731archives.github.io/731archives/favicon.png">
-  <style>
-    /* ===== RESET & BASE ===== */
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f0e8;color:#2d2d2d;min-height:100vh;display:flex;flex-direction:column;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>731 Archives - Étoile du Temple</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-storage-compat.js">
+    </script>
+    <!-- Quill.js pour l'éditeur de texte enrichi -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #0b0a0a;
+            color: #e0d8c8;
+            min-height: 100vh;
+        }
+        /* BANDEAU */
 
-    /* ===== BARRE HAUT ===== */
-    #topBar{background:#1a1a2e;color:#f0e6d3;padding:24px 30px;text-align:center;border-bottom:3px solid #c9a84c;}
-    #topBar h1{font-size:1.5rem;letter-spacing:2px;font-weight:400;}
-    #topBar h1 span{color:#c9a84c;}
 
-    /* ===== NAV ===== */
-    nav{background:#2d2d44;display:flex;justify-content:center;flex-wrap:wrap;gap:0;}
-    nav a{color:#e0d5c5;text-decoration:none;padding:12px 24px;font-size:14px;transition:background .2s;cursor:pointer;border-bottom:2px solid transparent;}
-    nav a:hover{background:#3d3d5c;border-bottom-color:#c9a84c;}
-    nav a.active{background:#3d3d5c;border-bottom-color:#c9a84c;color:#fff;}
-    @media(max-width:600px){nav a{padding:10px 14px;font-size:13px;}}
-
-    /* ===== CONTENEUR PRINCIPAL ===== */
-    #pageContent{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%;}
-    #pageContent h2{font-size:1.3rem;color:#1a1a2e;margin-bottom:10px;border-bottom:1px solid #c9a84c;padding-bottom:6px;}
-    #pageContent p{font-size:14px;color:#444;margin-bottom:10px;line-height:1.6;}
-
-    /* ===== CARDS ACCUEIL ===== */
-    .cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}
-    .card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);flex:1;min-width:220px;max-width:320px;border-top:4px solid #c9a84c;}
-    .card h3{font-size:1rem;color:#1a1a2e;margin-bottom:6px;}
-    .card .lock{font-size:.9rem;color:#888;margin-bottom:8px;}
-    .card ul{list-style:none;font-size:13px;}
-    .card ul li{padding:4px 0;color:#555;cursor:pointer;}
-    .card ul li:hover{color:#c9a84c;}
-    .card ul li .emoji-icon{margin-right:4px;}
-
-    /* ===== BOÎTE DE CONNEXION ===== */
-    #authBox{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);max-width:350px;margin:0 auto 20px;}
-    #authBox h3{margin-bottom:10px;color:#1a1a2e;}
-    #authBox input{width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:5px;font-size:14px;}
-    #authBox button{background:#1a1a2e;color:#fff;border:none;padding:8px 16px;border-radius:5px;cursor:pointer;width:100%;font-size:14px;}
-    #authBox button:hover{background:#2d2d44;}
-    #authBox .error{color:#c00;font-size:13px;margin-top:5px;}
-    #authBox .success{color:#080;font-size:13px;margin-top:5px;}
-    #userInfo{text-align:right;font-size:13px;color:#666;margin-bottom:10px;padding:8px;background:#f0ede6;border-radius:5px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-    #userInfo .btn-logout{background:#8b0000;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;}
-
-    /* ===== DOCUMENTS HISTOIRE ===== */
-    .histo-doc{background:#faf8f4;border:1px solid #e0d6c8;border-radius:6px;padding:12px;margin-bottom:10px;}
-    .histo-doc p{font-size:13px;margin-bottom:4px;}
-    .histo-doc .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
-    .histo-doc .actions button{font-size:12px;padding:4px 10px;border:none;border-radius:4px;cursor:pointer;}
-    .btn-view{background:#2d5a7b;color:#fff;}
-    .btn-view:hover{background:#1a3d5c;}
-    .btn-delete{background:#8b0000;color:#fff;}
-    .btn-delete:hover{background:#a00;}
-
-    /* ===== UPLOAD ===== */
-    #uploadBox{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:10px 0;}
-    #uploadBox h3{font-size:1rem;margin-bottom:10px;}
-    #uploadBox input[type="file"]{font-size:13px;}
-    #uploadBox button{background:#1a1a2e;color:#fff;border:none;padding:6px 14px;border-radius:5px;cursor:pointer;margin-top:6px;font-size:13px;}
-    #uploadBox .info-text{font-size:12px;color:#666;margin-top:4px;}
-    #uploadBox select{padding:6px;border-radius:5px;border:1px solid #ccc;font-size:13px;margin-bottom:6px;}
-
-    /* ===== LISTE SOUS-RUBRIQUE (ARCHIVES) ===== */
-    .sub-list{list-style:none;font-size:14px;}
-    .sub-list li{padding:6px 0;border-bottom:1px solid #eee;cursor:pointer;transition:color .15s;}
-    .sub-list li:hover{color:#c9a84c;}
-
-    /* ===== DOCUMENT ITEM (ARCHIVES) ===== */
-    .doc-item{background:#faf8f4;border:1px solid #e0d6c8;border-radius:6px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-    .doc-item .info{font-size:14px;flex:1;}
-    .doc-item .info .title{font-weight:600;color:#1a1a2e;}
-    .doc-item .info .meta{font-size:12px;color:#888;margin-top:2px;}
-    .doc-item .actions{display:flex;gap:6px;}
-
-    /* ===== MEMBRE ITEM ===== */
-    .membre-item{background:#faf8f4;border:1px solid #e0d6c8;border-radius:6px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-    .membre-item .info{font-size:14px;flex:1;}
-    .membre-item .actions{display:flex;gap:6px;}
-
-    /* ===== FOOTER ===== */
-    footer{background:#1a1a2e;color:#e0d5c5;text-align:center;padding:14px;font-size:12px;margin-top:auto;border-top:3px solid #c9a84c;}
-
-    /* ===== ZOOM (viewer) ===== */
-    #viewerOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;z-index:1000;justify-content:center;align-items:center;padding:20px;}
-    #viewerOverlay.active{display:flex;}
-    #viewerOverlay img{max-width:95%;max-height:95%;object-fit:contain;border-radius:6px;box-shadow:0 4px 30px rgba(0,0,0,.5);}
-    #viewerOverlay iframe{width:90%;height:90%;border:none;border-radius:6px;}
-    #viewerClose{position:absolute;top:15px;right:25px;font-size:30px;color:#fff;cursor:pointer;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:2px solid #fff;}
-
-    /* ===== BACK BUTTON ===== */
-    .back-link{display:inline-block;font-size:13px;color:#2d5a7b;cursor:pointer;margin-bottom:10px;}
-    .back-link:hover{text-decoration:underline;}
-
-    /* ===== CHARGEMENT ===== */
-    .loading{text-align:center;font-size:14px;color:#888;padding:20px;}
-
-    /* ===== HIDDEN ===== */
-    .hidden{display:none;}
-
-    /* ===== ADMIN TABS ===== */
-    .admin-tabs{display:flex;gap:0;margin-bottom:15px;flex-wrap:wrap;}
-    .admin-tabs button{background:#e0d6c8;border:none;padding:8px 16px;cursor:pointer;font-size:13px;border-radius:5px 5px 0 0;}
-    .admin-tabs button.active{background:#1a1a2e;color:#fff;}
-
-    .admin-upload-box{background:#fff;border:2px dashed #c9a84c;border-radius:8px;padding:15px;margin-bottom:15px;}
-    .admin-upload-box h4{margin-bottom:8px;color:#1a1a2e;font-size:14px;}
-    .admin-upload-box input[type="file"]{font-size:13px;}
-    .admin-upload-box button{background:#1a1a2e;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:13px;margin-top:6px;}
-    .admin-upload-box select{padding:5px;border-radius:4px;border:1px solid #ccc;font-size:13px;}
-    .admin-upload-box .info-text{font-size:12px;color:#666;margin-top:4px;}
-
-    /* rubrique-card (ancien style, gardé pour compat) */
-    .rubrique-card{background:#faf8f4;border:1px solid #e0d6c8;border-radius:8px;padding:15px;margin-bottom:12px;cursor:pointer;transition:box-shadow .15s;}
-    .rubrique-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.1);}
-    .rubrique-card h4{font-size:15px;color:#1a1a2e;}
-    .rubrique-card p{font-size:12px;color:#888;margin-top:3px;}
-
-    /* bouton document */
-    .doc-btn{background:#1a1a2e;color:#fff;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;}
-    .doc-btn:hover{background:#2d2d44;}
-  </style>
+        .bandeau {
+            width: 100%;
+            height: 300px;
+            background: url('https://rl731archives.github.io/731archives/bandeau.jpg') center/cover no-repeat;
+            /* Photo de bandeau récupérée depuis le site en ligne */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 -20px 40px rgba(0, 0, 0, 0.7);
+        }
+        .bandeau h1 {
+            font-size: 3rem;
+            color: #f5e6c8;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 6px;
+            font-weight: 400;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 40px;
+            border-radius: 4px;
+            backdrop-filter: blur(2px);
+        }
+        /* MENU */
+        nav {
+            background: #1a1410;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #3a2a1a;
+        }
+        nav a {
+            color: #c4a97a;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        nav a:hover {
+            background: #2a1f15;
+            border-color: #5a3f28;
+            color: #e8d5a8;
+        }
+        nav a.active {
+            background: #3a2a1a;
+            border-color: #8a6f3f;
+            color: #f5e6c8;
+        }
+        /* ZONE ADMIN en haut à droite */
+        .admin-zone {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 10;
+        }
+        .admin-zone button {
+            background: rgba(30, 20, 10, 0.85);
+            color: #c4a97a;
+            border: 1px solid #5a3f28;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+        .admin-zone button:hover {
+            background: #3a2a1a;
+            color: #f5e6c8;
+        }
+        /* MAIN */
+        .main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        /* PAGE ACCUEIL */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .presentation {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+            border-bottom: 1px solid #3a2a1a;
+        }
+        .presentation h2 {
+            font-size: 2rem;
+            color: #e8d5a8;
+            margin-bottom: 20px;
+            font-weight: 400;
+            letter-spacing: 3px;
+        }
+        .presentation p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #c4b898;
+            max-width: 800px;
+            margin: 0 auto 15px;
+        }
+        /* CARTES DEGRÉS */
+        .degres-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .carte-degre {
+            background: linear-gradient(145deg, #1a1410, #251e16);
+            border: 1px solid #3a2a1a;
+            border-radius: 12px;
+            padding: 25px 20px;
+            width: 280px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+        .carte-degre:hover {
+            transform: translateY(-4px);
+        }
+        .carte-degre h3 {
+            font-size: 1.4rem;
+            color: #e8d5a8;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3a2a1a;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+        .carte-degre h3 .lock {
+            font-size: 1.1rem;
+            margin-right: 8px;
+        }
+        .rubrique {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            color: #b8a888;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            cursor: default;
+        }
+        .rubrique.unlocked {
+            color: #e0d5c0;
+            cursor: pointer;
+        }
+        .rubrique.unlocked:hover {
+            background: #2a1f15;
+        }
+        .rubrique.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .rubrique .icon {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
+        }
+        /* PAGE HISTOIRE */
+        #page-histoire {
+            padding: 20px 0;
+        }
+        #page-histoire h2 {
+            font-size: 1.8rem;
+            color: #e8d5a8;
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #3a2a1a;
+            padding-bottom: 10px;
+        }
+        .histoire-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .histoire-texte {
+            flex: 2;
+            min-width: 300px;
+        }
+        .histoire-docs {
+            flex: 1;
+            min-width: 250px;
+            background: #15100d;
+            border: 1px solid #3a2a1a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .histoire-docs h3 {
+            color: #e8d5a8;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .doc-list {
+            list-style: none;
+        }
+        .doc-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a1f15;
+            font-size: 0.9rem;
+            color: #c4b898;
+        }
+        .doc-list li a {
+            color: #c4a97a;
+            text-decoration: none;
+        }
+        .doc-list li a:hover {
+            text-decoration: underline;
+        }
+        .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: 0.3s;
+            color: #aa4444;
+        }
+        .btn-delete:hover {
+            background: #3a1a1a;
+            color: #ff6666;
+        }
+        /* PAGE ARCHIVES */
+        #page-archives .degres-container {
+            /* on réutilise le style */
+        }
+        /* PAGE MEMBRES */
+        #page-membres {
+            padding: 20px 0;
+        }
+        #page-membres h2 {
+            font-size: 1.8rem;
+            color: #e8d5a8;
+            margin-bottom: 25px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #3a2a1a;
+            padding-bottom: 10px;
+        }
+        .membres-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .membre-card {
+            background: #15100d;
+            border: 1px solid #3a2a1a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .membre-card h4 {
+            color: #e8d5a8;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        .membre-card .role {
+            color: #a08060;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .membre-card .date {
+            color: #6a5a4a;
+            font-size: 0.75rem;
+            margin-top: 8px;
+        }
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: #1a1410;
+            border: 1px solid #5a3f28;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h3 {
+            color: #e8d5a8;
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .modal label {
+            display: block;
+            color: #c4b898;
+            margin: 12px 0 4px;
+            font-size: 0.9rem;
+        }
+        .modal input,
+        .modal textarea,
+        .modal select {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0b0a0a;
+            border: 1px solid #3a2a1a;
+            border-radius: 4px;
+            color: #e0d8c8;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+        .modal textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .modal .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .modal button {
+            padding: 8px 20px;
+            border: 1px solid #5a3f28;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            background: #2a1f15;
+            color: #c4a97a;
+        }
+        .modal button:hover {
+            background: #3a2a1a;
+            color: #f5e6c8;
+        }
+        .modal button.btn-primary {
+            background: #3a2a1a;
+            border-color: #8a6f3f;
+            color: #f5e6c8;
+        }
+        .modal button.btn-primary:hover {
+            background: #5a3f28;
+        }
+        .modal button.btn-danger {
+            background: #3a1a1a;
+            border-color: #8a3f3f;
+            color: #e8a0a0;
+        }
+        .modal button.btn-danger:hover {
+            background: #5a2a2a;
+        }
+        /* VISUALISEUR PLEIN ÉCRAN */
+        .viewer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .viewer-overlay.show {
+            display: flex;
+        }
+        .viewer-overlay img,
+        .viewer-overlay embed,
+        .viewer-overlay iframe {
+            max-width: 95%;
+            max-height: 95%;
+            border: none;
+            border-radius: 4px;
+        }
+        .viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: #fff;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 2001;
+        }
+        /* LOGIN MODAL */
+        #loginModal .modal {
+            max-width: 380px;
+        }
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #5a4a3a;
+            font-size: 0.8rem;
+            border-top: 1px solid #1a1410;
+            margin-top: 40px;
+        }
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .bandeau {
+                height: 180px;
+            }
+            .bandeau h1 {
+                font-size: 1.6rem;
+                padding: 8px 20px;
+                letter-spacing: 3px;
+            }
+            nav a {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .carte-degre {
+                width: 100%;
+                max-width: 320px;
+            }
+            .histoire-container {
+                flex-direction: column;
+            }
+            .degres-container {
+                gap: 16px;
+            }
+        }
+        /* ADMIN PANEL */
+        .admin-panel {
+            display: none;
+            background: #15100d;
+            border: 1px solid #5a3f28;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .admin-panel.show {
+            display: block;
+        }
+        .admin-panel h3 {
+            color: #e8d5a8;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .admin-panel textarea {
+            width: 100%;
+            min-height: 150px;
+            background: #0b0a0a;
+            border: 1px solid #3a2a1a;
+            border-radius: 4px;
+            color: #e0d8c8;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        .admin-panel .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .admin-panel .btn-group button {
+            padding: 8px 18px;
+            border: 1px solid #5a3f28;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            background: #2a1f15;
+            color: #c4a97a;
+        }
+        .admin-panel .btn-group button:hover {
+            background: #3a2a1a;
+            color: #f5e6c8;
+        }
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #2a1f15;
+            font-size: 0.9rem;
+            color: #c4b898;
+        }
+        .doc-item a {
+            color: #c4a97a;
+            text-decoration: none;
+        }
+        .doc-item a:hover {
+            text-decoration: underline;
+        }
+        .doc-item .doc-date {
+            color: #6a5a4a;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+        .login-error {
+            color: #e08080;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+        }
+        .histoire-admin-bar {
+            display: none;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .histoire-admin-bar.show {
+            display: flex;
+        }
+        .histoire-admin-bar button {
+            padding: 8px 18px;
+            border: 1px solid #5a3f28;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            background: #2a1f15;
+            color: #c4a97a;
+        }
+        .histoire-admin-bar button:hover {
+            background: #3a2a1a;
+            color: #f5e6c8;
+        }
+        .upload-section {
+            display: none;
+            background: #15100d;
+            border: 1px solid #3a2a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .upload-section.show {
+            display: block;
+        }
+        .upload-section input[type="file"] {
+            color: #e0d8c8;
+        }
+        .upload-section input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0b0a0a;
+            border: 1px solid #3a2a1a;
+            border-radius: 4px;
+            color: #e0d8c8;
+            font-family: inherit;
+            font-size: 0.9rem;
+            margin: 8px 0;
+        }
+        .upload-section .btn-group button {
+            padding: 8px 18px;
+            border: 1px solid #5a3f28;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            background: #2a1f15;
+            color: #c4a97a;
+            margin-right: 8px;
+            margin-top: 8px;
+        }
+        .upload-section .btn-group button:hover {
+            background: #3a2a1a;
+            color: #f5e6c8;
+        }
+        /* style Quill */
+        .ql-editor {
+            min-height: 200px;
+            color: #e0d8c8;
+        }
+        .ql-toolbar {
+            background: #1a1410;
+            border-color: #3a2a1a !important;
+        }
+        .ql-container {
+            background: #0b0a0a;
+            border-color: #3a2a1a !important;
+        }
+        .ql-editor.ql-blank::before {
+            color: #6a5a4a;
+        }
+        .ql-toolbar button .ql-stroke {
+            stroke: #c4a97a;
+        }
+        .ql-toolbar button .ql-fill {
+            fill: #c4a97a;
+        }
+        .ql-toolbar button:hover .ql-stroke {
+            stroke: #f5e6c8;
+        }
+        .ql-toolbar button:hover .ql-fill {
+            fill: #f5e6c8;
+        }
+        .ql-toolbar .ql-picker {
+            color: #c4a97a;
+        }
+        .ql-toolbar .ql-picker-options {
+            background: #1a1410;
+            border-color: #3a2a1a;
+        }
+        .ql-toolbar .ql-picker-item {
+            color: #e0d8c8;
+        }
+        .ql-toolbar .ql-picker-item:hover {
+            background: #2a1f15;
+        }
+        .ql-toolbar .ql-picker-label:hover {
+            color: #f5e6c8;
+        }
+    </style>
 </head>
 <body>
 
-  <div id="topBar">
-    <h1>★ <span>731</span> Archives · Étoile du Temple</h1>
-  </div>
+    <!-- BANDEAU -->
+    <header class="bandeau">
+        <h1>731 ARCHIVES</h1>
+        <div class="admin-zone">
+            <button id="btnLogin">Connexion Admin</button>
+            <button id="btnLogout" style="display:none;">Déconnexion</button>
+        </div>
+    </header>
 
-  <nav id="mainNav">
-    <a onclick="showPage('home')">Accueil</a>
-    <a onclick="showPage('history')">Histoire</a>
-    <a onclick="showPage('archives')">Archives</a>
-    <a onclick="showPage('media')">Photos & Vidéos</a>
-    <a onclick="showPage('members')">Membres</a>
-    <a onclick="showPage('login')" id="navLoginLink">Connexion</a>
-  </nav>
+    <!-- MENU -->
+    <nav id="mainNav">
+        <a href="#" data-page="accueil" class="active">Accueil</a>
+        <a href="#" data-page="histoire">Histoire</a>
+        <a href="#" data-page="archives">Archives</a>
+        <a href="#" data-page="membres">Membres</a>
+    </nav>
 
-  <div id="pageContent">
+    <!-- MAIN CONTENT -->
+    <div class="main">
 
-    <!-- ==================== ACCUEIL ==================== -->
-    <div id="homePage" class="page">
-      <h2>Bienvenue</h2>
-      <p>Bienvenue sur le site des archives de la Loge L'Étoile du Temple.</p>
-      <div id="homeRubriques"></div>
-      <div style="text-align:center;margin-top:15px;font-size:13px;color:#888;">
-        Connectez-vous pour accéder aux archives<br>
-        <small style="font-size:11px;color:#aaa;">Admin : RL731 / 08051956<br>Membres : mot de passe = date naissance JJMMAAAA</small>
-      </div>
+        <!-- PAGE ACCUEIL -->
+        <div id="page-accueil" class="page active">
+            <div class="presentation">
+                <h2>Archives de l'Étoile du Temple</h2>
+                <p>Bienvenue sur la plateforme des archives numériques de la Loge « L'Étoile du Temple ». Vous trouverez ici l'ensemble des textes, rituels, planches et orateurs classés par degré.</p>
+                <p>L'accès aux rubriques est déterminé par votre degré d'initiation.</p>
+            </div>
+            <div class="degres-container" id="homeDegres">
+                <!-- généré par JS -->
+            </div>
+        </div>
+
+        <!-- PAGE HISTOIRE -->
+        <div id="page-histoire" class="page">
+            <h2>Histoire de la Loge</h2>
+            <div class="histoire-admin-bar" id="histoireAdminBar">
+                <button onclick="editHistoire()">✏️ Modifier le texte</button>
+                <button onclick="document.querySelector('.upload-section').classList.toggle('show')">📎 Ajouter un document</button>
+            </div>
+            <div class="upload-section" id="histoireUploadSection">
+                <input type="file" id="histoireFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <input type="text" id="histoireDocTitle" placeholder="Titre du document">
+                <div class="btn-group">
+                    <button onclick="uploadHistoireDoc()">Téléverser</button>
+                    <button onclick="this.closest('.upload-section').classList.remove('show')">Annuler</button>
+                </div>
+            </div>
+            <div class="histoire-container">
+                <div class="histoire-texte" id="histoireTexte">
+                    <div id="histoireContent"></div>
+                </div>
+                <div class="histoire-docs">
+                    <h3>Documents</h3>
+                    <ul class="doc-list" id="histoireDocList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE ARCHIVES -->
+        <div id="page-archives" class="page">
+            <div class="degres-container" id="archivesDegres">
+                <!-- généré par JS -->
+            </div>
+        </div>
+
+        <!-- PAGE MEMBRES -->
+        <div id="page-membres" class="page">
+            <h2>Membres de la Loge</h2>
+            <div class="membres-list" id="membresList"></div>
+        </div>
+
     </div>
 
-    <!-- ==================== HISTOIRE ==================== -->
-    <div id="historyPage" class="page hidden">
-      <h2>Histoire de la Loge</h2>
-      <div id="historyContent"><p style="color:#888;font-size:13px;">Chargement...</p></div>
+    <footer>
+        © 2026 — Loge « L'Étoile du Temple » · Archives numériques
+    </footer>
+
+    <!-- MODAL LOGIN -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <h3>Connexion Administrateur</h3>
+            <label>Identifiant</label>
+            <input type="text" id="loginUser" placeholder="Identifiant">
+            <label>Mot de passe</label>
+            <input type="password" id="loginPass" placeholder="Mot de passe">
+            <div class="login-error" id="loginError">Identifiant ou mot de passe incorrect</div>
+            <div class="btn-group">
+                <button onclick="closeModal('loginModal')">Annuler</button>
+                <button class="btn-primary" onclick="doLogin()">Se connecter</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ==================== ARCHIVES ==================== -->
-    <div id="archivesPage" class="page hidden">
-      <h2>Archives documentaires</h2>
-      <div id="archivesContent"><p style="color:#888;font-size:13px;">Chargement...</p></div>
+    <!-- MODAL AJOUT / ÉDITION ARCHIVES -->
+    <div class="modal-overlay" id="archiveModal">
+        <div class="modal">
+            <h3 id="archiveModalTitle">Ajouter un document</h3>
+            <label>Degré</label>
+            <select id="archiveDegre">
+                <option value="apprenti">Apprenti</option>
+                <option value="compagnon">Compagnon</option>
+                <option value="maitre">Maître</option>
+            </select>
+            <label>Rubrique</label>
+            <select id="archiveRubrique">
+                <option value="rituels">📜 Rituels</option>
+                <option value="planches-apprenti">📝 Planches Apprenti</option>
+                <option value="planches-maitres1">📝 Planches Maîtres 1°</option>
+                <option value="orateur1">🎙 Orateur 1°</option>
+                <option value="planches-compagnon">📝 Planches Compagnon</option>
+                <option value="orateur2">🎙 Orateur 2°</option>
+                <option value="planches-maitres3">📝 Planches Maîtres 3°</option>
+                <option value="orateur3">🎙 Orateur 3°</option>
+            </select>
+            <label>Titre du document</label>
+            <input type="text" id="archiveTitle" placeholder="Titre">
+            <label>Fichier (PDF, image, doc)</label>
+            <input type="file" id="archiveFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+            <div class="btn-group">
+                <button onclick="closeModal('archiveModal')">Annuler</button>
+                <button class="btn-primary" onclick="saveArchiveDoc()">Ajouter</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ==================== PHOTOS & VIDEOS ==================== -->
-    <div id="mediaPage" class="page hidden">
-      <h2>Photos & Vidéos</h2>
-      <div id="mediaContent"><p style="color:#888;font-size:13px;">Connectez-vous pour voir les médias.</p></div>
+    <!-- MODAL AJOUT MEMBRE -->
+    <div class="modal-overlay" id="membreModal">
+        <div class="modal">
+            <h3>Ajouter un membre</h3>
+            <label>Nom</label>
+            <input type="text" id="membreNom" placeholder="Nom du membre">
+            <label>Rôle / Grade</label>
+            <input type="text" id="membreRole" placeholder="Ex: Vénérable Maître, Secrétaire...">
+            <label>Date d'entrée</label>
+            <input type="date" id="membreDate">
+            <div class="btn-group">
+                <button onclick="closeModal('membreModal')">Annuler</button>
+                <button class="btn-primary" onclick="saveMembre()">Ajouter</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ==================== MEMBRES ==================== -->
-    <div id="membersPage" class="page hidden">
-      <h2>Membres</h2>
-      <div id="membersContent"><p style="color:#888;font-size:13px;">Connectez-vous.</p></div>
+    <!-- MODAL CONFIRMATION SUPPRESSION -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>Confirmer la suppression</h3>
+            <p style="color:#c4b898;">Êtes-vous sûr de vouloir supprimer ce document ?</p>
+            <div class="btn-group">
+                <button onclick="closeModal('confirmModal')">Annuler</button>
+                <button class="btn-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ==================== CONNEXION ==================== -->
-    <div id="loginPage" class="page hidden">
-      <h2>Connexion</h2>
-      <div id="authBox">
-        <h3>Se connecter</h3>
-        <input type="text" id="loginId" placeholder="Identifiant">
-        <input type="password" id="loginPass" placeholder="Mot de passe">
-        <button onclick="doLogin()">Connexion</button>
-        <div id="loginMsg"></div>
-      </div>
+    <!-- VISUALISEUR PLEIN ÉCRAN -->
+    <div class="viewer-overlay" id="viewerOverlay">
+        <button class="viewer-close" onclick="closeViewer()">✕</button>
+        <div id="viewerContent"></div>
     </div>
 
-  </div>
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw82VFa3pb59qWwk4bq6w8lMY0dY-1z74",
+            authDomain: "archives-4bf4d.firebaseapp.com",
+            projectId: "archives-4bf4d",
+            storageBucket: "archives-4bf4d.appspot.com",
+            messagingSenderId: "359044894506",
+            appId: "1:359044894506:web:8696c53cd7e2935f87e39a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-  <footer>★ 731 Archives · Étoile du Temple ★</footer>
+        // ============================================================
+        // ÉTAT GLOBAL
+        // ============================================================
+        let currentUser = null; // { name, isAdmin, degre }
+        const ADMIN_USER = 'RL731';
+        const ADMIN_PASS = '08051956';
 
-  <!-- ===== VIEWER OVERLAY ===== -->
-  <div id="viewerOverlay" onclick="closeViewer()">
-    <div id="viewerClose" onclick="closeViewer();event.stopPropagation();">&times;</div>
-    <div id="viewerContent"></div>
-  </div>
-
-  <script>
-    // ============================================================
-    // CONFIG
-    // ============================================================
-    var ssR = {
-      'rituels1':{icon:'📜',label:'Rituels 1°',grade:1},
-      'rituels2':{icon:'📜',label:'Rituels 2°',grade:2},
-      'rituels3':{icon:'📜',label:'Rituels 3°',grade:3},
-      'planches-apprenti':{icon:'📝',label:'Planches Apprenti',grade:1},
-      'planches-compagnon':{icon:'📝',label:'Planches Compagnon',grade:2},
-      'planches-maitres1':{icon:'📝',label:'Planches Maîtres 1°',grade:1},
-      'planches-maitres3':{icon:'📝',label:'Planches Maîtres 3°',grade:3},
-      'orateur1':{icon:'🎙',label:'Orateur 1°',grade:1},
-      'orateur2':{icon:'🎙',label:'Orateur 2°',grade:2},
-      'orateur3':{icon:'🎙',label:'Orateur 3°',grade:3}
-    };
-
-    var gradeNames = ['','Apprenti','Compagnon','Maître'];
-    var gradeClasses = ['','apprenti','compagnon','maitre'];
-
-    // ============================================================
-    // FIREBASE INIT
-    // ============================================================
-    var firebaseConfig = {
-      apiKey: "AIzaSyBwn4w8my9tCnB_LK1xR6HZk2g58QpHxdc",
-      authDomain: "archives-4bf4d.firebaseapp.com",
-      projectId: "archives-4bf4d",
-      storageBucket: "archives-4bf4d.firebasestorage.app",
-      messagingSenderId: "481170680082",
-      appId: "1:481170680082:web:37e5db9e02869c0049fca9"
-    };
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
-    var auth = firebase.auth();
-
-    // ============================================================
-    // STATE
-    // ============================================================
-    var currentUser = null; // {id, nom, grade, isAdmin}
-    var currentPage = 'home';
-    var currentSub = null; // sous-rubrique sélectionnée dans Archives
-
-    // ============================================================
-    // UTILITY
-    // ============================================================
-    function $(id){return document.getElementById(id);}
-
-    function esc(str){
-      var d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
-
-    // ============================================================
-    // DELETE HISTORY DOCUMENT (admin)
-    // ============================================================
-    function deleteHistoryDoc(docId){
-      if(!currentUser || !currentUser.isAdmin){
-        alert('Action non autorisée.');
-        return;
-      }
-      if(!confirm('Supprimer ce document ? Cette action est irréversible.')) return;
-      db.collection('histoire_documents').doc(docId).delete()
-        .then(function(){
-          loadHistoryDocs();
-        })
-        .catch(function(e){
-          alert('Erreur lors de la suppression : '+e.message);
-        });
-    }
-
-    // ============================================================
-    // DELETE ARCHIVE DOCUMENT (admin)
-    // ============================================================
-    function deleteArchiveDoc(docId){
-      if(!currentUser || !currentUser.isAdmin){
-        alert('Action non autorisée.');
-        return;
-      }
-      if(!confirm('Supprimer ce document ? Cette action est irréversible.')) return;
-      db.collection('documents').doc(docId).delete()
-        .then(function(){
-          if(currentSub) renderDocs();
-          else renderArchives();
-        })
-        .catch(function(e){
-          alert('Erreur lors de la suppression : '+e.message);
-        });
-    }
-
-    // ============================================================
-    // DELETE MEMBER (admin)
-    // ============================================================
-    function deleteMember(userId){
-      if(!currentUser || !currentUser.isAdmin){
-        alert('Action non autorisée.');
-        return;
-      }
-      if(!confirm('Supprimer ce membre ? Cette action est irréversible.')) return;
-      db.collection('users').doc(userId).delete()
-        .then(function(){
-          loadMembers();
-        })
-        .catch(function(e){
-          alert('Erreur : '+e.message);
-        });
-    }
-
-    // ============================================================
-    // AUTH STATE
-    // ============================================================
-    auth.onAuthStateChanged(function(user){
-      if(user){
-        db.collection('users').doc(user.uid).get()
-          .then(function(doc){
-            if(doc.exists){
-              var d = doc.data();
-              currentUser = {
-                id: user.uid,
-                nom: d.nom || 'Membre',
-                grade: d.grade || 1,
-                isAdmin: d.isAdmin || false
-              };
-              updateUI();
-            } else {
-              // utilisateur connecté mais pas dans la BD -> on crée si email admin
-              if(user.email === 'rl731archives@gmail.com'){
-                currentUser = {
-                  id: user.uid,
-                  nom: 'RL731',
-                  grade: 3,
-                  isAdmin: true
-                };
-                db.collection('users').doc(user.uid).set({
-                  nom:'RL731',
-                  grade:3,
-                  isAdmin:true
-                }).catch(function(e){});
-                updateUI();
-              } else {
-                currentUser = {id:user.uid, nom:'Membre', grade:1, isAdmin:false};
-                updateUI();
-              }
-            }
-          })
-          .catch(function(e){
-            console.log('Erreur chargement user:', e);
-            showPage('home');
-          });
-      } else {
-        currentUser = null;
-        currentSub = null;
-        updateUI();
-      }
-    });
-
-    // ============================================================
-    // UPDATE UI
-    // ============================================================
-    function updateUI(){
-      var link = $('navLoginLink');
-      if(currentUser){
-        link.textContent = 'Déconnexion ['+currentUser.nom+']';
-        link.onclick = function(){doLogout();};
-      } else {
-        link.textContent = 'Connexion';
-        link.onclick = function(){showPage('login');};
-      }
-      // Recharger la page courante
-      showPage(currentPage);
-    }
-
-    // ============================================================
-    // LOGIN / LOGOUT
-    // ============================================================
-    function doLogin(){
-      var id = $('loginId').value.trim();
-      var pass = $('loginPass').value.trim();
-      var msg = $('loginMsg');
-      msg.innerHTML = '';
-      if(!id || !pass){ msg.innerHTML = '<div class="error">Veuillez remplir tous les champs.</div>'; return; }
-
-      // Admin spécial: RL731 / 08051956
-      if(id === 'RL731' && pass === '08051956'){
-        auth.signInWithEmailAndPassword('rl731archives@gmail.com', pass)
-          .then(function(){
-            msg.innerHTML = '<div class="success">Connexion admin réussie.</div>';
-            $('loginId').value = '';
-            $('loginPass').value = '';
-            showPage('home');
-          })
-          .catch(function(e){
-            if(e.code === 'auth/user-not-found'){
-              auth.createUserWithEmailAndPassword('rl731archives@gmail.com', pass)
-                .then(function(cred){
-                  return db.collection('users').doc(cred.user.uid).set({
-                    nom:'RL731', grade:3, isAdmin:true
-                  });
-                })
-                .then(function(){
-                  msg.innerHTML = '<div class="success">Compte admin créé.</div>';
-                  $('loginId').value = '';
-                  $('loginPass').value = '';
-                  showPage('home');
-                })
-                .catch(function(e2){
-                  msg.innerHTML = '<div class="error">Erreur: '+e2.message+'</div>';
-                });
-            } else {
-              msg.innerHTML = '<div class="error">Erreur: '+e.message+'</div>';
-            }
-          });
-        return;
-      }
-
-      // Membre normal
-      db.collection('users').where('nom','==',id).get()
-        .then(function(snap){
-          if(snap.empty){
-            msg.innerHTML = '<div class="error">Identifiant inconnu.</div>';
-            return;
-          }
-          var doc = snap.docs[0];
-          var data = doc.data();
-          // Vérifier mot de passe = date naissance
-          var dateNaissance = data.dateNaissance || '';
-          var cleanPass = dateNaissance.replace(/\//g,'');
-          if(cleanPass !== pass){
-            msg.innerHTML = '<div class="error">Mot de passe incorrect.</div>';
-            return;
-          }
-          auth.signInAnonymously()
-            .then(function(cred){
-              currentUser = {
-                id: cred.user.uid,
-                nom: data.nom,
-                grade: data.grade || 1,
-                isAdmin: false
-              };
-              updateUI();
-              msg.innerHTML = '<div class="success">Connexion réussie.</div>';
-              $('loginId').value = '';
-              $('loginPass').value = '';
-            })
-            .catch(function(e){
-              msg.innerHTML = '<div class="error">Erreur: '+e.message+'</div>';
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        document.querySelectorAll('nav a').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.dataset.page;
+                document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + page).classList.add('active');
+                if (page === 'accueil') renderHomeDegres();
+                if (page === 'archives') renderArchives();
+                if (page === 'histoire') loadHistoire();
+                if (page === 'membres') loadMembres();
             });
-        })
-        .catch(function(e){
-          msg.innerHTML = '<div class="error">Erreur: '+e.message+'</div>';
         });
-    }
 
-    function doLogout(){
-      currentUser = null;
-      currentSub = null;
-      auth.signOut();
-      showPage('home');
-    }
-
-    // ============================================================
-    // SHOW PAGE
-    // ============================================================
-    function showPage(page){
-      // Cacher toutes les pages
-      var pages = document.querySelectorAll('.page');
-      for(var i=0;i<pages.length;i++) pages[i].classList.add('hidden');
-      currentPage = page;
-
-      // Nav active
-      var links = document.querySelectorAll('#mainNav a');
-      for(var i=0;i<links.length;i++) links[i].classList.remove('active');
-      var navMap = {home:0, history:1, archives:2, media:3, members:4, login:5};
-      var idx = navMap[page];
-      if(idx !== undefined && links[idx]) links[idx].classList.add('active');
-
-      if(page === 'home'){ $('homePage').classList.remove('hidden'); showHome(); }
-      else if(page === 'history'){ $('historyPage').classList.remove('hidden'); loadHistoryDocs(); }
-      else if(page === 'archives'){ $('archivesPage').classList.remove('hidden'); currentSub=null; renderArchives(); }
-      else if(page === 'media'){ $('mediaPage').classList.remove('hidden'); loadMedia(); }
-      else if(page === 'members'){ $('membersPage').classList.remove('hidden'); loadMembers(); }
-      else if(page === 'login'){ $('loginPage').classList.remove('hidden'); }
-    }
-
-    // ============================================================
-    // HOME
-    // ============================================================
-    function showHome(){
-      var c = $('homeRubriques');
-      if(!c) return;
-      var niveaux = [
-        {n:1, label:'APPRENTI', cl:'apprenti', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
-        {n:2, label:'COMPAGNON', cl:'compagnon', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
-        {n:3, label:'MAÎTRE', cl:'maitre', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
-      ];
-      var h = '<div class="cards">';
-      for(var i=0;i<niveaux.length;i++){
-        var niv = niveaux[i];
-        if(currentUser && currentUser.grade < niv.n) continue;
-        h += '<div class="card '+niv.cl+'">';
-        h += '<h3>'+niv.label+'</h3>';
-        h += '<div class="lock">🔒</div>';
-        h += '<ul>';
-        for(var j=0;j<niv.subs.length;j++){
-          var sk = niv.subs[j];
-          var s = ssR[sk];
-          if(!s) continue;
-          var access = (currentUser && currentUser.grade >= s.grade);
-          h += '<li onclick="'+(access?"showPage('archives');selectSubDirect('"+sk+"')":'')+'" style="'+(access?'':'pointer-events:none;opacity:0.4')+'"><span class="emoji-icon">'+s.icon+'</span>'+s.label+'</li>';
-        }
-        h += '</ul></div>';
-      }
-      h += '</div>';
-      c.innerHTML = h;
-    }
-
-    // ============================================================
-    // SELECT SUB DIRECT
-    // ============================================================
-    function selectSubDirect(key){
-      currentSub = key;
-      renderArchives();
-    }
-
-    // ============================================================
-    // LOAD HISTORY DOCS
-    // ============================================================
-    function loadHistoryDocs(){
-      var c = $('historyContent');
-      c.innerHTML = '<p class="loading">Chargement...</p>';
-
-      db.collection('histoire_documents').orderBy('date','desc').get()
-        .then(function(snap){
-          if(snap.empty){
-            c.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Aucun document pour le moment.</p>';
-            return;
-          }
-          var docs = [];
-          snap.forEach(function(doc){
-            docs.push({id: doc.id, data: doc.data()});
-          });
-
-          if(currentUser && currentUser.isAdmin){
-            displayAdminHistoryDocs(c, docs);
-          } else {
-            displayPublicHistoryDocs(c, docs);
-          }
-        })
-        .catch(function(e){
-          c.innerHTML = '<p style="color:#c00;">Erreur chargement: '+e.message+'</p>';
+        // ============================================================
+        // LOGIN / LOGOUT
+        // ============================================================
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            openModal('loginModal');
         });
-    }
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            currentUser = null;
+            updateUI();
+        });
 
-    // ============================================================
-    // DISPLAY ADMIN HISTORY DOCS (avec bouton Supprimer)
-    // ============================================================
-    function displayAdminHistoryDocs(c, docs){
-      var h = '';
-      // Ajouter la boîte d'upload en haut (admin seulement)
-      h += '<div class="admin-upload-box">';
-      h += '<h4>📤 Ajouter un document à l\'Histoire</h4>';
-      h += '<input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.txt" style="margin-bottom:6px;">';
-      h += '<br><button onclick="uploadHistoryDoc()">Téléverser</button>';
-      h += '<div class="info-text">Formats acceptés : PDF, images, Word, texte (max 10 Mo)</div>';
-      h += '</div>';
-
-      h += '<div id="historyDocsList">';
-      for(var i=0;i<docs.length;i++){
-        var d = docs[i];
-        var data = d.data;
-        var lien = '';
-        var type = data.type || 'document';
-        var nom = data.nom || 'Document';
-        if(data.url){
-          lien = '<a href="'+esc(data.url)+'" target="_blank">📄 '+esc(nom)+'</a>';
-        } else if(data.dataURL){
-          // Afficher selon le type
-          if(type.indexOf('image')!==-1 || type.indexOf('png')!==-1 || type.indexOf('jpg')!==-1 || type.indexOf('jpeg')!==-1 || type.indexOf('gif')!==-1){
-            lien = '<img src="'+data.dataURL+'" style="max-width:150px;max-height:150px;cursor:pointer;border-radius:4px;" onclick="openViewer(\''+data.dataURL+'\',\'image\')">';
-          } else {
-            lien = '<button class="doc-btn" onclick="openViewer(\''+data.dataURL+'\',\'iframe\')">📄 Voir '+esc(nom)+'</button>';
-          }
-        } else {
-          lien = esc(nom);
-        }
-        var dateStr = '';
-        if(data.date){
-          var dt = data.date.toDate ? data.date.toDate() : new Date(data.date);
-          dateStr = dt.toLocaleDateString('fr-FR');
+        function doLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                currentUser = { name: user, isAdmin: true, degre: 'maitre' };
+                document.getElementById('loginError').style.display = 'none';
+                closeModal('loginModal');
+                // Re-render les pages
+                renderHomeDegres();
+                renderArchives();
+                loadHistoire();
+                loadMembres();
+                updateUI();
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPass').value = '';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
         }
 
-        h += '<div class="histo-doc">';
-        h += '<p>'+lien+'</p>';
-        h += '<p style="font-size:12px;color:#888;">Ajouté le '+dateStr+'</p>';
-        h += '<div class="actions">';
-        h += '<button class="btn-delete" onclick="deleteHistoryDoc(\''+d.id+'\')">🗑 Supprimer</button>';
-        h += '</div></div>';
-      }
-      h += '</div>';
-      c.innerHTML = h;
-    }
-
-    // ============================================================
-    // DISPLAY PUBLIC HISTORY DOCS
-    // ============================================================
-    function displayPublicHistoryDocs(c, docs){
-      var h = '<div id="historyDocsList">';
-      for(var i=0;i<docs.length;i++){
-        var d = docs[i];
-        var data = d.data;
-        var lien = '';
-        var nom = data.nom || 'Document';
-        if(data.url){
-          lien = '<a href="'+esc(data.url)+'" target="_blank">📄 '+esc(nom)+'</a>';
-        } else if(data.dataURL){
-          if(data.type && (data.type.indexOf('image')!==-1 || data.type.indexOf('png')!==-1 || data.type.indexOf('jpg')!==-1 || data.type.indexOf('jpeg')!==-1 || data.type.indexOf('gif')!==-1)){
-            lien = '<img src="'+data.dataURL+'" style="max-width:150px;max-height:150px;cursor:pointer;border-radius:4px;" onclick="openViewer(\''+data.dataURL+'\',\'image\')">';
-          } else {
-            lien = '<button class="doc-btn" onclick="openViewer(\''+data.dataURL+'\',\'iframe\')">📄 Voir '+esc(nom)+'</button>';
-          }
-        } else {
-          lien = esc(nom);
+        function updateUI() {
+            const isAdmin = currentUser && currentUser.isAdmin;
+            document.getElementById('btnLogin').style.display = isAdmin ? 'none' : 'inline-block';
+            document.getElementById('btnLogout').style.display = isAdmin ? 'inline-block' : 'none';
+            // Admin bar
+            const bar = document.getElementById('histoireAdminBar');
+            if (bar) {
+                if (isAdmin) bar.classList.add('show');
+                else bar.classList.remove('show');
+            }
+            // upload section
+            const upload = document.querySelector('.upload-section');
+            if (upload && !isAdmin) upload.classList.remove('show');
         }
-        var dateStr = '';
-        if(data.date){
-          var dt = data.date.toDate ? data.date.toDate() : new Date(data.date);
-          dateStr = dt.toLocaleDateString('fr-FR');
+
+        // ============================================================
+        // MODALS
+        // ============================================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
         }
-        h += '<div class="histo-doc"><p>'+lien+'</p><p style="font-size:12px;color:#888;">Ajouté le '+dateStr+'</p></div>';
-      }
-      h += '</div>';
-      c.innerHTML = h;
-    }
 
-    // ============================================================
-    // UPLOAD HISTORY DOC (admin)
-    // ============================================================
-    function uploadHistoryDoc(){
-      if(!currentUser || !currentUser.isAdmin){ alert('Action non autorisée.'); return; }
-      var input = $('historyFileInput');
-      if(!input.files || input.files.length===0){ alert('Veuillez sélectionner un fichier.'); return; }
-      var file = input.files[0];
-      if(file.size > 10*1024*1024){ alert('Fichier trop volumineux (max 10 Mo).'); return; }
-      var reader = new FileReader();
-      reader.onload = function(e){
-        var dataURL = e.target.result;
-        var type = file.type || 'application/octet-stream';
-        var nom = file.name;
-        db.collection('histoire_documents').add({
-          nom: nom,
-          dataURL: dataURL,
-          type: type,
-          date: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(function(){
-          input.value = '';
-          loadHistoryDocs();
-        })
-        .catch(function(e2){ alert('Erreur upload: '+e2.message); });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ============================================================
-    // RENDER ARCHIVES (collection "documents")
-    // ============================================================
-    function renderArchives(){
-      var c = $('archivesContent');
-      if(!currentUser){
-        c.innerHTML = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</p>';
-        return;
-      }
-
-      if(currentSub){
-        renderDocs();
-        return;
-      }
-
-      // Affichage comme l'accueil : 3 cartes avec listes et icônes
-      var niveaux = [
-        {n:1, label:'APPRENTI', cl:'apprenti', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1']},
-        {n:2, label:'COMPAGNON', cl:'compagnon', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2']},
-        {n:3, label:'MAÎTRE', cl:'maitre', subs:['rituels1','planches-apprenti','planches-maitres1','orateur1','rituels2','planches-compagnon','orateur2','rituels3','planches-maitres3','orateur3']}
-      ];
-
-      var h = '<div class="cards">';
-      for(var i=0;i<niveaux.length;i++){
-        var niv = niveaux[i];
-        if(currentUser.grade < niv.n) continue;
-        h += '<div class="card '+niv.cl+'">';
-        h += '<h3>'+niv.label+'</h3>';
-        h += '<div class="lock">🔒</div>';
-        h += '<ul class="sub-list">';
-        for(var j=0;j<niv.subs.length;j++){
-          var sk = niv.subs[j];
-          var s = ssR[sk];
-          if(!s) continue;
-          var access = (currentUser.grade >= s.grade);
-          h += '<li onclick="'+(access?"selectSubDirect('"+sk+"')":'')+'" style="'+(access?'':'pointer-events:none;opacity:0.4;cursor:not-allowed')+'">';
-          h += '<span class="emoji-icon">'+s.icon+'</span> '+s.label;
-          h += '</li>';
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
         }
-        h += '</ul></div>';
-      }
-      h += '</div>';
+        // Fermer modal au clic sur fond
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
 
-      if(!h || h === '<div class="cards"></div>'){
-        h = '<p style="font-size:13px;color:#666;padding:20px;text-align:center">Aucune rubrique disponible pour votre grade.</p>';
-      }
-      c.innerHTML = h;
-    }
+        // ============================================================
+        // CONFIG DES DEGRÉS ET RUBRIQUES
+        // ============================================================
+        const DEGRES = [{
+            id: 'apprenti',
+            label: 'APPRENTI',
+            icon: '🔒',
+            rubriques: [
+                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
+                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
+                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
+                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' }
+            ]
+        }, {
+            id: 'compagnon',
+            label: 'COMPAGNON',
+            icon: '🔒',
+            rubriques: [
+                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
+                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
+                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
+                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' },
+                { id: 'rituels2', icon: '📜', label: 'Rituels 2°' },
+                { id: 'planches-compagnon', icon: '📝', label: 'Planches Compagnon' },
+                { id: 'orateur2', icon: '🎙', label: 'Orateur 2°' }
+            ]
+        }, {
+            id: 'maitre',
+            label: 'MAÎTRE',
+            icon: '🔒',
+            rubriques: [
+                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
+                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
+                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
+                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' },
+                { id: 'rituels2', icon: '📜', label: 'Rituels 2°' },
+                { id: 'planches-compagnon', icon: '📝', label: 'Planches Compagnon' },
+                { id: 'orateur2', icon: '🎙', label: 'Orateur 2°' },
+                { id: 'rituels3', icon: '📜', label: 'Rituels 3°' },
+                { id: 'planches-maitres3', icon: '📝', label: 'Planches Maîtres 3°' },
+                { id: 'orateur3', icon: '🎙', label: 'Orateur 3°' }
+            ]
+        }];
 
-    // ============================================================
-    // RENDER DOCS (documents d'une sous-rubrique) - avec bouton Supprimer pour admin
-    // ============================================================
-    function renderDocs(){
-      var c = $('archivesContent');
-      if(!currentUser || !currentSub){
+        const RUBRIQUE_LABELS = {
+            'rituels1': '📜 Rituels 1°',
+            'planches-apprenti': '📝 Planches Apprenti',
+            'planches-maitres1': '📝 Planches Maîtres 1°',
+            'orateur1': '🎙 Orateur 1°',
+            'rituels2': '📜 Rituels 2°',
+            'planches-compagnon': '📝 Planches Compagnon',
+            'orateur2': '🎙 Orateur 2°',
+            'rituels3': '📜 Rituels 3°',
+            'planches-maitres3': '📝 Planches Maîtres 3°',
+            'orateur3': '🎙 Orateur 3°'
+        };
+
+        // ============================================================
+        // ACCUEIL — CARTES DEGRÉS
+        // ============================================================
+        function renderHomeDegres() {
+            const container = document.getElementById('homeDegres');
+            container.innerHTML = '';
+            const degreUser = currentUser ? currentUser.degre : null;
+            DEGRES.forEach(deg => {
+                const isUnlocked = degreUser === deg.id ||
+                    (degreUser === 'compagnon' && (deg.id === 'apprenti' || deg.id === 'compagnon')) ||
+                    (degreUser === 'maitre');
+                const card = document.createElement('div');
+                card.className = 'carte-degre';
+                card.innerHTML = `
+                    <h3>${isUnlocked ? '' : '🔒 '}${deg.label}</h3>
+                    ${deg.rubriques.map(r => `
+                        <div class="rubrique ${isUnlocked ? 'unlocked' : 'locked'}">
+                            <span class="icon">${r.icon}</span>
+                            <span>${r.label}</span>
+                        </div>
+                    `).join('')}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ============================================================
+        // HISTOIRE
+        // ============================================================
+        async function loadHistoire() {
+            const contentDiv = document.getElementById('histoireContent');
+            const listDiv = document.getElementById('histoireDocList');
+            try {
+                const doc = await db.collection('histoire').doc('contenu').get();
+                if (doc.exists) {
+                    contentDiv.innerHTML = doc.data().texte || '<p style="color:#6a5a4a;">Texte en cours de rédaction...</p>';
+                } else {
+                    contentDiv.innerHTML = '<p style="color:#6a5a4a;">Texte en cours de rédaction...</p>';
+                }
+                // Charger les documents
+                const snap = await db.collection('histoire').doc('documents').collection('files')
+                    .orderBy('date', 'desc').get();
+                listDiv.innerHTML = '';
+                if (snap.empty) {
+                    listDiv.innerHTML = '<li style="color:#6a5a4a;">Aucun document pour le moment.</li>';
+                    return;
+                }
+                snap.forEach(d => {
+                    const data = d.data();
+                    const li = document.createElement('li');
+                    const isAdmin = currentUser && currentUser.isAdmin;
+                    const dateStr = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString(
+                    'fr-FR') : '';
+                    li.innerHTML = `
+                        <a href="${data.url}" target="_blank">${data.title || 'Sans titre'}</a>
+                        <span style="display:flex;align-items:center;gap:8px;">
+                            ${dateStr ? `<span class="doc-date">${dateStr}</span>` : ''}
+                            ${isAdmin ? `<button class="btn-delete" onclick="deleteHistoireDoc('${d.id}')" title="Supprimer">🗑</button>` : ''}
+                        </span>
+                    `;
+                    listDiv.appendChild(li);
+                });
+            } catch (e) {
+                console.error('Erreur chargement histoire:', e);
+                contentDiv.innerHTML = '<p style="color:#a06060;">Erreur de chargement.</p>';
+            }
+        }
+
+        async function editHistoire() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            const contentDiv = document.getElementById('histoireContent');
+            const currentText = contentDiv.innerHTML;
+            const newText = prompt('Modifier le texte de l\'histoire :', currentText.replace(/<br\s*\/?>/g, '\n')
+                .replace(/<[^>]*>/g, ''));
+            if (newText && newText !== currentText.replace(/<br\s*\/?>/g, '\n').replace(/<[^>]*>/g, '')) {
+                try {
+                    await db.collection('histoire').doc('contenu').set({
+                        texte: newText.replace(/\n/g, '<br>')
+                    });
+                    loadHistoire();
+                } catch (e) {
+                    alert('Erreur lors de la sauvegarde.');
+                }
+            }
+        }
+
+        async function uploadHistoireDoc() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            const fileInput = document.getElementById('histoireFileInput');
+            const titleInput = document.getElementById('histoireDocTitle');
+            const file = fileInput.files[0];
+            const title = titleInput.value.trim() || 'Document';
+            if (!file) { alert('Veuillez sélectionner un fichier.'); return; }
+            try {
+                const ref = storage.ref('histoire/documents/' + Date.now() + '_' + file.name);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+                await db.collection('histoire').doc('documents').collection('files').add({
+                    title: title,
+                    url: url,
+                    date: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                fileInput.value = '';
+                titleInput.value = '';
+                document.querySelector('.upload-section').classList.remove('show');
+                loadHistoire();
+            } catch (e) {
+                alert('Erreur upload: ' + e.message);
+            }
+        }
+
+        async function deleteHistoireDoc(docId) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Supprimer ce document ?')) return;
+            try {
+                await db.collection('histoire').doc('documents').collection('files').doc(docId).delete();
+                loadHistoire();
+            } catch (e) {
+                alert('Erreur suppression: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // ARCHIVES — DOCUMENTS
+        // ============================================================
+        async function renderArchives() {
+            const container = document.getElementById('archivesDegres');
+            container.innerHTML = '';
+            const degreUser = currentUser ? currentUser.degre : null;
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            for (const deg of DEGRES) {
+                const isUnlocked = degreUser === deg.id ||
+                    (degreUser === 'compagnon' && (deg.id === 'apprenti' || deg.id === 'compagnon')) ||
+                    (degreUser === 'maitre') || isAdmin;
+
+                const card = document.createElement('div');
+                card.className = 'carte-degre';
+                let rubriquesHtml = '';
+                for (const rub of deg.rubriques) {
+                    let docsHtml = '';
+                    try {
+                        const snap = await db.collection('archives')
+                            .where('degre', '==', deg.id)
+                            .where('rubrique', '==', rub.id)
+                            .orderBy('date', 'desc')
+                            .get();
+                        if (!snap.empty) {
+                            snap.forEach(d => {
+                                const data = d.data();
+                                const dateStr = data.date ? new Date(data.date.seconds * 1000)
+                                    .toLocaleDateString('fr-FR') : '';
+                                docsHtml += `<div class="doc-item">
+                                    <div>
+                                        <a href="${data.url}" target="_blank">${data.title || 'Sans titre'}</a>
+                                        ${dateStr ? `<span class="doc-date">${dateStr}</span>` : ''}
+                                    </div>
+                                    ${isAdmin ? `<button class="btn-delete" onclick="deleteArchiveDoc('${d.id}')" title="Supprimer">🗑</button>` : ''}
+                                </div>`;
+                            });
+                        } else {
+                            docsHtml =
+                            `<div class="doc-item" style="color:#6a5a4a;font-size:0.85rem;">Aucun document</div>`;
+                        }
+                    } catch (e) {
+                        docsHtml = `<div class="doc-item" style="color:#a06060;">Erreur chargement</div>`;
+                    }
+                    rubriquesHtml += `
+                        <div class="rubrique ${isUnlocked ? 'unlocked' : 'locked'}">
+                            <span class="icon">${rub.icon}</span>
+                            <span>${rub.label}</span>
+                        </div>
+                        ${isUnlocked ? docsHtml : ''}
+                    `;
+                }
+                card.innerHTML = `
+                    <h3>${isUnlocked ? '' : '🔒 '}${deg.label}</h3>
+                    ${rubriquesHtml}
+                    ${isAdmin ? `<div style="margin-top:15px;text-align:center;"><button onclick="openArchiveModal('${deg.id}')" style="padding:6px 14px;border:1px solid #5a3f28;border-radius:4px;cursor:pointer;background:#2a1f15;color:#c4a97a;">+ Ajouter un document</button></div>` : ''}
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        let archiveModalDegre = 'apprenti';
+
+        function openArchiveModal(degre) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            archiveModalDegre = degre;
+            document.getElementById('archiveDegre').value = degre;
+            document.getElementById('archiveModalTitle').textContent = 'Ajouter un document — ' + degre
+            .charAt(0).toUpperCase() + degre.slice(1);
+            openModal('archiveModal');
+        }
+
+        async function saveArchiveDoc() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            const degre = document.getElementById('archiveDegre').value;
+            const rubrique = document.getElementById('archiveRubrique').value;
+            const title = document.getElementById('archiveTitle').value.trim() || 'Document';
+            const fileInput = document.getElementById('archiveFile');
+            const file = fileInput.files[0];
+            if (!file) { alert('Veuillez sélectionner un fichier.'); return; }
+            try {
+                const ref = storage.ref('archives/' + Date.now() + '_' + file.name);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+                await db.collection('archives').add({
+                    degre: degre,
+                    rubrique: rubrique,
+                    title: title,
+                    url: url,
+                    date: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                fileInput.value = '';
+                document.getElementById('archiveTitle').value = '';
+                closeModal('archiveModal');
+                renderArchives();
+            } catch (e) {
+                alert('Erreur: ' + e.message);
+            }
+        }
+
+        async function deleteArchiveDoc(docId) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Supprimer ce document ?')) return;
+            try {
+                await db.collection('archives').doc(docId).delete();
+                renderArchives();
+            } catch (e) {
+                alert('Erreur suppression: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // MEMBRES
+        // ============================================================
+        async function loadMembres() {
+            const container = document.getElementById('membresList');
+            container.innerHTML = '';
+            const isAdmin = currentUser && currentUser.isAdmin;
+            try {
+                const snap = await db.collection('membres').orderBy('date', 'desc').get();
+                if (snap.empty) {
+                    container.innerHTML = '<p style="color:#6a5a4a;grid-column:1/-1;text-align:center;">Aucun membre pour le moment.</p>';
+                    return;
+                }
+                snap.forEach(d => {
+                    const data = d.data();
+                    const dateStr = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString(
+                    'fr-FR') : '';
+                    const card = document.createElement('div');
+                    card.className = 'membre-card';
+                    card.innerHTML = `
+                        <h4>${data.nom || 'Anonyme'}</h4>
+                        <div class="role">${data.role || 'Membre'}</div>
+                        ${dateStr ? `<div class="date">Entré le ${dateStr}</div>` : ''}
+                        ${isAdmin ? `<button class="btn-delete" onclick="deleteMembre('${d.id}')" style="margin-top:10px;" title="Supprimer">🗑</button>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+                if (isAdmin) {
+                    const addBtn = document.createElement('div');
+                    addBtn.style.cssText =
+                        'grid-column:1/-1;text-align:center;margin-top:10px;';
+                    addBtn.innerHTML =
+                        '<button onclick="openModal(\'membreModal\')" style="padding:10px 24px;border:1px solid #5a3f28;border-radius:4px;cursor:pointer;background:#2a1f15;color:#c4a97a;">+ Ajouter un membre</button>';
+                    container.appendChild(addBtn);
+                }
+            } catch (e) {
+                container.innerHTML = '<p style="color:#a06060;">Erreur de chargement des membres.</p>';
+            }
+        }
+
+        async function saveMembre() {
+            if (!currentUser || !currentUser.isAdmin) return;
+            const nom = document.getElementById('membreNom').value.trim();
+            const role = document.getElementById('membreRole').value.trim();
+            const date = document.getElementById('membreDate').value;
+            if (!nom) { alert('Veuillez entrer un nom.'); return; }
+            try {
+                await db.collection('membres').add({
+                    nom: nom,
+                    role: role || 'Membre',
+                    date: date ? new Date(date) : firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('membreNom').value = '';
+                document.getElementById('membreRole').value = '';
+                document.getElementById('membreDate').value = '';
+                closeModal('membreModal');
+                loadMembres();
+            } catch (e) {
+                alert('Erreur: ' + e.message);
+            }
+        }
+
+        async function deleteMembre(docId) {
+            if (!currentUser || !currentUser.isAdmin) return;
+            if (!confirm('Supprimer ce membre ?')) return;
+            try {
+                await db.collection('membres').doc(docId).delete();
+                loadMembres();
+            } catch (e) {
+                alert('Erreur: ' + e.message);
+            }
+        }
+
+        // ============================================================
+        // VISUALISEUR PLEIN ÉCRAN
+        // ============================================================
+        function openViewer(url) {
+            const overlay = document.getElementById('viewerOverlay');
+            const content = document.getElementById('viewerContent');
+            overlay.classList.add('show');
+            if (url.match(/\.(png|jpg|jpeg|gif)$/i)) {
+                content.innerHTML = `<img src="${url}" alt="Document">`;
+            } else if (url.match(/\.pdf$/i)) {
+                content.innerHTML =
+                    `<iframe src="${url}" style="width:90vw;height:90vh;" frameborder="0"></iframe>`;
+            } else {
+                content.innerHTML = `<iframe src="${url}" style="width:90vw;height:90vh;" frameborder="0"></iframe>`;
+            }
+        }
+
+        function closeViewer() {
+            document.getElementById('viewerOverlay').classList.remove('show');
+            document.getElementById('viewerContent').innerHTML = '';
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        renderHomeDegres();
+        loadHistoire();
         renderArchives();
-        return;
-      }
+        loadMembres();
 
-      c.innerHTML = '<p class="loading">Chargement...</p>';
-
-      var s = ssR[currentSub];
-      if(!s){
-        c.innerHTML = '<p style="color:#c00;">Rubrique inconnue.</p>';
-        return;
-      }
-
-      // Vérifier accès
-      if(currentUser.grade < s.grade){
-        c.innerHTML = '<p style="color:#c00;">Vous n\'avez pas accès à cette rubrique.</p>';
-        return;
-      }
-
-      // Ajouter upload box si admin
-      var h = '<div class="back-link" onclick="currentSub=null;renderArchives();">← Retour aux rubriques</div>';
-      h += '<h2>'+s.icon+' '+s.label+'</h2>';
-
-      if(currentUser.isAdmin){
-        h += '<div class="admin-upload-box">';
-        h += '<h4>📤 Ajouter un document à "'+s.label+'"</h4>';
-        h += '<input type="file" id="archiveFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.txt" style="margin-bottom:6px;">';
-        h += '<br><button onclick="uploadArchiveDoc()">Téléverser</button>';
-        h += '<div class="info-text">Formats acceptés : PDF, images, Word, texte (max 10 Mo)</div>';
-        h += '</div>';
-      }
-
-      h += '<div id="archiveDocsList" class="loading">Chargement...</div>';
-      c.innerHTML = h;
-
-      var list = $('archiveDocsList');
-
-      db.collection('documents').where('sousRubrique','==',currentSub).orderBy('date','desc').get()
-        .then(function(snap){
-          if(snap.empty){
-            list.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Aucun document dans cette rubrique.</p>';
-            return;
-          }
-          var html = '';
-          snap.forEach(function(doc){
-            var data = doc.data();
-            var nom = data.nom || 'Document';
-            var dateStr = '';
-            if(data.date){
-              var dt = data.date.toDate ? data.date.toDate() : new Date(data.date);
-              dateStr = dt.toLocaleDateString('fr-FR');
-            }
-
-            html += '<div class="doc-item">';
-            html += '<div class="info">';
-            html += '<div class="title">'+esc(nom)+'</div>';
-            if(dateStr) html += '<div class="meta">Ajouté le '+dateStr+'</div>';
-
-            // Lien ou visualisation
-            if(data.url){
-              html += '<div><a href="'+esc(data.url)+'" target="_blank">📄 Ouvrir</a></div>';
-            } else if(data.dataURL){
-              var t = data.type || '';
-              if(t.indexOf('image')!==-1 || t.indexOf('png')!==-1 || t.indexOf('jpg')!==-1 || t.indexOf('jpeg')!==-1 || t.indexOf('gif')!==-1){
-                html += '<div><img src="'+data.dataURL+'" style="max-width:100px;max-height:100px;cursor:pointer;border-radius:4px;margin-top:4px;" onclick="openViewer(\''+data.dataURL+'\',\'image\')"></div>';
-              } else {
-                html += '<div><button class="doc-btn" onclick="openViewer(\''+data.dataURL+'\',\'iframe\')">📄 Voir le document</button></div>';
-              }
-            }
-
-            html += '</div>'; // .info
-
-            // Bouton Supprimer pour admin
-            if(currentUser && currentUser.isAdmin){
-              html += '<div class="actions">';
-              html += '<button class="btn-delete" onclick="deleteArchiveDoc(\''+doc.id+'\')">🗑 Supprimer</button>';
-              html += '</div>';
-            }
-
-            html += '</div>'; // .doc-item
-          });
-          list.innerHTML = html;
-        })
-        .catch(function(e){
-          list.innerHTML = '<p style="color:#c00;">Erreur: '+e.message+'</p>';
-        });
-    }
-
-    // ============================================================
-    // UPLOAD ARCHIVE DOC (admin)
-    // ============================================================
-    function uploadArchiveDoc(){
-      if(!currentUser || !currentUser.isAdmin){ alert('Action non autorisée.'); return; }
-      if(!currentSub){ alert('Aucune rubrique sélectionnée.'); return; }
-      var input = $('archiveFileInput');
-      if(!input.files || input.files.length===0){ alert('Veuillez sélectionner un fichier.'); return; }
-      var file = input.files[0];
-      if(file.size > 10*1024*1024){ alert('Fichier trop volumineux (max 10 Mo).'); return; }
-      var reader = new FileReader();
-      reader.onload = function(e){
-        var dataURL = e.target.result;
-        var type = file.type || 'application/octet-stream';
-        var nom = file.name;
-        db.collection('documents').add({
-          nom: nom,
-          dataURL: dataURL,
-          type: type,
-          sousRubrique: currentSub,
-          date: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(function(){
-          input.value = '';
-          renderDocs();
-        })
-        .catch(function(e2){ alert('Erreur upload: '+e2.message); });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ============================================================
-    // LOAD MEDIA
-    // ============================================================
-    function loadMedia(){
-      var c = $('mediaContent');
-      if(!currentUser){
-        c.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Connectez-vous pour voir les médias.</p>';
-        return;
-      }
-      c.innerHTML = '<p class="loading">Chargement...</p>';
-
-      db.collection('media').orderBy('date','desc').get()
-        .then(function(snap){
-          if(snap.empty){
-            c.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Aucun média pour le moment.</p>';
-            return;
-          }
-          var h = '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
-          snap.forEach(function(doc){
-            var d = doc.data();
-            var url = d.url || d.dataURL;
-            var type = d.type || '';
-            var nom = d.nom || 'Média';
-            if(url){
-              if(type.indexOf('video')!==-1 || nom.match(/\.(mp4|webm|ogg)$/i)){
-                h += '<div style="flex:1;min-width:200px;max-width:300px;background:#faf8f4;border:1px solid #e0d6c8;border-radius:6px;padding:8px;">';
-                h += '<p style="font-size:12px;margin-bottom:4px;">'+esc(nom)+'</p>';
-                h += '<video controls style="width:100%;max-height:200px;border-radius:4px;"><source src="'+url+'" type="video/mp4">Votre navigateur ne supporte pas la vidéo.</video>';
-                // Supprimer pour admin
-                if(currentUser && currentUser.isAdmin){
-                  h += '<button class="btn-delete" style="margin-top:6px;font-size:11px;padding:2px 8px;" onclick="deleteMedia(\''+doc.id+'\')">🗑 Supprimer</button>';
-                }
-                h += '</div>';
-              } else {
-                h += '<div style="background:#faf8f4;border:1px solid #e0d6c8;border-radius:6px;padding:8px;">';
-                h += '<img src="'+url+'" style="max-width:200px;max-height:200px;border-radius:4px;cursor:pointer;" onclick="openViewer(\''+url+'\',\'image\')">';
-                if(currentUser && currentUser.isAdmin){
-                  h += '<br><button class="btn-delete" style="margin-top:4px;font-size:11px;padding:2px 8px;" onclick="deleteMedia(\''+doc.id+'\')">🗑 Supprimer</button>';
-                }
-                h += '</div>';
-              }
-            }
-          });
-          h += '</div>';
-
-          // Upload admin
-          if(currentUser && currentUser.isAdmin){
-            h += '<div class="admin-upload-box" style="margin-top:15px;">';
-            h += '<h4>📤 Ajouter un média</h4>';
-            h += '<input type="file" id="mediaFileInput" accept=".jpg,.jpeg,.png,.gif,.mp4,.webm,.ogg" style="margin-bottom:6px;">';
-            h += '<br><button onclick="uploadMedia()">Téléverser</button>';
-            h += '<div class="info-text">Images (max 10 Mo) et vidéos (max 50 Mo)</div>';
-            h += '</div>';
-          }
-
-          c.innerHTML = h;
-        })
-        .catch(function(e){
-          c.innerHTML = '<p style="color:#c00;">Erreur: '+e.message+'</p>';
-        });
-    }
-
-    // ============================================================
-    // DELETE MEDIA (admin)
-    // ============================================================
-    function deleteMedia(docId){
-      if(!currentUser || !currentUser.isAdmin){ alert('Action non autorisée.'); return; }
-      if(!confirm('Supprimer ce média ?')) return;
-      db.collection('media').doc(docId).delete()
-        .then(function(){ loadMedia(); })
-        .catch(function(e){ alert('Erreur: '+e.message); });
-    }
-
-    // ============================================================
-    // UPLOAD MEDIA (admin)
-    // ============================================================
-    function uploadMedia(){
-      if(!currentUser || !currentUser.isAdmin){ alert('Action non autorisée.'); return; }
-      var input = $('mediaFileInput');
-      if(!input.files || input.files.length===0){ alert('Sélectionnez un fichier.'); return; }
-      var file = input.files[0];
-      // max 50 Mo pour vidéos, 10 Mo pour images
-      if(file.type.indexOf('video')!==-1 && file.size > 50*1024*1024){ alert('Vidéo trop volumineuse (max 50 Mo).'); return; }
-      if(file.type.indexOf('image')!==-1 && file.size > 10*1024*1024){ alert('Image trop volumineuse (max 10 Mo).'); return; }
-      var reader = new FileReader();
-      reader.onload = function(e){
-        db.collection('media').add({
-          nom: file.name,
-          dataURL: e.target.result,
-          type: file.type,
-          date: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(function(){
-          input.value = '';
-          loadMedia();
-        })
-        .catch(function(e2){ alert('Erreur: '+e2.message); });
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ============================================================
-    // LOAD MEMBERS - avec bouton Supprimer pour admin
-    // ============================================================
-    function loadMembers(){
-      var c = $('membersContent');
-      if(!currentUser){
-        c.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Connectez-vous pour accéder à la liste des membres.</p>';
-        return;
-      }
-      c.innerHTML = '<p class="loading">Chargement...</p>';
-
-      db.collection('users').get()
-        .then(function(snap){
-          if(snap.empty){
-            c.innerHTML = '<p style="font-size:13px;color:#888;text-align:center;">Aucun membre pour le moment.</p>';
-            return;
-          }
-          var h = '';
-          // Si admin, ajouter le formulaire d'ajout
-          if(currentUser.isAdmin){
-            h += '<div class="admin-upload-box">';
-            h += '<h4>➕ Ajouter un membre</h4>';
-            h += '<input type="text" id="newMemberNom" placeholder="Nom du membre" style="width:100%;padding:8px;margin-bottom:6px;border:1px solid #ccc;border-radius:5px;font-size:14px;">';
-            h += '<input type="text" id="newMemberDate" placeholder="Date naissance (JJ/MM/AAAA)" style="width:100%;padding:8px;margin-bottom:6px;border:1px solid #ccc;border-radius:5px;font-size:14px;">';
-            h += '<select id="newMemberGrade" style="padding:6px;border-radius:5px;border:1px solid #ccc;font-size:13px;margin-bottom:6px;">';
-            h += '<option value="1">Apprenti</option>';
-            h += '<option value="2">Compagnon</option>';
-            h += '<option value="3">Maître</option>';
-            h += '</select>';
-            h += '<br><button onclick="addMember()">Ajouter le membre</button>';
-            h += '</div>';
-          }
-
-          h += '<div id="membersList">';
-          snap.forEach(function(doc){
-            var d = doc.data();
-            var nom = d.nom || 'Inconnu';
-            var grade = d.grade || 1;
-            var dateN = d.dateNaissance || '—';
-            var gradeLabel = gradeNames[grade] || 'Inconnu';
-
-            h += '<div class="membre-item">';
-            h += '<div class="info">';
-            h += '<strong>'+esc(nom)+'</strong> — '+gradeLabel;
-            h += '<br><span style="font-size:12px;color:#888;">Né(e) le '+esc(dateN)+'</span>';
-            h += '</div>';
-            // Bouton Supprimer pour admin seulement
-            if(currentUser.isAdmin && doc.id !== currentUser.id){
-              h += '<div class="actions">';
-              h += '<button class="btn-delete" onclick="deleteMember(\''+doc.id+'\')">🗑 Supprimer</button>';
-              h += '</div>';
-            }
-            h += '</div>';
-          });
-          h += '</div>';
-          c.innerHTML = h;
-        })
-        .catch(function(e){
-          c.innerHTML = '<p style="color:#c00;">Erreur: '+e.message+'</p>';
-        });
-    }
-
-    // ============================================================
-    // ADD MEMBER (admin)
-    // ============================================================
-    function addMember(){
-      if(!currentUser || !currentUser.isAdmin){ alert('Action non autorisée.'); return; }
-      var nom = $('newMemberNom').value.trim();
-      var dateN = $('newMemberDate').value.trim();
-      var grade = parseInt($('newMemberGrade').value);
-      if(!nom || !dateN){ alert('Veuillez remplir tous les champs.'); return; }
-
-      // Vérifier si le nom existe déjà
-      db.collection('users').where('nom','==',nom).get()
-        .then(function(snap){
-          if(!snap.empty){
-            alert('Ce nom existe déjà.');
-            return;
-          }
-          db.collection('users').add({
-            nom: nom,
-            dateNaissance: dateN,
-            grade: grade,
-            isAdmin: false
-          })
-          .then(function(){
-            $('newMemberNom').value = '';
-            $('newMemberDate').value = '';
-            $('newMemberGrade').value = '1';
-            loadMembers();
-          })
-          .catch(function(e){ alert('Erreur: '+e.message); });
-        })
-        .catch(function(e){ alert('Erreur: '+e.message); });
-    }
-
-    // ============================================================
-    // VIEWER
-    // ============================================================
-    function openViewer(url, type){
-      var overlay = $('viewerOverlay');
-      var content = $('viewerContent');
-      if(type==='image'){
-        content.innerHTML = '<img src="'+url+'" alt="Document">';
-      } else {
-        content.innerHTML = '<iframe src="'+url+'"></iframe>';
-      }
-      overlay.classList.add('active');
-    }
-
-    function openViewerById(dataURL, type){
-      openViewer(dataURL, type);
-    }
-
-    function closeViewer(){
-      $('viewerOverlay').classList.remove('active');
-      $('viewerContent').innerHTML = '';
-    }
-
-    // ============================================================
-    // APPLY LOGIN (helper depuis boutons externes)
-    // ============================================================
-    function applyLogin(){
-      if(currentUser && currentUser.isAdmin){
-        // admin connecté
-      }
-    }
-
-    // ============================================================
-    // INIT
-    // ============================================================
-    showPage('home');
-  </script>
+        console.log('731 Archives — Site initialisé');
+        console.log('Admin: ' + ADMIN_USER);
+    </script>
 </body>
 </html>
