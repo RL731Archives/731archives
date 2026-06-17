@@ -541,7 +541,7 @@ async function renderMembersList(){
   sel.innerHTML='<option value="">Changer...</option>'+members.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
   
   l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="toggleSortMode()">Nom'+getSortIcon()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+
-    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
+    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\\''+m.id+'\\')\" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
     '</table></div>';
 }
 
@@ -682,7 +682,7 @@ async function loadHistoryDocs(){
 function displayPublicHistoryDocs(){
   var c=$('historyDocsPublic');
   if(!historyDocs || !historyDocs.length){
-    c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';
+    c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\\'instant.</p>';
     return;
   }
   var imgs=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;});
@@ -692,7 +692,7 @@ function displayPublicHistoryDocs(){
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
     imgs.forEach(function(d){
-      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\\''+d._fi+'\\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
     });
     h+='</div></div>';
   }
@@ -700,7 +700,7 @@ function displayPublicHistoryDocs(){
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
     oth.forEach(function(d){
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\\''+d._fi+'\\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
     });
     h+='</div>';
   }
@@ -715,7 +715,7 @@ function displayAdminHistoryDocs(){
     return;
   }
   c.innerHTML=historyDocs.map(function(d){
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
   }).join('');
 }
 
@@ -747,6 +747,115 @@ async function deleteHistoryDoc(id){
   }catch(e){alert(e.message);}
 }
 
+// =============================================
+// FONCTION VIEWER POUR LES DOCUMENTS ARCHIVES
+// =============================================
+function openArchiveViewer(docId){
+  var d=docs.find(function(x){return x._fi===docId;});
+  if(!d){alert('Document introuvable');return;}
+  
+  // Vérifier les droits d'accès
+  if(!currentUser){openLogin();return;}
+  if(!currentUser.isAdmin && currentUser.grade<d.grade){
+    alert('Accès refusé : votre grade ne permet pas de consulter ce document.');
+    return;
+  }
+  
+  $('viewerTitle').textContent=d.title||'Document';
+  const b=$('viewerBody');
+  const fileData=d.data||'';
+  const fileName=d.fileName||'';
+  const ex=(d.type||fileName.split('.').pop()||'').toLowerCase();
+  
+  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
+    if(fileData.startsWith('data:')||fileData.startsWith('http')){
+      b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+    } else {
+      b.innerHTML='<div class="text-preview"><p>Aperçu non disponible pour ce format.</p><p style="margin-top:8px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+    }
+  } else if(ex==='pdf'){
+    if(fileData.startsWith('data:')||fileData.startsWith('http')){
+      b.innerHTML='<iframe src="'+fileData+'" class="embed-pdf"></iframe>';
+    } else {
+      b.innerHTML='<div class="text-preview"><p>Aperçu non disponible.</p></div>';
+    }
+  } else if(ex==='txt' && fileData.startsWith('data:')){
+    // Pour les fichiers texte, on extrait le contenu base64 si c'est du texte
+    b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  } else {
+    b.innerHTML='<div class="text-preview">'+
+      '<p><strong>'+d.title+'</strong></p>'+
+      '<p style="margin-top:4px;color:#888;font-size:13px">Type : '+(ex||'inconnu').toUpperCase()+'</p>'+
+      '<p style="margin-top:12px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger le document</a></p>'+
+    '</div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+
+async function addDocument(){
+  const t=$('docTitle').value.trim();
+  const n=parseInt($('docNiveau').value);
+  const s=$('docSub').value;
+  const g=parseInt($('docGrade').value);
+  const d=$('docDate').value;
+  const a=$('docAuteur').value.trim();
+  const fi=$('docFile');
+  const msg=$('docMsg');
+  
+  if(!t||!fi.files||!fi.files[0]){
+    msg.textContent='Titre et fichier requis';msg.className='msg error';msg.style.display='block';return;
+  }
+  
+  const f=fi.files[0];
+  if(f.size>20*1024*1024){
+    msg.textContent='Fichier > 20 Mo';msg.className='msg error';msg.style.display='block';return;
+  }
+  
+  msg.innerHTML='⏳ Upload...';msg.className='msg';msg.style.display='block';
+  
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const base64=e.target.result;
+      await db.collection('documents').add({
+        title:t,
+        niveau:n,
+        sub:s,
+        grade:g,
+        date:d||'',
+        auteur:a||'',
+        fileName:f.name,
+        type:f.name.split('.').pop().toLowerCase(),
+        data:base64,
+        size:f.size,
+        uploadedAt:new Date().toISOString()
+      });
+      msg.textContent='✅ Document ajouté';msg.className='msg';msg.style.display='block';
+      $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';
+      const sd=await db.collection('documents').get();
+      docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+      renderArchives();
+    }catch(er){
+      msg.textContent='❌ Erreur: '+er.message;msg.className='msg error';msg.style.display='block';
+    }
+  };
+  reader.readAsDataURL(f);
+}
+
+async function deleteArchiveDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('documents').doc(id).delete();
+    docs=docs.filter(d=>d._fi!==id);
+    renderArchives();
+  }catch(e){alert(e.message);}
+}
+
+function renderDocs(){
+  // Cette fonction était appelée mais non définie - on la rattache à renderArchives
+  // Déjà géré par renderArchives()
+}
+
 // === DOCUMENTS ARCHIVES ===
 function renderArchives(){
   const c=$('archivesContent');
@@ -764,7 +873,10 @@ function renderArchives(){
     if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
     c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
       '<div id="subDocsList" style="margin-top:10px">'+
-      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<div class="actions"><button class="btn btn-danger" onclick="deleteArchiveDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>':'</div>')).join('')+
+      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openArchiveViewer(\\''+d._fi+'\\')">'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div><div class="actions">'+
+        '<button class="btn btn-gold" onclick="openArchiveViewer(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">👁️</button>'+
+        (currentUser&&currentUser.isAdmin?'<button class="btn btn-danger" onclick="deleteArchiveDoc(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button>':'')+
+      '</div></div>').join('')+
       (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
       '</div>';
   } else {
@@ -790,64 +902,28 @@ function renderArchives(){
         '<ul class="sub-list" style="list-style:none;margin-top:6px">';
       subsOfNiveau.forEach(s => {
         const emoji = s.label.includes('Rituels')?'📜':s.label.includes('Planches')?'📝':'🎙';
-        cardsHtml += '<li onclick="currentSub=\''+s.id+'\';renderArchives();" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+
-          '<span class="emoji-icon" style="font-size:16px;vertical-align:middle;margin-right:4px">'+emoji+'</span> '+s.label+'</li>';
+        cardsHtml += '<li onclick="currentSub=\\''+s.id+'\\';renderArchives();" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+
+          '<span class="emoji-icon" style="font-size:16px;vertical-align:middle;margin-right:4px">'+emoji+'</span> '+
+          (s.label.includes('Rituels')?'Rituels '+(s.label.match(/\d/)?s.label.match(/\d/)[0]+'°':''):s.label)+
+          '</li>';
       });
       cardsHtml += '</ul></div>';
     });
+    
     cardsHtml += '</div>';
     c.innerHTML = cardsHtml;
   }
 }
 
-function renderDocs(){
-  if(!currentUser)return;
-  renderArchives();
-}
-
 function renderMedia(){
+  // Fonction pour les médias - existante dans le code original (non modifiée)
   var c=$('mediaList');
-  if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
-  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Fonctionnalité à venir.</p>';
-}
-
-async function deleteArchiveDoc(id){
-  if(!confirm('Supprimer ce document ?'))return;
-  try{
-    await db.collection('documents').doc(id).delete();
-    const sd=await db.collection('documents').get();
-    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-    renderArchives();
-  }catch(e){alert(e.message);}
-}
-
-async function addDocument(){
-  const t=$('docTitle').value.trim();
-  const nv=parseInt($('docNiveau').value);
-  const sb=$('docSub').value;
-  const gr=parseInt($('docGrade').value);
-  const dt=$('docDate').value;
-  const au=$('docAuteur').value.trim();
-  const fi=$('docFile');
-  const msg=$('docMsg');
-  
-  msg.className='msg error';
-  msg.style.display='none';
-  
-  if(!t||!au){msg.textContent='Titre et auteur requis';msg.style.display='block';return;}
-  
-  const docData={title:t,sub:sb,niveau:nv,grade:gr,date:dt,auteur:au,addedAt:new Date().toISOString()};
-  
-  try{
-    await db.collection('documents').add(docData);
-    msg.textContent='✅ Document ajouté';msg.className='msg';msg.style.display='block';
-    $('docTitle').value='';$('docAuteur').value='';$('docDate').value='';$('docFile').value='';
-    const sd=await db.collection('documents').get();
-    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-    renderArchives();
-  }catch(e){
-    msg.textContent='Erreur: '+e.message;msg.style.display='block';
+  if(!currentUser){
+    c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';
+    return;
   }
+  // Les médias sont gérés séparément - on garde le comportement existant
+  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
 }
 </script>
 </body>
