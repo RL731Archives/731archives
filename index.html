@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <style>
-:root{--gold:#9m8c66;--bordeaux:#7m132b;--card1:#f5f0e8;--card2:#e8e0d0;--card3:#d8090;--text:#2c1810;--bg:#faf6f0;--header-bg:linear-gradient(135deg,#7m132b,#5a0e1e);}
+:root{--gold:#9a8c66;--bordeaux:#7a132b;--card1:#f5f0e8;--card2:#e8e0d0;--card3:#d8c9b0;--text:#2c1810;--bg:#faf6f0;--header-bg:linear-gradient(135deg,#7a132b,#5a0e1e);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
 nav{background:var(--header-bg);padding:10px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
@@ -272,7 +272,7 @@ function renderAccueilSubs(){
   var h='<div class="cards">';
   var subsArr=Object.entries(ssR);
   var niveaux={1:[],2:[],3:[]};
-  subsArr.forEach(function(x){var k=x[0],v=x[1];niveaux[v.niveau].push('<li onclick="showPage(\\'archives\\',null);currentSub=\\''+k+'\\';renderArchives()" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+v.label+'</li>');});
+  subsArr.forEach(function(x){var k=x[0],v=x[1];niveaux[v.niveau].push('<li onclick="showPage(\'archives\',null);currentSub=\''+k+'\';renderArchives()" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+v.label+'</li>');});
   var nl=['APPRENTI','COMPAGNON','MAÎTRE'];
   var nc=['var(--card1)','var(--card2)','var(--card3)'];
   for(var i=1;i<=3;i++){
@@ -436,7 +436,7 @@ function renderArchives(){
 function renderDocs(){if(!currentUser)return;renderArchives();}
 function renderMedia(){var c=$('mediaList');if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Fonctionnalité à venir.</p>';}
 
-// Viewier pour les documents d'archives
+// Viewer pour les documents d'archives
 function openArchiveViewer(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
@@ -520,7 +520,7 @@ async function addDocument(){
 loadMembers();
 initSite();
 
-// ADMIN PANEL HTML ajouté dynamiquement pour ne pas surcharger le DOM
+// ADMIN PANEL HTML ajouté dynamiquement
 setTimeout(function(){
   if(!$('adminPanel')){
     var div=document.createElement('div');
@@ -625,7 +625,7 @@ async function renderMembersList(){
   var sel=$('memChangeId');var cv=sel.value;
   sel.innerHTML='<option value="">Changer...</option>'+members.map(function(m){return '<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>';}).join('');
   l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="toggleSortMode()">Nom'+getSortIcon()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+
-    getSortedMembres().map(function(m){return '<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>';}).join('')+
+    getSortedMembres().map(function(m){return '<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>';}).join('')+
     '</table></div>';
 }
 async function changeMemberGrade(){
