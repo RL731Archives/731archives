@@ -699,7 +699,7 @@ function displayPublicHistoryDocs(){
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
     imgs.forEach(function(d){
-      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong></div></div>';
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
     });
     h+='</div></div>';
   }
@@ -707,7 +707,7 @@ function displayPublicHistoryDocs(){
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
     oth.forEach(function(d){
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
     });
     h+='</div>';
   }
@@ -722,7 +722,7 @@ function displayAdminHistoryDocs(){
     return;
   }
   c.innerHTML=historyDocs.map(function(d){
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
   }).join('');
 }
 
@@ -770,7 +770,7 @@ function renderArchives(){
     if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
     c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
       '<div id="subDocsList" style="margin-top:10px">'+
-      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+d.auteur+'</span></div></div>').join('')+
+      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<div class="actions"><button class="btn btn-danger" onclick="deleteArchiveDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div>':'')+'</div>').join('')+
       (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
       '</div>';
   } else {
@@ -789,6 +789,16 @@ function renderMedia(){
   var c=$('mediaList');
   if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
   c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Fonctionnalité à venir.</p>';
+}
+
+async function deleteArchiveDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('documents').doc(id).delete();
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    renderArchives();
+  }catch(e){alert(e.message);}
 }
 
 // === ADMIN : AJOUTER DOCUMENT ===
