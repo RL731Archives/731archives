@@ -760,6 +760,7 @@ function renderArchives(){
     }
     const gradeLabel=['','Apprenti','Compagnon','Maître'][sub.niveau];
     var subDocs=docs.filter(d=>d.sub===currentSub);
+    subDocs.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
     if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
     c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
       '<div id="subDocsList" style="margin-top:10px">'+
