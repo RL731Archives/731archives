@@ -1,1330 +1,825 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>731 Archives - Étoile du Temple</title>
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-storage-compat.js">
-    </script>
-    <!-- Quill.js pour l'éditeur de texte enrichi -->
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.min.js">
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background-color: #0b0a0a;
-            color: #e0d8c8;
-            min-height: 100vh;
-        }
-        /* BANDEAU */
-
-
-        .bandeau {
-            width: 100%;
-            height: 300px;
-            background: url('https://rl731archives.github.io/731archives/bandeau.jpg') center/cover no-repeat;
-            /* Photo de bandeau récupérée depuis le site en ligne */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: inset 0 -20px 40px rgba(0, 0, 0, 0.7);
-        }
-        .bandeau h1 {
-            font-size: 3rem;
-            color: #f5e6c8;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8);
-            letter-spacing: 6px;
-            font-weight: 400;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 40px;
-            border-radius: 4px;
-            backdrop-filter: blur(2px);
-        }
-        /* MENU */
-        nav {
-            background: #1a1410;
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            padding: 8px 10px;
-            flex-wrap: wrap;
-            border-bottom: 1px solid #3a2a1a;
-        }
-        nav a {
-            color: #c4a97a;
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-        }
-        nav a:hover {
-            background: #2a1f15;
-            border-color: #5a3f28;
-            color: #e8d5a8;
-        }
-        nav a.active {
-            background: #3a2a1a;
-            border-color: #8a6f3f;
-            color: #f5e6c8;
-        }
-        /* ZONE ADMIN en haut à droite */
-        .admin-zone {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            z-index: 10;
-        }
-        .admin-zone button {
-            background: rgba(30, 20, 10, 0.85);
-            color: #c4a97a;
-            border: 1px solid #5a3f28;
-            padding: 6px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.3s;
-        }
-        .admin-zone button:hover {
-            background: #3a2a1a;
-            color: #f5e6c8;
-        }
-        /* MAIN */
-        .main {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        /* PAGE ACCUEIL */
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-        .presentation {
-            text-align: center;
-            margin-bottom: 50px;
-            padding: 40px 20px;
-            border-bottom: 1px solid #3a2a1a;
-        }
-        .presentation h2 {
-            font-size: 2rem;
-            color: #e8d5a8;
-            margin-bottom: 20px;
-            font-weight: 400;
-            letter-spacing: 3px;
-        }
-        .presentation p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #c4b898;
-            max-width: 800px;
-            margin: 0 auto 15px;
-        }
-        /* CARTES DEGRÉS */
-        .degres-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
-        }
-        .carte-degre {
-            background: linear-gradient(145deg, #1a1410, #251e16);
-            border: 1px solid #3a2a1a;
-            border-radius: 12px;
-            padding: 25px 20px;
-            width: 280px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s;
-        }
-        .carte-degre:hover {
-            transform: translateY(-4px);
-        }
-        .carte-degre h3 {
-            font-size: 1.4rem;
-            color: #e8d5a8;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #3a2a1a;
-            font-weight: 400;
-            letter-spacing: 2px;
-        }
-        .carte-degre h3 .lock {
-            font-size: 1.1rem;
-            margin-right: 8px;
-        }
-        .rubrique {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            margin: 4px 0;
-            border-radius: 6px;
-            color: #b8a888;
-            font-size: 0.95rem;
-            transition: 0.3s;
-            cursor: default;
-        }
-        .rubrique.unlocked {
-            color: #e0d5c0;
-            cursor: pointer;
-        }
-        .rubrique.unlocked:hover {
-            background: #2a1f15;
-        }
-        .rubrique.locked {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .rubrique .icon {
-            font-size: 1.2rem;
-            width: 28px;
-            text-align: center;
-        }
-        /* PAGE HISTOIRE */
-        #page-histoire {
-            padding: 20px 0;
-        }
-        #page-histoire h2 {
-            font-size: 1.8rem;
-            color: #e8d5a8;
-            margin-bottom: 25px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            border-bottom: 1px solid #3a2a1a;
-            padding-bottom: 10px;
-        }
-        .histoire-container {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .histoire-texte {
-            flex: 2;
-            min-width: 300px;
-        }
-        .histoire-docs {
-            flex: 1;
-            min-width: 250px;
-            background: #15100d;
-            border: 1px solid #3a2a1a;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .histoire-docs h3 {
-            color: #e8d5a8;
-            font-size: 1.2rem;
-            font-weight: 400;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-        .doc-list {
-            list-style: none;
-        }
-        .doc-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            border-bottom: 1px solid #2a1f15;
-            font-size: 0.9rem;
-            color: #c4b898;
-        }
-        .doc-list li a {
-            color: #c4a97a;
-            text-decoration: none;
-        }
-        .doc-list li a:hover {
-            text-decoration: underline;
-        }
-        .btn-delete {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            transition: 0.3s;
-            color: #aa4444;
-        }
-        .btn-delete:hover {
-            background: #3a1a1a;
-            color: #ff6666;
-        }
-        /* PAGE ARCHIVES */
-        #page-archives .degres-container {
-            /* on réutilise le style */
-        }
-        /* PAGE MEMBRES */
-        #page-membres {
-            padding: 20px 0;
-        }
-        #page-membres h2 {
-            font-size: 1.8rem;
-            color: #e8d5a8;
-            margin-bottom: 25px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            border-bottom: 1px solid #3a2a1a;
-            padding-bottom: 10px;
-        }
-        .membres-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 16px;
-        }
-        .membre-card {
-            background: #15100d;
-            border: 1px solid #3a2a1a;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-        }
-        .membre-card h4 {
-            color: #e8d5a8;
-            font-size: 1.1rem;
-            font-weight: 400;
-        }
-        .membre-card .role {
-            color: #a08060;
-            font-size: 0.85rem;
-            margin-top: 5px;
-        }
-        .membre-card .date {
-            color: #6a5a4a;
-            font-size: 0.75rem;
-            margin-top: 8px;
-        }
-        /* MODAL */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.show {
-            display: flex;
-        }
-        .modal {
-            background: #1a1410;
-            border: 1px solid #5a3f28;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .modal h3 {
-            color: #e8d5a8;
-            font-size: 1.3rem;
-            font-weight: 400;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
-        }
-        .modal label {
-            display: block;
-            color: #c4b898;
-            margin: 12px 0 4px;
-            font-size: 0.9rem;
-        }
-        .modal input,
-        .modal textarea,
-        .modal select {
-            width: 100%;
-            padding: 8px 12px;
-            background: #0b0a0a;
-            border: 1px solid #3a2a1a;
-            border-radius: 4px;
-            color: #e0d8c8;
-            font-family: inherit;
-            font-size: 0.95rem;
-        }
-        .modal textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .modal .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: flex-end;
-        }
-        .modal button {
-            padding: 8px 20px;
-            border: 1px solid #5a3f28;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            background: #2a1f15;
-            color: #c4a97a;
-        }
-        .modal button:hover {
-            background: #3a2a1a;
-            color: #f5e6c8;
-        }
-        .modal button.btn-primary {
-            background: #3a2a1a;
-            border-color: #8a6f3f;
-            color: #f5e6c8;
-        }
-        .modal button.btn-primary:hover {
-            background: #5a3f28;
-        }
-        .modal button.btn-danger {
-            background: #3a1a1a;
-            border-color: #8a3f3f;
-            color: #e8a0a0;
-        }
-        .modal button.btn-danger:hover {
-            background: #5a2a2a;
-        }
-        /* VISUALISEUR PLEIN ÉCRAN */
-        .viewer-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        .viewer-overlay.show {
-            display: flex;
-        }
-        .viewer-overlay img,
-        .viewer-overlay embed,
-        .viewer-overlay iframe {
-            max-width: 95%;
-            max-height: 95%;
-            border: none;
-            border-radius: 4px;
-        }
-        .viewer-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 2rem;
-            color: #fff;
-            cursor: pointer;
-            background: none;
-            border: none;
-            z-index: 2001;
-        }
-        /* LOGIN MODAL */
-        #loginModal .modal {
-            max-width: 380px;
-        }
-        /* FOOTER */
-        footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: #5a4a3a;
-            font-size: 0.8rem;
-            border-top: 1px solid #1a1410;
-            margin-top: 40px;
-        }
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .bandeau {
-                height: 180px;
-            }
-            .bandeau h1 {
-                font-size: 1.6rem;
-                padding: 8px 20px;
-                letter-spacing: 3px;
-            }
-            nav a {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
-            .carte-degre {
-                width: 100%;
-                max-width: 320px;
-            }
-            .histoire-container {
-                flex-direction: column;
-            }
-            .degres-container {
-                gap: 16px;
-            }
-        }
-        /* ADMIN PANEL */
-        .admin-panel {
-            display: none;
-            background: #15100d;
-            border: 1px solid #5a3f28;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        .admin-panel.show {
-            display: block;
-        }
-        .admin-panel h3 {
-            color: #e8d5a8;
-            font-size: 1.1rem;
-            font-weight: 400;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-        .admin-panel textarea {
-            width: 100%;
-            min-height: 150px;
-            background: #0b0a0a;
-            border: 1px solid #3a2a1a;
-            border-radius: 4px;
-            color: #e0d8c8;
-            padding: 10px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            resize: vertical;
-        }
-        .admin-panel .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .admin-panel .btn-group button {
-            padding: 8px 18px;
-            border: 1px solid #5a3f28;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            background: #2a1f15;
-            color: #c4a97a;
-        }
-        .admin-panel .btn-group button:hover {
-            background: #3a2a1a;
-            color: #f5e6c8;
-        }
-        .doc-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            border-bottom: 1px solid #2a1f15;
-            font-size: 0.9rem;
-            color: #c4b898;
-        }
-        .doc-item a {
-            color: #c4a97a;
-            text-decoration: none;
-        }
-        .doc-item a:hover {
-            text-decoration: underline;
-        }
-        .doc-item .doc-date {
-            color: #6a5a4a;
-            font-size: 0.75rem;
-            margin-left: 10px;
-        }
-        .login-error {
-            color: #e08080;
-            font-size: 0.85rem;
-            margin-top: 8px;
-            display: none;
-        }
-        .histoire-admin-bar {
-            display: none;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .histoire-admin-bar.show {
-            display: flex;
-        }
-        .histoire-admin-bar button {
-            padding: 8px 18px;
-            border: 1px solid #5a3f28;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            background: #2a1f15;
-            color: #c4a97a;
-        }
-        .histoire-admin-bar button:hover {
-            background: #3a2a1a;
-            color: #f5e6c8;
-        }
-        .upload-section {
-            display: none;
-            background: #15100d;
-            border: 1px solid #3a2a1a;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-        .upload-section.show {
-            display: block;
-        }
-        .upload-section input[type="file"] {
-            color: #e0d8c8;
-        }
-        .upload-section input[type="text"] {
-            width: 100%;
-            padding: 8px 12px;
-            background: #0b0a0a;
-            border: 1px solid #3a2a1a;
-            border-radius: 4px;
-            color: #e0d8c8;
-            font-family: inherit;
-            font-size: 0.9rem;
-            margin: 8px 0;
-        }
-        .upload-section .btn-group button {
-            padding: 8px 18px;
-            border: 1px solid #5a3f28;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            background: #2a1f15;
-            color: #c4a97a;
-            margin-right: 8px;
-            margin-top: 8px;
-        }
-        .upload-section .btn-group button:hover {
-            background: #3a2a1a;
-            color: #f5e6c8;
-        }
-        /* style Quill */
-        .ql-editor {
-            min-height: 200px;
-            color: #e0d8c8;
-        }
-        .ql-toolbar {
-            background: #1a1410;
-            border-color: #3a2a1a !important;
-        }
-        .ql-container {
-            background: #0b0a0a;
-            border-color: #3a2a1a !important;
-        }
-        .ql-editor.ql-blank::before {
-            color: #6a5a4a;
-        }
-        .ql-toolbar button .ql-stroke {
-            stroke: #c4a97a;
-        }
-        .ql-toolbar button .ql-fill {
-            fill: #c4a97a;
-        }
-        .ql-toolbar button:hover .ql-stroke {
-            stroke: #f5e6c8;
-        }
-        .ql-toolbar button:hover .ql-fill {
-            fill: #f5e6c8;
-        }
-        .ql-toolbar .ql-picker {
-            color: #c4a97a;
-        }
-        .ql-toolbar .ql-picker-options {
-            background: #1a1410;
-            border-color: #3a2a1a;
-        }
-        .ql-toolbar .ql-picker-item {
-            color: #e0d8c8;
-        }
-        .ql-toolbar .ql-picker-item:hover {
-            background: #2a1f15;
-        }
-        .ql-toolbar .ql-picker-label:hover {
-            color: #f5e6c8;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>731 Archives — Étoile du Temple</title>
+  <style>
+    :root{--bg:#F5F0E8;--bordeaux:#800020;--gold:#D4AF37;--text:#2a2a2a;--card1:#fffaf6;--card2:#f0ece8;--card3:#e7e2de}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:50px;height:50px;background:linear-gradient(135deg,var(--gold),#b8942b);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700}
+    .site-title{color:var(--bordeaux);font-size:18px;font-weight:700;line-height:1.2}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;text-decoration:none;font-size:14px}
+    .btn-gold{background:var(--gold);color:#fff}
+    .btn-bdx{background:var(--bordeaux);color:#fff}
+    .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
+    .btn-danger{background:#c62828;color:#fff}
+    .btn-green{background:#2e7d32;color:#fff}
+    .btn-sort{background:transparent;border:none;cursor:pointer;color:inherit;font-weight:600;font-size:13px;padding:0 2px;display:inline-flex;align-items:center;gap:3px}
+    nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
+    nav ul{list-style:none;display:flex}
+    nav li{flex:1}
+    nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer}
+    nav a:hover,nav a.active{color:var(--gold)}
+    .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
+    .banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
+    .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,0.4));display:flex;align-items:center;justify-content:center;padding:24px}
+    .banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center}
+    .page{display:none}
+    .page.active{display:block}
+    .cards{display:flex;gap:12px;margin:14px 0}
+    .card{flex:1;padding:16px;border-radius:8px;border:2px solid var(--gold);position:relative}
+    .card h3{color:var(--bordeaux);font-size:16px;margin-bottom:8px;text-align:center}
+    .card .lock{position:absolute;right:10px;top:10px;background:var(--gold);color:#fff;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px}
+    .card.apprenti{background:var(--card1)}
+    .card.compagnon{background:var(--card2)}
+    .card.maitre{background:var(--card3)}
+    .card .sub-list{list-style:none;margin-top:6px}
+    .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card .sub-list li .emoji-icon{font-size:16px;vertical-align:middle;margin-right:4px}
+    .card .sub-list li:hover{background:var(--gold);color:#fff}
+    .two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+    .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
+    .admin-panel h3{color:var(--bordeaux);margin-bottom:8px}
+    .admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
+    .admin-panel label{font-size:12px;color:#777}
+    .admin-panel .row{display:flex;gap:8px}
+    .admin-panel .row>*{flex:1}
+    footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
+    .msg{background:#e8f5e9;color:#2e7d32;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px;display:none}
+    .msg.error{background:#ffebee;color:#c62828}
+    .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
+    .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
+    .sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
+    .sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
+    .sub-tabs button.active{background:var(--bordeaux);color:#fff}
+    .rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+    .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center}
+    .rubrique-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+    .rubrique-card h4{color:var(--bordeaux);font-size:14px;margin-bottom:4px}
+    #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
+    #loginOverlay.open{display:grid}
+    #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
+    #loginOverlay .modal h2{color:var(--bordeaux);margin-bottom:12px}
+    #loginOverlay .modal input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:5px}
+    #viewerOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;place-items:center;padding:30px}
+    #viewerOverlay.open{display:grid}
+    #viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:210mm;max-width:95vw;max-height:95vh;overflow-y:auto;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.3)}
+    #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #eee;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
+    #viewerOverlay .viewer-header h3{font-size:16px}
+    #viewerOverlay .viewer-header button{background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:14px}
+    #viewerOverlay .viewer-body{padding:20px;text-align:center;min-height:100px}
+    #viewerOverlay .viewer-body img{max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto}
+    #viewerOverlay .viewer-body iframe{width:100%;height:80vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .embed-pdf{width:100%;height:80vh;border:none;border-radius:4px}
+    #viewerOverlay .viewer-body .text-preview{padding:24px;background:#f9f9f9;border-radius:4px;font-size:15px;line-height:1.8;text-align:left;max-height:70vh;overflow-y:auto}
+    .back-link{color:var(--bordeaux);font-size:13px;cursor:pointer;margin-bottom:8px;display:inline-block}
+    .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
+    .upload-zone:hover{background:#f5f0e0}
+    .upload-zone.dragover{background:#efe5c8;border-color:var(--bordeaux)}
+    .upload-zone .icon{font-size:40px;color:var(--gold)}
+    .upload-zone p{color:#888;font-size:13px;margin-top:6px}
+    .upload-progress{height:6px;background:#eee;border-radius:3px;margin:8px 0;overflow:hidden;display:none}
+    .upload-progress .bar{height:100%;background:var(--gold);width:0%;border-radius:3px}
+    .histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
+    .histo-doc .preview{width:48px;height:48px;border-radius:4px;background:#f0ece8;display:grid;place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
+    .histo-doc .preview img{width:100%;height:100%;object-fit:cover}
+    .histo-doc .info{flex:1;min-width:0}
+    .histo-doc .info strong{display:block;font-size:14px;cursor:pointer}
+    .histo-doc .info strong:hover{color:var(--bordeaux)}
+    .histo-doc .info span{font-size:11px;color:#888;display:block}
+    .histo-doc .actions{display:flex;gap:4px;flex-shrink:0}
+    .histo-doc .actions button{padding:4px 10px;font-size:11px;border-radius:4px;border:none;cursor:pointer}
+    .histo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
+    .histo-gallery-item{border:1px solid #eee;border-radius:6px;overflow:hidden;background:#fff;cursor:pointer}
+    .histo-gallery-item:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    .histo-gallery-item .thumb{height:140px;background:#f0ece8;display:grid;place-items:center;overflow:hidden}
+    .histo-gallery-item .thumb img{width:100%;height:100%;object-fit:cover}
+    .histo-gallery-item .caption{padding:8px;font-size:12px;color:var(--text)}
+    .histo-gallery-item .caption strong{display:block;font-size:13px}
+    .histo-gallery-item .caption span{color:#888;font-size:10px;display:block}
+    .histo-doc-admin-section{border-top:1px solid #ddd;margin-top:16px;padding-top:14px}
+    .admin-msg{display:none;padding:8px 12px;border-radius:5px;margin:8px 0;font-size:13px}
+    .admin-msg.success{display:block;background:#e8f5e9;color:#2e7d32}
+    .admin-msg.error{display:block;background:#ffebee;color:#c62828}
+    .admin-msg.info{display:block;background:#e3f2fd;color:#1565c0}
+    @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
+    @media(max-width:800px){#viewerOverlay .viewer-modal{width:95vw}#viewerOverlay .viewer-body img{max-height:70vh}#viewerOverlay .viewer-body iframe{height:60vh}}
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <!-- BANDEAU -->
-    <header class="bandeau">
-        <h1>731 ARCHIVES</h1>
-        <div class="admin-zone">
-            <button id="btnLogin">Connexion Admin</button>
-            <button id="btnLogout" style="display:none;">Déconnexion</button>
+<header>
+  <div class="brand"><div class="logo">★</div><div class="site-title">Archives de l'Étoile du Temple</div></div>
+  <div><button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button><button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button></div>
+</header>
+
+<nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
+
+<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"><div><h1>Archives de l'Étoile du Temple</h1></div></div></div>
+
+<!-- ACCUEIL -->
+<div id="page-accueil" class="page active">
+  <div class="two-col">
+    <div>
+      <h2 style="color:var(--bordeaux);margin-bottom:10px">Bienvenue</h2>
+      <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple.</p>
+      <div class="cards">
+        <div class="card apprenti" data-grade-card="1"><h3>APPRENTI</h3><div class="lock">🔒</div>
+          <ul class="sub-list">
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+          </ul>
         </div>
-    </header>
-
-    <!-- MENU -->
-    <nav id="mainNav">
-        <a href="#" data-page="accueil" class="active">Accueil</a>
-        <a href="#" data-page="histoire">Histoire</a>
-        <a href="#" data-page="archives">Archives</a>
-        <a href="#" data-page="membres">Membres</a>
-    </nav>
-
-    <!-- MAIN CONTENT -->
-    <div class="main">
-
-        <!-- PAGE ACCUEIL -->
-        <div id="page-accueil" class="page active">
-            <div class="presentation">
-                <h2>Archives de l'Étoile du Temple</h2>
-                <p>Bienvenue sur la plateforme des archives numériques de la Loge « L'Étoile du Temple ». Vous trouverez ici l'ensemble des textes, rituels, planches et orateurs classés par degré.</p>
-                <p>L'accès aux rubriques est déterminé par votre degré d'initiation.</p>
-            </div>
-            <div class="degres-container" id="homeDegres">
-                <!-- généré par JS -->
-            </div>
+        <div class="card compagnon" data-grade-card="2"><h3>COMPAGNON</h3><div class="lock">🔒</div>
+          <ul class="sub-list">
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
+          </ul>
         </div>
-
-        <!-- PAGE HISTOIRE -->
-        <div id="page-histoire" class="page">
-            <h2>Histoire de la Loge</h2>
-            <div class="histoire-admin-bar" id="histoireAdminBar">
-                <button onclick="editHistoire()">✏️ Modifier le texte</button>
-                <button onclick="document.querySelector('.upload-section').classList.toggle('show')">📎 Ajouter un document</button>
-            </div>
-            <div class="upload-section" id="histoireUploadSection">
-                <input type="file" id="histoireFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                <input type="text" id="histoireDocTitle" placeholder="Titre du document">
-                <div class="btn-group">
-                    <button onclick="uploadHistoireDoc()">Téléverser</button>
-                    <button onclick="this.closest('.upload-section').classList.remove('show')">Annuler</button>
-                </div>
-            </div>
-            <div class="histoire-container">
-                <div class="histoire-texte" id="histoireTexte">
-                    <div id="histoireContent"></div>
-                </div>
-                <div class="histoire-docs">
-                    <h3>Documents</h3>
-                    <ul class="doc-list" id="histoireDocList"></ul>
-                </div>
-            </div>
+        <div class="card maitre" data-grade-card="3"><h3>MAÎTRE</h3><div class="lock">🔒</div>
+          <ul class="sub-list">
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
+            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
+            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}"><span class="emoji-icon">📜</span> Rituels 3°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-grade="3"><span class="emoji-icon">📝</span> Planches Maîtres 3°</li>
+            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-grade="3"><span class="emoji-icon">🎙</span> Orateur 3°</li>
+          </ul>
         </div>
-
-        <!-- PAGE ARCHIVES -->
-        <div id="page-archives" class="page">
-            <div class="degres-container" id="archivesDegres">
-                <!-- généré par JS -->
-            </div>
-        </div>
-
-        <!-- PAGE MEMBRES -->
-        <div id="page-membres" class="page">
-            <h2>Membres de la Loge</h2>
-            <div class="membres-list" id="membresList"></div>
-        </div>
-
+      </div>
     </div>
+    <div>
+      <div class="admin-panel">
+        <h3>⚡ Accès rapide</h3>
+        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
+        <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">🔓 Se connecter</button>
+        <div style="margin-top:10px;font-size:12px;color:#999">Admin : RL731 / 08051956<br>Membres : mot de passe = date naissance JJMMAAAA</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <footer>
-        © 2026 — Loge « L'Étoile du Temple » · Archives numériques
-    </footer>
+<!-- HISTOIRE -->
+<div id="page-histoire" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <h2 style="color:var(--bordeaux)">Histoire de l'Étoile du Temple</h2>
+    <button id="saveHistoryBtn" class="btn btn-gold" style="display:none" onclick="saveHistory()">💾 Sauvegarder</button>
+  </div>
+  <div id="historyDisplay" class="history-content"><p style="color:#999;font-style:italic">La Loge L'Étoile du Temple a été fondée en 1956.</p></div>
 
-    <!-- MODAL LOGIN -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <h3>Connexion Administrateur</h3>
-            <label>Identifiant</label>
-            <input type="text" id="loginUser" placeholder="Identifiant">
-            <label>Mot de passe</label>
-            <input type="password" id="loginPass" placeholder="Mot de passe">
-            <div class="login-error" id="loginError">Identifiant ou mot de passe incorrect</div>
-            <div class="btn-group">
-                <button onclick="closeModal('loginModal')">Annuler</button>
-                <button class="btn-primary" onclick="doLogin()">Se connecter</button>
-            </div>
+  <div style="margin-top:16px;padding-top:14px;border-top:1px solid #ddd">
+    <h4 style="color:var(--bordeaux);margin-bottom:10px">📂 Documents d'archives historiques</h4>
+    <div id="historyDocsPublic"><p style="color:#999;font-size:13px;font-style:italic">Chargement...</p></div>
+  </div>
+
+  <div id="historyAdminUpload" style="display:none;margin-top:16px" class="histo-doc-admin-section">
+    <h4 style="color:var(--bordeaux);margin-bottom:8px">📤 Ajouter un document</h4>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('historyFileInput').click()">
+      <div class="icon">📄</div>
+      <p><strong>Cliquez</strong> ou glissez-déposez un fichier</p>
+      <p style="font-size:11px;color:#aaa">PDF, images (JPG, PNG, GIF), texte — max 20 Mo</p>
+    </div>
+    <input type="file" id="historyFileInput" accept=".pdf,.jpg,.jpeg,.png,.gif,.txt" style="display:none">
+    <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <input id="historyDocTitle" placeholder="Titre du document" style="flex:2;min-width:180px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px">
+      <input id="historyDocDate" type="date" style="flex:1;min-width:140px;padding:8px 10px;border:1px solid #ddd;border-radius:5px;font-size:14px">
+      <button class="btn btn-green" onclick="uploadHistoryDoc()" id="uploadBtn">📤 Uploader</button>
+    </div>
+    <div id="uploadAdminMsg" class="admin-msg"></div>
+
+    <div style="margin-top:14px">
+      <h5 style="color:var(--bordeaux);margin-bottom:6px">📋 Documents uploadés</h5>
+      <div id="historyDocsList"><p style="font-size:12px;color:#999">Chargement...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHIVES -->
+<div id="page-archives" class="page">
+  <div class="two-col">
+    <div><h2 style="color:var(--bordeaux);margin-bottom:10px">Archives documentaires</h2><div id="archivesContent"><p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p></div></div>
+    <div>
+      <div class="admin-panel" id="adminPanel" style="display:none">
+        <h3>📁 Administration</h3>
+        <div class="sub-tabs"><button class="active" onclick="showAdminTab('docs',this)">Documents</button><button onclick="showAdminTab('membres',this)">Membres</button></div>
+        <div id="adminDocs">
+          <label>Titre</label><input id="docTitle">
+          <label>Niveau</label><select id="docNiveau" onchange="updateSubs()"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+          <label>Sous-rubrique</label><select id="docSub"></select>
+          <label>Grade requis</label><select id="docGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+          <label>Date</label><input id="docDate" type="date">
+          <label>Auteur</label><input id="docAuteur">
+          <label>Fichier</label><input id="docFile" type="file">
+          <button class="btn btn-bdx" style="width:100%;margin-top:6px" onclick="addDocument()">➕ Ajouter</button>
+          <div id="docMsg" class="msg"></div>
         </div>
-    </div>
-
-    <!-- MODAL AJOUT / ÉDITION ARCHIVES -->
-    <div class="modal-overlay" id="archiveModal">
-        <div class="modal">
-            <h3 id="archiveModalTitle">Ajouter un document</h3>
-            <label>Degré</label>
-            <select id="archiveDegre">
-                <option value="apprenti">Apprenti</option>
-                <option value="compagnon">Compagnon</option>
-                <option value="maitre">Maître</option>
-            </select>
-            <label>Rubrique</label>
-            <select id="archiveRubrique">
-                <option value="rituels">📜 Rituels</option>
-                <option value="planches-apprenti">📝 Planches Apprenti</option>
-                <option value="planches-maitres1">📝 Planches Maîtres 1°</option>
-                <option value="orateur1">🎙 Orateur 1°</option>
-                <option value="planches-compagnon">📝 Planches Compagnon</option>
-                <option value="orateur2">🎙 Orateur 2°</option>
-                <option value="planches-maitres3">📝 Planches Maîtres 3°</option>
-                <option value="orateur3">🎙 Orateur 3°</option>
-            </select>
-            <label>Titre du document</label>
-            <input type="text" id="archiveTitle" placeholder="Titre">
-            <label>Fichier (PDF, image, doc)</label>
-            <input type="file" id="archiveFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-            <div class="btn-group">
-                <button onclick="closeModal('archiveModal')">Annuler</button>
-                <button class="btn-primary" onclick="saveArchiveDoc()">Ajouter</button>
-            </div>
+        <div id="adminMembres" style="display:none">
+          <label>Prénom</label><input id="memPrenom"><label>Nom</label><input id="memNom">
+          <label>Grade</label><select id="memGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+          <label>Date naissance (JJMMAAAA)</label><input id="memBirth" placeholder="15031960">
+          <div class="row"><div><button class="btn btn-bdx" style="width:100%" onclick="addMember()">➕ Ajouter</button></div></div>
+          <div style="margin:10px 0">
+            <select id="memChangeId"><option value="">Changer grade...</option></select>
+            <select id="memChangeGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
+            <button class="btn btn-gold" onclick="changeMemberGrade()">OK</button>
+          </div>
+          <div id="memList"></div><div id="memMsg" class="msg"></div>
         </div>
+      </div>
+      <div id="loginPrompt" class="admin-panel">
+        <h3>🔒 Connexion requise</h3>
+        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous en admin.</p>
+        <button class="btn btn-gold" style="width:100%" onclick="openLogin()">🔓 Connexion</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <!-- MODAL AJOUT MEMBRE -->
-    <div class="modal-overlay" id="membreModal">
-        <div class="modal">
-            <h3>Ajouter un membre</h3>
-            <label>Nom</label>
-            <input type="text" id="membreNom" placeholder="Nom du membre">
-            <label>Rôle / Grade</label>
-            <input type="text" id="membreRole" placeholder="Ex: Vénérable Maître, Secrétaire...">
-            <label>Date d'entrée</label>
-            <input type="date" id="membreDate">
-            <div class="btn-group">
-                <button onclick="closeModal('membreModal')">Annuler</button>
-                <button class="btn-primary" onclick="saveMembre()">Ajouter</button>
-            </div>
-        </div>
-    </div>
+<!-- PHOTOS -->
+<div id="page-photos" class="page">
+  <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:14px">Connectez-vous pour voir les médias.</p>
+  <div id="mediaList"><p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p></div>
+</div>
 
-    <!-- MODAL CONFIRMATION SUPPRESSION -->
-    <div class="modal-overlay" id="confirmModal">
-        <div class="modal">
-            <h3>Confirmer la suppression</h3>
-            <p style="color:#c4b898;">Êtes-vous sûr de vouloir supprimer ce document ?</p>
-            <div class="btn-group">
-                <button onclick="closeModal('confirmModal')">Annuler</button>
-                <button class="btn-danger" id="confirmDeleteBtn">Supprimer</button>
-            </div>
-        </div>
-    </div>
+<!-- CONTACT -->
+<div id="page-contact" class="page">
+  <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
+  <div style="background:#fff;padding:20px;border-radius:8px">
+    <p><strong>Loge L'Étoile du Temple</strong><br>Fondée en 1956</p>
+    <p style="margin-top:10px">Contact : <a href="mailto:f.brl731@proton.me">f.brl731@proton.me</a></p>
+    <p>731archives.netlify.app</p>
+  </div>
+</div>
 
-    <!-- VISUALISEUR PLEIN ÉCRAN -->
-    <div class="viewer-overlay" id="viewerOverlay">
-        <button class="viewer-close" onclick="closeViewer()">✕</button>
-        <div id="viewerContent"></div>
-    </div>
+<!-- MODAL CONNEXION -->
+<div id="loginOverlay">
+  <div class="modal">
+    <h2>🔐 Connexion</h2>
+    <input id="loginUser" placeholder="Identifiant"><input id="loginPass" type="password" placeholder="Mot de passe">
+    <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
+    <div id="loginMsg" style="margin-top:8px;display:none;color:#c62828;font-size:13px"></div>
+  </div>
+</div>
 
-    <script>
-        // ============================================================
-        // FIREBASE CONFIG
-        // ============================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBw82VFa3pb59qWwk4bq6w8lMY0dY-1z74",
-            authDomain: "archives-4bf4d.firebaseapp.com",
-            projectId: "archives-4bf4d",
-            storageBucket: "archives-4bf4d.appspot.com",
-            messagingSenderId: "359044894506",
-            appId: "1:359044894506:web:8696c53cd7e2935f87e39a"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+<!-- MODAL VIEWER -->
+<div id="viewerOverlay">
+  <div class="viewer-modal">
+    <div class="viewer-header"><h3 id="viewerTitle">Document</h3><button onclick="closeViewer()">✕ Fermer</button></div>
+    <div class="viewer-body" id="viewerBody"><p style="color:#999">Chargement...</p></div>
+  </div>
+</div>
 
-        // ============================================================
-        // ÉTAT GLOBAL
-        // ============================================================
-        let currentUser = null; // { name, isAdmin, degre }
-        const ADMIN_USER = 'RL731';
-        const ADMIN_PASS = '08051956';
+<footer>731archives.netlify.app — Étoile du Temple — 1956</footer>
 
-        // ============================================================
-        // NAVIGATION
-        // ============================================================
-        document.querySelectorAll('nav a').forEach(el => {
-            el.addEventListener('click', function(e) {
-                e.preventDefault();
-                const page = this.dataset.page;
-                document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-                this.classList.add('active');
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById('page-' + page).classList.add('active');
-                if (page === 'accueil') renderHomeDegres();
-                if (page === 'archives') renderArchives();
-                if (page === 'histoire') loadHistoire();
-                if (page === 'membres') loadMembres();
-            });
-        });
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",
+  authDomain: "archives-4bf4d.firebaseapp.com",
+  projectId: "archives-4bf4d",
+  storageBucket: "archives-4bf4d.firebasestorage.app",
+  messagingSenderId: "1042447510184",
+  appId: "1:1042447510184:web:4724fcf049159b231af09d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        // ============================================================
-        // LOGIN / LOGOUT
-        // ============================================================
-        document.getElementById('btnLogin').addEventListener('click', () => {
-            openModal('loginModal');
-        });
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            currentUser = null;
-            updateUI();
-        });
+const ssR = {
+  'rituels1':{label:'Rituels 1°',niveau:1},
+  'planches-apprenti':{label:"Planches d'Apprenti",niveau:1},
+  'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},
+  'orateur1':{label:"Orateur 1°",niveau:1},
+  'rituels2':{label:'Rituels 2°',niveau:2},
+  'planches-compagnon':{label:'Planches Compagnons',niveau:2},
+  'orateur2':{label:'Orateur 2°',niveau:2},
+  'rituels3':{label:'Rituels 3°',niveau:3},
+  'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},
+  'orateur3':{label:'Orateur 3°',niveau:3}
+};
 
-        function doLogin() {
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
-            if (user === ADMIN_USER && pass === ADMIN_PASS) {
-                currentUser = { name: user, isAdmin: true, degre: 'maitre' };
-                document.getElementById('loginError').style.display = 'none';
-                closeModal('loginModal');
-                // Re-render les pages
-                renderHomeDegres();
-                renderArchives();
-                loadHistoire();
-                loadMembres();
-                updateUI();
-                document.getElementById('loginUser').value = '';
-                document.getElementById('loginPass').value = '';
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
+let currentUser=null;
+let members=[];
+let docs=[];
+let historyText='';
+let dataLoaded=false;
+let currentSub=null;
+let currentNiveau=1;
+let sortMode='none';
+let historyDocs=[];
+
+function $(id){return document.getElementById(id);}
+
+function showPage(n,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+n).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(n==='archives')renderArchives();
+  if(n==='photos')renderMedia();
+  if(n==='histoire'){
+    if(historyText)$('historyDisplay').innerHTML=historyText;
+    loadHistoryDocs();
+  }
+}
+
+function openLogin(){$('loginOverlay').classList.add('open');}
+function closeLogin(){$('loginOverlay').classList.remove('open');$('loginMsg').style.display='none';}
+
+async function loadAllData(){
+  try{
+    const sm=await db.collection('membres').get();
+    members=sm.docs.map(d=>d.data());
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    const hd2=await db.collection('contenu').doc('histoire').get();
+    if(hd2.exists)historyText=hd2.data().texte||'';
+    dataLoaded=true;
+  }catch(e){
+    members=JSON.parse(localStorage.getItem('rl_members')||'[]');
+    docs=JSON.parse(localStorage.getItem('rl_docs')||'[]');
+    historyText=localStorage.getItem('rl_history')||'';
+    dataLoaded=true;
+  }
+  if(historyText)$('historyDisplay').innerHTML=historyText;
+}
+
+function updateSubFolderCards(){
+  document.querySelectorAll('[data-grade-card]').forEach(c=>{
+    const g=parseInt(c.dataset.gradeCard);
+    c.style.display=(!currentUser||currentUser.grade<g)?'none':'block';
+  });
+  document.querySelectorAll('.card .sub-list li').forEach(li=>{
+    if(!currentUser){li.style.pointerEvents='none';li.style.opacity='0.5';return;}
+    const r=parseInt(li.getAttribute('data-grade'));
+    if(currentUser.grade>=r){li.style.pointerEvents='auto';li.style.opacity='1';li.style.cursor='pointer';}
+    else{li.style.pointerEvents='none';li.style.opacity='0.4';li.style.cursor='not-allowed';}
+  });
+}
+
+async function doLogin(){
+  const u=$('loginUser').value.trim();
+  const p=$('loginPass').value.trim();
+  const msg=$('loginMsg');
+  msg.style.display='none';
+  
+  if(u==='RL731' && p==='08051956'){
+    currentUser={id:'RL731',prenom:'Admin',nom:'',grade:3,isAdmin:true};
+    localStorage.setItem('rl_session',JSON.stringify(currentUser));
+    closeLogin();
+    applyLogin();
+    return;
+  }
+  if(!dataLoaded)await loadAllData();
+  const m=members.find(x=>x.id===u && x.birth===p);
+  if(m){
+    currentUser={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};
+    localStorage.setItem('rl_session',JSON.stringify(currentUser));
+    closeLogin();
+    applyLogin();
+    return;
+  }
+  msg.textContent='Identifiants incorrects';
+  msg.style.display='block';
+}
+
+function applyLogin(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-accueil').classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector('nav a').classList.add('active');
+  
+  $('logoutBtn').style.display='inline-block';
+  
+  if(currentUser.isAdmin){
+    $('adminPanel').style.display='block';
+    $('loginPrompt').style.display='none';
+    $('historyAdminUpload').style.display='block';
+    $('historyDisplay').setAttribute('contenteditable','true');
+    $('saveHistoryBtn').style.display='inline-block';
+    updateSubs();
+    renderMembersList();
+  } else {
+    $('adminPanel').style.display='none';
+    $('loginPrompt').style.display='block';
+  }
+  loadHistoryDocs();
+  updateSubFolderCards();
+  renderDocs();
+  renderMedia();
+}
+
+function doLogout(){
+  currentUser=null;
+  localStorage.removeItem('rl_session');
+  $('adminPanel').style.display='none';
+  $('loginPrompt').style.display='block';
+  $('logoutBtn').style.display='none';
+  $('historyAdminUpload').style.display='none';
+  $('historyDisplay').setAttribute('contenteditable','false');
+  $('saveHistoryBtn').style.display='none';
+  currentSub=null;
+  currentNiveau=1;
+  sortMode='none';
+  updateSubFolderCards();
+  renderDocs();
+  renderMedia();
+  renderArchives();
+  loadHistoryDocs();
+}
+
+function selectSubDirect(k){
+  const s=ssR[k];
+  if(!s || !currentUser || currentUser.grade<s.niveau)return;
+  currentSub=k;
+  showPage('archives',document.querySelector('nav a:nth-child(3)'));
+  renderArchives();
+}
+
+(function(){
+  loadAllData().then(()=>{
+    const s=localStorage.getItem('rl_session');
+    if(s){
+      try{
+        currentUser=JSON.parse(s);
+        if(currentUser.isAdmin){
+          $('adminPanel').style.display='block';
+          $('loginPrompt').style.display='none';
+          $('logoutBtn').style.display='inline-block';
+          $('historyAdminUpload').style.display='block';
+          $('historyDisplay').setAttribute('contenteditable','true');
+          $('saveHistoryBtn').style.display='inline-block';
+          updateSubs();
+          renderMembersList();
         }
+        updateSubFolderCards();
+      }catch(e){updateSubFolderCards();}
+    }else{updateSubFolderCards();}
+    if(historyText)$('historyDisplay').innerHTML=historyText;
+    loadHistoryDocs();
+  });
+})();
 
-        function updateUI() {
-            const isAdmin = currentUser && currentUser.isAdmin;
-            document.getElementById('btnLogin').style.display = isAdmin ? 'none' : 'inline-block';
-            document.getElementById('btnLogout').style.display = isAdmin ? 'inline-block' : 'none';
-            // Admin bar
-            const bar = document.getElementById('histoireAdminBar');
-            if (bar) {
-                if (isAdmin) bar.classList.add('show');
-                else bar.classList.remove('show');
-            }
-            // upload section
-            const upload = document.querySelector('.upload-section');
-            if (upload && !isAdmin) upload.classList.remove('show');
-        }
+function showAdminTab(n,el){
+  document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  $('adminDocs').style.display=n==='docs'?'block':'none';
+  $('adminMembres').style.display=n==='membres'?'block':'none';
+  if(n==='membres')renderMembersList();
+  if(n==='docs')updateSubs();
+}
 
-        // ============================================================
-        // MODALS
-        // ============================================================
-        function openModal(id) {
-            document.getElementById(id).classList.add('show');
-        }
+function updateSubs(){
+  const n=parseInt($('docNiveau').value);
+  $('docSub').innerHTML=Object.entries(ssR)
+    .filter(([k,v])=>v.niveau===n)
+    .map(([k,v])=>'<option value="'+k+'">'+v.label+'</option>').join('');
+}
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-        // Fermer modal au clic sur fond
-        document.querySelectorAll('.modal-overlay').forEach(m => {
-            m.addEventListener('click', function(e) {
-                if (e.target === this) this.classList.remove('show');
-            });
-        });
+function toggleSortMode(){
+  sortMode=(sortMode==='none'||sortMode==='nom_desc')?'nom_asc':'nom_desc';
+  renderMembersList();
+}
+function getSortedMembres(){
+  if(sortMode==='none')return members;
+  return[...members].sort((a,b)=>{
+    const na=(a.nom||'').toLowerCase(),nb=(b.nom||'').toLowerCase();
+    return sortMode==='nom_asc'?na.localeCompare(nb):nb.localeCompare(na);
+  });
+}
+function getSortIcon(){return sortMode==='none'?' ⇅':sortMode==='nom_asc'?' ▲':' ▼';}
 
-        // ============================================================
-        // CONFIG DES DEGRÉS ET RUBRIQUES
-        // ============================================================
-        const DEGRES = [{
-            id: 'apprenti',
-            label: 'APPRENTI',
-            icon: '🔒',
-            rubriques: [
-                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
-                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
-                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
-                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' }
-            ]
-        }, {
-            id: 'compagnon',
-            label: 'COMPAGNON',
-            icon: '🔒',
-            rubriques: [
-                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
-                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
-                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
-                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' },
-                { id: 'rituels2', icon: '📜', label: 'Rituels 2°' },
-                { id: 'planches-compagnon', icon: '📝', label: 'Planches Compagnon' },
-                { id: 'orateur2', icon: '🎙', label: 'Orateur 2°' }
-            ]
-        }, {
-            id: 'maitre',
-            label: 'MAÎTRE',
-            icon: '🔒',
-            rubriques: [
-                { id: 'rituels1', icon: '📜', label: 'Rituels 1°' },
-                { id: 'planches-apprenti', icon: '📝', label: 'Planches Apprenti' },
-                { id: 'planches-maitres1', icon: '📝', label: 'Planches Maîtres 1°' },
-                { id: 'orateur1', icon: '🎙', label: 'Orateur 1°' },
-                { id: 'rituels2', icon: '📜', label: 'Rituels 2°' },
-                { id: 'planches-compagnon', icon: '📝', label: 'Planches Compagnon' },
-                { id: 'orateur2', icon: '🎙', label: 'Orateur 2°' },
-                { id: 'rituels3', icon: '📜', label: 'Rituels 3°' },
-                { id: 'planches-maitres3', icon: '📝', label: 'Planches Maîtres 3°' },
-                { id: 'orateur3', icon: '🎙', label: 'Orateur 3°' }
-            ]
-        }];
+async function addMember(){
+  const p=$('memPrenom').value.trim(),n=$('memNom').value.trim(),g=parseInt($('memGrade').value),b=$('memBirth').value.trim(),msg=$('memMsg');
+  if(!p||!n||!b){msg.textContent='Prénom, nom et date requis';msg.className='msg error';msg.style.display='block';return;}
+  if(b.length!==8||isNaN(b)){msg.textContent='JJMMAAAA';msg.className='msg error';msg.style.display='block';return;}
+  const id=(p+'.'+n).toLowerCase();
+  if(!dataLoaded)await loadAllData();
+  if(members.find(m=>m.id===id)){msg.textContent='Existe déjà';msg.className='msg error';msg.style.display='block';return;}
+  try{
+    await db.collection('membres').doc(id).set({id,prenom:p,nom:n,grade:g,birth:b});
+    msg.textContent='✅ Ajouté '+id;msg.className='msg';msg.style.display='block';
+    $('memPrenom').value='';$('memNom').value='';$('memBirth').value='';
+    renderMembersList();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';
+  }
+}
 
-        const RUBRIQUE_LABELS = {
-            'rituels1': '📜 Rituels 1°',
-            'planches-apprenti': '📝 Planches Apprenti',
-            'planches-maitres1': '📝 Planches Maîtres 1°',
-            'orateur1': '🎙 Orateur 1°',
-            'rituels2': '📜 Rituels 2°',
-            'planches-compagnon': '📝 Planches Compagnon',
-            'orateur2': '🎙 Orateur 2°',
-            'rituels3': '📜 Rituels 3°',
-            'planches-maitres3': '📝 Planches Maîtres 3°',
-            'orateur3': '🎙 Orateur 3°'
-        };
+async function removeMember(id){
+  if(!confirm('Supprimer ?'))return;
+  try{
+    await db.collection('membres').doc(id).delete();
+    renderMembersList();
+  }catch(e){alert(e.message);}
+}
 
-        // ============================================================
-        // ACCUEIL — CARTES DEGRÉS
-        // ============================================================
-        function renderHomeDegres() {
-            const container = document.getElementById('homeDegres');
-            container.innerHTML = '';
-            const degreUser = currentUser ? currentUser.degre : null;
-            DEGRES.forEach(deg => {
-                const isUnlocked = degreUser === deg.id ||
-                    (degreUser === 'compagnon' && (deg.id === 'apprenti' || deg.id === 'compagnon')) ||
-                    (degreUser === 'maitre');
-                const card = document.createElement('div');
-                card.className = 'carte-degre';
-                card.innerHTML = `
-                    <h3>${isUnlocked ? '' : '🔒 '}${deg.label}</h3>
-                    ${deg.rubriques.map(r => `
-                        <div class="rubrique ${isUnlocked ? 'unlocked' : 'locked'}">
-                            <span class="icon">${r.icon}</span>
-                            <span>${r.label}</span>
-                        </div>
-                    `).join('')}
-                `;
-                container.appendChild(card);
-            });
-        }
+async function renderMembersList(){
+  const l=$('memList');
+  try{
+    const s=await db.collection('membres').get();
+    members=s.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){
+    l.innerHTML='<p style="font-size:12px;color:#999">Erreur</p>';
+    return;
+  }
+  if(!members.length){l.innerHTML='<p style="font-size:12px;color:#999">Aucun</p>';return;}
+  
+  const sel=$('memChangeId');
+  const cv=sel.value;
+  sel.innerHTML='<option value="">Changer...</option>'+members.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
+  
+  l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="toggleSortMode()">Nom'+getSortIcon()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+
+    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
+    '</table></div>';
+}
 
-        // ============================================================
-        // HISTOIRE
-        // ============================================================
-        async function loadHistoire() {
-            const contentDiv = document.getElementById('histoireContent');
-            const listDiv = document.getElementById('histoireDocList');
-            try {
-                const doc = await db.collection('histoire').doc('contenu').get();
-                if (doc.exists) {
-                    contentDiv.innerHTML = doc.data().texte || '<p style="color:#6a5a4a;">Texte en cours de rédaction...</p>';
-                } else {
-                    contentDiv.innerHTML = '<p style="color:#6a5a4a;">Texte en cours de rédaction...</p>';
-                }
-                // Charger les documents
-                const snap = await db.collection('histoire').doc('documents').collection('files')
-                    .orderBy('date', 'desc').get();
-                listDiv.innerHTML = '';
-                if (snap.empty) {
-                    listDiv.innerHTML = '<li style="color:#6a5a4a;">Aucun document pour le moment.</li>';
-                    return;
-                }
-                snap.forEach(d => {
-                    const data = d.data();
-                    const li = document.createElement('li');
-                    const isAdmin = currentUser && currentUser.isAdmin;
-                    const dateStr = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString(
-                    'fr-FR') : '';
-                    li.innerHTML = `
-                        <a href="${data.url}" target="_blank">${data.title || 'Sans titre'}</a>
-                        <span style="display:flex;align-items:center;gap:8px;">
-                            ${dateStr ? `<span class="doc-date">${dateStr}</span>` : ''}
-                            ${isAdmin ? `<button class="btn-delete" onclick="deleteHistoireDoc('${d.id}')" title="Supprimer">🗑</button>` : ''}
-                        </span>
-                    `;
-                    listDiv.appendChild(li);
-                });
-            } catch (e) {
-                console.error('Erreur chargement histoire:', e);
-                contentDiv.innerHTML = '<p style="color:#a06060;">Erreur de chargement.</p>';
-            }
-        }
+async function changeMemberGrade(){
+  const id=$('memChangeId').value,ng=parseInt($('memChangeGrade').value),msg=$('memMsg');
+  if(!id){msg.textContent='Sélectionnez';msg.className='msg error';msg.style.display='block';return;}
+  try{
+    await db.collection('membres').doc(id).update({grade:ng});
+    msg.textContent='✅ OK';msg.className='msg';msg.style.display='block';
+    renderMembersList();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';
+  }
+}
 
-        async function editHistoire() {
-            if (!currentUser || !currentUser.isAdmin) return;
-            const contentDiv = document.getElementById('histoireContent');
-            const currentText = contentDiv.innerHTML;
-            const newText = prompt('Modifier le texte de l\'histoire :', currentText.replace(/<br\s*\/?>/g, '\n')
-                .replace(/<[^>]*>/g, ''));
-            if (newText && newText !== currentText.replace(/<br\s*\/?>/g, '\n').replace(/<[^>]*>/g, '')) {
-                try {
-                    await db.collection('histoire').doc('contenu').set({
-                        texte: newText.replace(/\n/g, '<br>')
-                    });
-                    loadHistoire();
-                } catch (e) {
-                    alert('Erreur lors de la sauvegarde.');
-                }
-            }
-        }
+async function saveHistory(){
+  const c=$('historyDisplay').innerHTML;
+  try{
+    await db.collection('contenu').doc('histoire').set({texte:c});
+    historyText=c;
+  }catch(e){
+    localStorage.setItem('rl_history',c);
+    historyText=c;
+  }
+  const btn=$('saveHistoryBtn');
+  btn.textContent='✅ Sauvegardé';
+  setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);
+}
 
-        async function uploadHistoireDoc() {
-            if (!currentUser || !currentUser.isAdmin) return;
-            const fileInput = document.getElementById('histoireFileInput');
-            const titleInput = document.getElementById('histoireDocTitle');
-            const file = fileInput.files[0];
-            const title = titleInput.value.trim() || 'Document';
-            if (!file) { alert('Veuillez sélectionner un fichier.'); return; }
-            try {
-                const ref = storage.ref('histoire/documents/' + Date.now() + '_' + file.name);
-                await ref.put(file);
-                const url = await ref.getDownloadURL();
-                await db.collection('histoire').doc('documents').collection('files').add({
-                    title: title,
-                    url: url,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                fileInput.value = '';
-                titleInput.value = '';
-                document.querySelector('.upload-section').classList.remove('show');
-                loadHistoire();
-            } catch (e) {
-                alert('Erreur upload: ' + e.message);
-            }
-        }
+async function uploadHistoryDoc(){
+  const fi=$('historyFileInput');
+  const t=$('historyDocTitle').value.trim();
+  const d=$('historyDocDate').value;
+  const msg=$('uploadAdminMsg');
+  const ub=$('uploadBtn');
+  const pr=$('uploadProgress');
+  const br=$('uploadProgressBar');
+  
+  msg.className='admin-msg';
+  msg.style.display='none';
+  
+  if(!fi.files || !fi.files[0]){
+    msg.textContent='❌ Sélectionnez un fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  if(!t){
+    msg.textContent='❌ Titre requis';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
+  const f=fi.files[0];
+  if(f.size>20*1024*1024){
+    msg.textContent='❌ Fichier > 20 Mo';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
+  ub.disabled=true;
+  ub.innerHTML='⏳ Upload...';
+  pr.style.display='block';
+  br.style.width='0%';
+  msg.className='admin-msg info';
+  msg.textContent='⏳ Conversion du fichier...';
+  msg.style.display='block';
+  
+  const reader=new FileReader();
+  reader.onprogress=function(e){
+    if(e.lengthComputable){
+      br.style.width=(e.loaded/e.total*50)+'%';
+    }
+  };
+  reader.onload=async function(e){
+    br.style.width='60%';
+    msg.textContent='⏳ Enregistrement dans Firestore...';
+    try{
+      const base64=e.target.result;
+      await db.collection('histoire_documents').add({
+        title:t,
+        date:d||'',
+        fileName:f.name,
+        type:f.name.split('.').pop().toLowerCase(),
+        data:base64,
+        size:f.size,
+        uploadedAt:new Date().toISOString()
+      });
+      br.style.width='100%';
+      msg.textContent='✅ Upload réussi !';
+      msg.className='admin-msg success';
+      msg.style.display='block';
+      fi.value='';
+      $('historyDocTitle').value='';
+      $('historyDocDate').value='';
+      $('uploadZone').querySelector('p').innerHTML='<strong>Cliquez</strong> ou glissez-déposez un fichier';
+      setTimeout(function(){
+        pr.style.display='none';
+        br.style.width='0%';
+      },800);
+      await loadHistoryDocs();
+    }catch(er){
+      msg.textContent='❌ Erreur: '+er.message;
+      msg.className='admin-msg error';
+      msg.style.display='block';
+      pr.style.display='none';
+      br.style.width='0%';
+    }
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+  };
+  reader.onerror=function(){
+    msg.textContent='❌ Erreur lors de la lecture du fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+    pr.style.display='none';
+    br.style.width='0%';
+  };
+  reader.readAsDataURL(f);
+}
 
-        async function deleteHistoireDoc(docId) {
-            if (!currentUser || !currentUser.isAdmin) return;
-            if (!confirm('Supprimer ce document ?')) return;
-            try {
-                await db.collection('histoire').doc('documents').collection('files').doc(docId).delete();
-                loadHistoire();
-            } catch (e) {
-                alert('Erreur suppression: ' + e.message);
-            }
-        }
+async function loadHistoryDocs(){
+  try{
+    var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
+    historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){
+    console.log('histoire_documents status:', e.message);
+    historyDocs=[];
+  }
+  displayPublicHistoryDocs();
+  if(currentUser && currentUser.isAdmin) displayAdminHistoryDocs();
+}
 
-        // ============================================================
-        // ARCHIVES — DOCUMENTS
-        // ============================================================
-        async function renderArchives() {
-            const container = document.getElementById('archivesDegres');
-            container.innerHTML = '';
-            const degreUser = currentUser ? currentUser.degre : null;
-            const isAdmin = currentUser && currentUser.isAdmin;
+function displayPublicHistoryDocs(){
+  var c=$('historyDocsPublic');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';
+    return;
+  }
+  var imgs=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;});
+  var oth=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)<0;});
+  var h='';
+  
+  if(imgs.length){
+    h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
+    imgs.forEach(function(d){
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong></div></div>';
+    });
+    h+='</div></div>';
+  }
+  
+  if(oth.length){
+    h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
+    oth.forEach(function(d){
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+    });
+    h+='</div>';
+  }
+  
+  c.innerHTML=h;
+}
 
-            for (const deg of DEGRES) {
-                const isUnlocked = degreUser === deg.id ||
-                    (degreUser === 'compagnon' && (deg.id === 'apprenti' || deg.id === 'compagnon')) ||
-                    (degreUser === 'maitre') || isAdmin;
+function displayAdminHistoryDocs(){
+  var c=$('historyDocsList');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';
+    return;
+  }
+  c.innerHTML=historyDocs.map(function(d){
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+  }).join('');
+}
 
-                const card = document.createElement('div');
-                card.className = 'carte-degre';
-                let rubriquesHtml = '';
-                for (const rub of deg.rubriques) {
-                    let docsHtml = '';
-                    try {
-                        const snap = await db.collection('archives')
-                            .where('degre', '==', deg.id)
-                            .where('rubrique', '==', rub.id)
-                            .orderBy('date', 'desc')
-                            .get();
-                        if (!snap.empty) {
-                            snap.forEach(d => {
-                                const data = d.data();
-                                const dateStr = data.date ? new Date(data.date.seconds * 1000)
-                                    .toLocaleDateString('fr-FR') : '';
-                                docsHtml += `<div class="doc-item">
-                                    <div>
-                                        <a href="${data.url}" target="_blank">${data.title || 'Sans titre'}</a>
-                                        ${dateStr ? `<span class="doc-date">${dateStr}</span>` : ''}
-                                    </div>
-                                    ${isAdmin ? `<button class="btn-delete" onclick="deleteArchiveDoc('${d.id}')" title="Supprimer">🗑</button>` : ''}
-                                </div>`;
-                            });
-                        } else {
-                            docsHtml =
-                            `<div class="doc-item" style="color:#6a5a4a;font-size:0.85rem;">Aucun document</div>`;
-                        }
-                    } catch (e) {
-                        docsHtml = `<div class="doc-item" style="color:#a06060;">Erreur chargement</div>`;
-                    }
-                    rubriquesHtml += `
-                        <div class="rubrique ${isUnlocked ? 'unlocked' : 'locked'}">
-                            <span class="icon">${rub.icon}</span>
-                            <span>${rub.label}</span>
-                        </div>
-                        ${isUnlocked ? docsHtml : ''}
-                    `;
-                }
-                card.innerHTML = `
-                    <h3>${isUnlocked ? '' : '🔒 '}${deg.label}</h3>
-                    ${rubriquesHtml}
-                    ${isAdmin ? `<div style="margin-top:15px;text-align:center;"><button onclick="openArchiveModal('${deg.id}')" style="padding:6px 14px;border:1px solid #5a3f28;border-radius:4px;cursor:pointer;background:#2a1f15;color:#c4a97a;">+ Ajouter un document</button></div>` : ''}
-                `;
-                container.appendChild(card);
-            }
-        }
+function openViewerById(docId){
+  var d=historyDocs.find(function(x){return x._fi===docId;});
+  if(!d){alert('Document introuvable');return;}
+  $('viewerTitle').textContent=d.title||'Document';
+  const b=$('viewerBody');
+  const ex=(d.type||'').toLowerCase();
+  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
+    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ex==='pdf'){
+    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
+  } else if(ex==='txt'){
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+  } else {
+    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
 
-        let archiveModalDegre = 'apprenti';
+function closeViewer(){$('viewerOverlay').classList.remove('open');}
 
-        function openArchiveModal(degre) {
-            if (!currentUser || !currentUser.isAdmin) return;
-            archiveModalDegre = degre;
-            document.getElementById('archiveDegre').value = degre;
-            document.getElementById('archiveModalTitle').textContent = 'Ajouter un document — ' + degre
-            .charAt(0).toUpperCase() + degre.slice(1);
-            openModal('archiveModal');
-        }
+async function deleteHistoryDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('histoire_documents').doc(id).delete();
+    loadHistoryDocs();
+  }catch(e){alert(e.message);}
+}
 
-        async function saveArchiveDoc() {
-            if (!currentUser || !currentUser.isAdmin) return;
-            const degre = document.getElementById('archiveDegre').value;
-            const rubrique = document.getElementById('archiveRubrique').value;
-            const title = document.getElementById('archiveTitle').value.trim() || 'Document';
-            const fileInput = document.getElementById('archiveFile');
-            const file = fileInput.files[0];
-            if (!file) { alert('Veuillez sélectionner un fichier.'); return; }
-            try {
-                const ref = storage.ref('archives/' + Date.now() + '_' + file.name);
-                await ref.put(file);
-                const url = await ref.getDownloadURL();
-                await db.collection('archives').add({
-                    degre: degre,
-                    rubrique: rubrique,
-                    title: title,
-                    url: url,
-                    date: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                fileInput.value = '';
-                document.getElementById('archiveTitle').value = '';
-                closeModal('archiveModal');
-                renderArchives();
-            } catch (e) {
-                alert('Erreur: ' + e.message);
-            }
-        }
+// === DOCUMENTS ARCHIVES ===
+function renderArchives(){
+  const c=$('archivesContent');
+  if(!currentUser){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}
+  const subsArr=Object.entries(ssR).map(([k,v])=>({id:k,...v}));
+  const filtered=currentUser.isAdmin?subsArr:subsArr.filter(s=>currentUser.grade>=s.niveau);
+  if(currentSub){
+    const sub=ssR[currentSub];
+    if(!sub||(currentUser.grade<sub.niveau&&!currentUser.isAdmin)){
+      c.innerHTML='<p style="color:#999;padding:20px">Accès refusé.</p>';return;
+    }
+    const gradeLabel=['','Apprenti','Compagnon','Maître'][sub.niveau];
+    var subDocs=docs.filter(d=>d.sub===currentSub);
+    if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
+    c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
+      '<div id="subDocsList" style="margin-top:10px">'+
+      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+d.auteur+'</span></div></div>').join('')+
+      (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
+      '</div>';
+  } else {
+    c.innerHTML='<p style="color:#555;font-size:13px;margin-bottom:10px">Sélectionnez une rubrique :</p><div class="rubriques">'+
+      filtered.map(s=>'<div class="rubrique-card" onclick="if(currentUser&&currentUser.grade>='+s.niveau+'){currentSub=\''+s.id+'\';renderArchives();}"><h4>'+s.label+'</h4><span style="font-size:12px;color:#888">Niveau '+s.niveau+'</span></div>').join('')+
+      '</div>';
+  }
+}
 
-        async function deleteArchiveDoc(docId) {
-            if (!currentUser || !currentUser.isAdmin) return;
-            if (!confirm('Supprimer ce document ?')) return;
-            try {
-                await db.collection('archives').doc(docId).delete();
-                renderArchives();
-            } catch (e) {
-                alert('Erreur suppression: ' + e.message);
-            }
-        }
+function renderDocs(){
+  if(!currentUser)return;
+  renderArchives();
+}
 
-        // ============================================================
-        // MEMBRES
-        // ============================================================
-        async function loadMembres() {
-            const container = document.getElementById('membresList');
-            container.innerHTML = '';
-            const isAdmin = currentUser && currentUser.isAdmin;
-            try {
-                const snap = await db.collection('membres').orderBy('date', 'desc').get();
-                if (snap.empty) {
-                    container.innerHTML = '<p style="color:#6a5a4a;grid-column:1/-1;text-align:center;">Aucun membre pour le moment.</p>';
-                    return;
-                }
-                snap.forEach(d => {
-                    const data = d.data();
-                    const dateStr = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString(
-                    'fr-FR') : '';
-                    const card = document.createElement('div');
-                    card.className = 'membre-card';
-                    card.innerHTML = `
-                        <h4>${data.nom || 'Anonyme'}</h4>
-                        <div class="role">${data.role || 'Membre'}</div>
-                        ${dateStr ? `<div class="date">Entré le ${dateStr}</div>` : ''}
-                        ${isAdmin ? `<button class="btn-delete" onclick="deleteMembre('${d.id}')" style="margin-top:10px;" title="Supprimer">🗑</button>` : ''}
-                    `;
-                    container.appendChild(card);
-                });
-                if (isAdmin) {
-                    const addBtn = document.createElement('div');
-                    addBtn.style.cssText =
-                        'grid-column:1/-1;text-align:center;margin-top:10px;';
-                    addBtn.innerHTML =
-                        '<button onclick="openModal(\'membreModal\')" style="padding:10px 24px;border:1px solid #5a3f28;border-radius:4px;cursor:pointer;background:#2a1f15;color:#c4a97a;">+ Ajouter un membre</button>';
-                    container.appendChild(addBtn);
-                }
-            } catch (e) {
-                container.innerHTML = '<p style="color:#a06060;">Erreur de chargement des membres.</p>';
-            }
-        }
+function renderMedia(){
+  var c=$('mediaList');
+  if(!currentUser){c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';return;}
+  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Fonctionnalité à venir.</p>';
+}
 
-        async function saveMembre() {
-            if (!currentUser || !currentUser.isAdmin) return;
-            const nom = document.getElementById('membreNom').value.trim();
-            const role = document.getElementById('membreRole').value.trim();
-            const date = document.getElementById('membreDate').value;
-            if (!nom) { alert('Veuillez entrer un nom.'); return; }
-            try {
-                await db.collection('membres').add({
-                    nom: nom,
-                    role: role || 'Membre',
-                    date: date ? new Date(date) : firebase.firestore.FieldValue.serverTimestamp()
-                });
-                document.getElementById('membreNom').value = '';
-                document.getElementById('membreRole').value = '';
-                document.getElementById('membreDate').value = '';
-                closeModal('membreModal');
-                loadMembres();
-            } catch (e) {
-                alert('Erreur: ' + e.message);
-            }
-        }
-
-        async function deleteMembre(docId) {
-            if (!currentUser || !currentUser.isAdmin) return;
-            if (!confirm('Supprimer ce membre ?')) return;
-            try {
-                await db.collection('membres').doc(docId).delete();
-                loadMembres();
-            } catch (e) {
-                alert('Erreur: ' + e.message);
-            }
-        }
-
-        // ============================================================
-        // VISUALISEUR PLEIN ÉCRAN
-        // ============================================================
-        function openViewer(url) {
-            const overlay = document.getElementById('viewerOverlay');
-            const content = document.getElementById('viewerContent');
-            overlay.classList.add('show');
-            if (url.match(/\.(png|jpg|jpeg|gif)$/i)) {
-                content.innerHTML = `<img src="${url}" alt="Document">`;
-            } else if (url.match(/\.pdf$/i)) {
-                content.innerHTML =
-                    `<iframe src="${url}" style="width:90vw;height:90vh;" frameborder="0"></iframe>`;
-            } else {
-                content.innerHTML = `<iframe src="${url}" style="width:90vw;height:90vh;" frameborder="0"></iframe>`;
-            }
-        }
-
-        function closeViewer() {
-            document.getElementById('viewerOverlay').classList.remove('show');
-            document.getElementById('viewerContent').innerHTML = '';
-        }
-
-        // ============================================================
-        // INIT
-        // ============================================================
-        renderHomeDegres();
-        loadHistoire();
-        renderArchives();
-        loadMembres();
-
-        console.log('731 Archives — Site initialisé');
-        console.log('Admin: ' + ADMIN_USER);
-    </script>
+// === ADMIN : AJOUTER DOCUMENT ===
+async function addDocument(){
+  const t=$('docTitle').value.trim();
+  const nv=parseInt($('docNiveau').value);
+  const sb=$('docSub').value;
+  const gr=parseInt($('docGrade').value);
+  const dt=$('docDate').value;
+  const au=$('docAuteur').value.trim();
+  const fi=$('docFile');
+  const msg=$('docMsg');
+  
+  msg.className='msg error';
+  msg.style.display='none';
+  
+  if(!t||!au){msg.textContent='Titre et auteur requis';msg.style.display='block';return;}
+  
+  const docData={title:t,sub:sb,niveau:nv,grade:gr,date:dt,auteur:au,addedAt:new Date().toISOString()};
+  
+  try{
+    await db.collection('documents').add(docData);
+    msg.textContent='✅ Document ajouté';msg.className='msg';msg.style.display='block';
+    $('docTitle').value='';$('docAuteur').value='';$('docDate').value='';$('docFile').value='';
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    renderArchives();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.style.display='block';
+  }
+}
+</script>
 </body>
 </html>
