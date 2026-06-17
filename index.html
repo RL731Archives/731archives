@@ -129,38 +129,30 @@
     <div>
       <h2 style="color:var(--bordeaux);margin-bottom:10px">Bienvenue</h2>
       <p style="color:#555;margin-bottom:14px">Ce site archive les travaux, photos et vidéos de la Loge L'Étoile du Temple.</p>
-      <div class="cards">
-        <div class="card apprenti" data-grade-card="1"><h3>APPRENTI</h3><div class="lock">🔒</div>
+      <div class="cards" id="homeCards">
+        <div class="card apprenti" id="homeCard1">
+          <h3>APPRENTI</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+            <li onclick="goToSub('rituels1')"><span class="emoji-icon">📜</span> Rituels 1°</li>
+            <li onclick="goToSub('planches-apprenti')"><span class="emoji-icon">📝</span> Planches Apprenti</li>
+            <li onclick="goToSub('planches-maitres1')"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
+            <li onclick="goToSub('orateur1')"><span class="emoji-icon">🎙</span> Orateur 1°</li>
           </ul>
         </div>
-        <div class="card compagnon" data-grade-card="2"><h3>COMPAGNON</h3><div class="lock">🔒</div>
+        <div class="card compagnon" id="homeCard2">
+          <h3>COMPAGNON</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
+            <li onclick="goToSub('rituels2')"><span class="emoji-icon">📜</span> Rituels 2°</li>
+            <li onclick="goToSub('planches-compagnon')"><span class="emoji-icon">📝</span> Planches Compagnon</li>
+            <li onclick="goToSub('orateur2')"><span class="emoji-icon">🎙</span> Orateur 2°</li>
           </ul>
         </div>
-        <div class="card maitre" data-grade-card="3"><h3>MAÎTRE</h3><div class="lock">🔒</div>
+        <div class="card maitre" id="homeCard3">
+          <h3>MAÎTRE</h3><div class="lock">🔒</div>
           <ul class="sub-list">
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('rituels1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📜</span> Rituels 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-apprenti')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Apprenti</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('planches-maitres1')}" class="js-sub" data-grade="1"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=1){selectSubDirect('orateur1')}" class="js-sub" data-grade="1"><span class="emoji-icon">🎙</span> Orateur 1°</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="2" onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('rituels2')}"><span class="emoji-icon">📜</span> Rituels 2°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('planches-compagnon')}" class="js-sub" data-grade="2"><span class="emoji-icon">📝</span> Planches Compagnon</li>
-            <li onclick="if(currentUser&&currentUser.grade>=2){selectSubDirect('orateur2')}" class="js-sub" data-grade="2"><span class="emoji-icon">🎙</span> Orateur 2°</li>
-            <li style="margin-top:6px;border-top:1px solid var(--gold);padding-top:6px" class="js-sub" data-grade="3" onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('rituels3')}"><span class="emoji-icon">📜</span> Rituels 3°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('planches-maitres3')}" class="js-sub" data-grade="3"><span class="emoji-icon">📝</span> Planches Maîtres 3°</li>
-            <li onclick="if(currentUser&&currentUser.grade>=3){selectSubDirect('orateur3')}" class="js-sub" data-grade="3"><span class="emoji-icon">🎙</span> Orateur 3°</li>
+            <li onclick="goToSub('rituels3')"><span class="emoji-icon">📜</span> Rituels 3°</li>
+            <li onclick="goToSub('planches-maitres3')"><span class="emoji-icon">📝</span> Planches Maîtres 3°</li>
+            <li onclick="goToSub('orateur3')"><span class="emoji-icon">🎙</span> Orateur 3°</li>
           </ul>
         </div>
       </div>
@@ -362,17 +354,26 @@ async function loadAllData(){
   if(historyText)$('historyDisplay').innerHTML=historyText;
 }
 
-function updateSubFolderCards(){
-  document.querySelectorAll('[data-grade-card]').forEach(c=>{
-    const g=parseInt(c.dataset.gradeCard);
-    c.style.display=(!currentUser||currentUser.grade<g)?'none':'block';
+function updateHomeCards(){
+  ['homeCard1','homeCard2','homeCard3'].forEach(id=>{
+    const el=$(id);
+    if(!el)return;
+    if(!currentUser){
+      el.style.display='block';
+      return;
+    }
+    const grade=parseInt(id.replace('homeCard',''));
+    el.style.display=(currentUser.grade>=grade)?'block':'none';
   });
-  document.querySelectorAll('.card .sub-list li').forEach(li=>{
-    if(!currentUser){li.style.pointerEvents='none';li.style.opacity='0.5';return;}
-    const r=parseInt(li.getAttribute('data-grade'));
-    if(currentUser.grade>=r){li.style.pointerEvents='auto';li.style.opacity='1';li.style.cursor='pointer';}
-    else{li.style.pointerEvents='none';li.style.opacity='0.4';li.style.cursor='not-allowed';}
-  });
+}
+
+function goToSub(key){
+  if(!currentUser){openLogin();return;}
+  const s=ssR[key];
+  if(!s||currentUser.grade<s.niveau){return;}
+  currentSub=key;
+  showPage('archives',document.querySelector('nav a:nth-child(3)'));
+  renderArchives();
 }
 
 async function doLogin(){
@@ -422,7 +423,7 @@ function applyLogin(){
     $('loginPrompt').style.display='block';
   }
   loadHistoryDocs();
-  updateSubFolderCards();
+  updateHomeCards();
   renderDocs();
   renderMedia();
 }
@@ -439,19 +440,11 @@ function doLogout(){
   currentSub=null;
   currentNiveau=1;
   sortMode='none';
-  updateSubFolderCards();
+  updateHomeCards();
   renderDocs();
   renderMedia();
   renderArchives();
   loadHistoryDocs();
-}
-
-function selectSubDirect(k){
-  const s=ssR[k];
-  if(!s || !currentUser || currentUser.grade<s.niveau)return;
-  currentSub=k;
-  showPage('archives',document.querySelector('nav a:nth-child(3)'));
-  renderArchives();
 }
 
 (function(){
@@ -470,9 +463,9 @@ function selectSubDirect(k){
           updateSubs();
           renderMembersList();
         }
-        updateSubFolderCards();
-      }catch(e){updateSubFolderCards();}
-    }else{updateSubFolderCards();}
+        updateHomeCards();
+      }catch(e){updateHomeCards();}
+    }else{updateHomeCards();}
     if(historyText)$('historyDisplay').innerHTML=historyText;
     loadHistoryDocs();
   });
@@ -548,7 +541,7 @@ async function renderMembersList(){
   sel.innerHTML='<option value="">Changer...</option>'+members.map(m=>'<option value="'+m.id+'"'+(m.id===cv?' selected':'')+'>'+m.nom+' '+m.prenom+'</option>').join('');
   
   l.innerHTML='<div style="max-height:300px;overflow-y:auto"><table style="width:100%;font-size:13px"><tr style="background:var(--bordeaux);color:#fff"><th style="padding:6px">ID</th><th style="padding:6px"><button class="btn-sort" onclick="toggleSortMode()">Nom'+getSortIcon()+'</button></th><th style="padding:6px">Grade</th><th style="padding:6px">Action</th></tr>'+
-    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\''+m.id+'\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
+    getSortedMembres().map(m=>'<tr><td style="padding:6px">'+m.id+'</td><td style="padding:6px">'+m.nom+' '+m.prenom+'</td><td style="padding:6px">'+['','Apprenti','Compagnon','Maître'][m.grade]+'</td><td style="padding:6px"><button class="btn btn-outline" onclick="removeMember(\\''+m.id+'\\')" style="padding:2px 6px;font-size:11px">✕</button></td></tr>').join('')+
     '</table></div>';
 }
 
@@ -699,7 +692,7 @@ function displayPublicHistoryDocs(){
   if(imgs.length){
     h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
     imgs.forEach(function(d){
-      h+='<div class="histo-gallery-item" onclick="openViewerById(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\\''+d._fi+'\\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
     });
     h+='</div></div>';
   }
@@ -707,7 +700,7 @@ function displayPublicHistoryDocs(){
   if(oth.length){
     h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
     oth.forEach(function(d){
-      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\''+d._fi+'\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\\''+d._fi+'\\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
     });
     h+='</div>';
   }
@@ -722,7 +715,7 @@ function displayAdminHistoryDocs(){
     return;
   }
   c.innerHTML=historyDocs.map(function(d){
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
   }).join('');
 }
 
@@ -759,7 +752,7 @@ function renderArchives(){
   const c=$('archivesContent');
   if(!currentUser){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}
   const subsArr=Object.entries(ssR).map(([k,v])=>({id:k,...v}));
-  const filtered=currentUser.isAdmin?subsArr:subsArr.filter(s=>currentUser.grade>=s.niveau);
+  
   if(currentSub){
     const sub=ssR[currentSub];
     if(!sub||(currentUser.grade<sub.niveau&&!currentUser.isAdmin)){
@@ -770,13 +763,39 @@ function renderArchives(){
     if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
     c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
       '<div id="subDocsList" style="margin-top:10px">'+
-      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<div class="actions"><button class="btn btn-danger" onclick="deleteArchiveDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div>':'')+'</div>').join('')+
+      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div>'+(currentUser&&currentUser.isAdmin?'<div class="actions"><button class="btn btn-danger" onclick="deleteArchiveDoc(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>':'</div>')).join('')+
       (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
       '</div>';
   } else {
-    c.innerHTML='<p style="color:#555;font-size:13px;margin-bottom:10px">Sélectionnez une rubrique :</p><div class="rubriques">'+
-      filtered.map(s=>'<div class="rubrique-card" onclick="if(currentUser&&currentUser.grade>='+s.niveau+'){currentSub=\''+s.id+'\';renderArchives();}"><h4>'+s.label+'</h4><span style="font-size:12px;color:#888">Niveau '+s.niveau+'</span></div>').join('')+
-      '</div>';
+    const niveauLabels = {1:'APPRENTI',2:'COMPAGNON',3:'MAÎTRE'};
+    const niveauColors = {1:'var(--card1)',2:'var(--card2)',3:'var(--card3)'};
+    
+    let visibleNiveaux = [];
+    if(currentUser.isAdmin){
+      visibleNiveaux = [1,2,3];
+    } else {
+      visibleNiveaux = [1];
+      if(currentUser.grade>=2) visibleNiveaux.push(2);
+      if(currentUser.grade>=3) visibleNiveaux.push(3);
+    }
+    
+    let cardsHtml = '<p style="color:#555;font-size:13px;margin-bottom:10px">Sélectionnez une rubrique :</p><div class="cards">';
+    
+    visibleNiveaux.forEach(nv => {
+      const subsOfNiveau = subsArr.filter(s => s.niveau === nv);
+      cardsHtml += '<div class="card" style="background:'+niveauColors[nv]+';flex:1;padding:16px;border-radius:8px;border:2px solid var(--gold);position:relative">' +
+        '<div style="position:absolute;right:10px;top:10px;background:var(--gold);color:#fff;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px">🔒</div>' +
+        '<h3 style="color:var(--bordeaux);font-size:16px;margin-bottom:8px;text-align:center">'+niveauLabels[nv]+'</h3>' +
+        '<ul class="sub-list" style="list-style:none;margin-top:6px">';
+      subsOfNiveau.forEach(s => {
+        const emoji = s.label.includes('Rituels')?'📜':s.label.includes('Planches')?'📝':'🎙';
+        cardsHtml += '<li onclick="currentSub=\\''+s.id+'\\';renderArchives();" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+
+          '<span class="emoji-icon" style="font-size:16px;vertical-align:middle;margin-right:4px">'+emoji+'</span> '+s.label+'</li>';
+      });
+      cardsHtml += '</ul></div>';
+    });
+    cardsHtml += '</div>';
+    c.innerHTML = cardsHtml;
   }
 }
 
@@ -801,7 +820,6 @@ async function deleteArchiveDoc(id){
   }catch(e){alert(e.message);}
 }
 
-// === ADMIN : AJOUTER DOCUMENT ===
 async function addDocument(){
   const t=$('docTitle').value.trim();
   const nv=parseInt($('docNiveau').value);
