@@ -160,7 +160,7 @@
     <div>
       <div class="admin-panel">
         <h3>⚡ Accès rapide</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
+        <p id="loginPrompt" style="font-size:13px;color:#666;margin-bottom:10px">Connectez-vous pour accéder aux archives</p>
         <button class="btn btn-bdx" style="width:100%" onclick="openLogin()">🔓 Se connecter</button>
         <div style="margin-top:10px;font-size:12px;color:#999"><br>Membres : mot de passe = date naissance JJMMAAAA</div>
       </div>
@@ -424,6 +424,7 @@ function applyLogin(){
   if(currentUser.isAdmin){
     $('adminPanel').style.display='block';
     $('loginPrompt').style.display='none';
+    $('adminPanel').style.display='block';
     $('historyAdminUpload').style.display='block';
     $('historyDisplay').setAttribute('contenteditable','true');
     $('saveHistoryBtn').style.display='inline-block';
@@ -730,6 +731,15 @@ function displayAdminHistoryDocs(){
   }).join('');
 }
 
+function dataUriToBlobUrl(dataUri){
+  var arr=dataUri.split(','),mime=arr[0].match(/:(.*?);/);
+  if(!mime)return dataUri;
+  mime=mime[1];
+  var bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
+  while(n--)u8arr[n]=bstr.charCodeAt(n);
+  return URL.createObjectURL(new Blob([u8arr],{type:mime}));
+}
+
 function openViewerById(docId){
   var d=historyDocs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
@@ -739,7 +749,8 @@ function openViewerById(docId){
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
+    var url=(d.data.length>500000)?dataUriToBlobUrl(d.data):d.data;
+    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
   } else if(ex==='txt'){
     b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
   } else {
@@ -761,31 +772,24 @@ async function deleteHistoryDoc(id){
 // =============================================
 // FONCTION VIEWER POUR LES DOCUMENTS ARCHIVES
 // =============================================
-  function dataUriToBlobUrl(dataUri){
-  var parts=dataUri.split(',');
-  var mimeMatch=parts[0].match(/:(.*?);/);
-  var mime=mimeMatch?mimeMatch[1]:'application/octet-stream';
-  var raw=atob(parts[1]);
-  var rawLen=raw.length;
-  var arr=new Uint8Array(rawLen);
-  for(var i=0;i<rawLen;i++)arr[i]=raw.charCodeAt(i);
-  var blob=new Blob([arr],{type:mime});
-  return URL.createObjectURL(blob);
-}
 function openArchiveViewer(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
+  
+  // Vérifier les droits d'accès
   if(!currentUser){openLogin();return;}
   if(!currentUser.isAdmin && currentUser.grade<d.grade){
     alert('Accès refusé : votre grade ne permet pas de consulter ce document.');
     return;
   }
+  
   $('viewerTitle').textContent=d.title||'Document';
   const b=$('viewerBody');
   const fileData=d.data||'';
   const fileName=d.fileName||'';
   const rawType=(d.type||fileName.split('.').pop()||'pdf').toLowerCase().trim();
   
+  // Déterminer le type réel à partir du data base64 si disponible
   var ex=rawType;
   if(fileData.startsWith('data:') && fileData.indexOf('/')>5){
     var mime=fileData.substring(5,fileData.indexOf(';'));
@@ -799,21 +803,15 @@ function openArchiveViewer(docId){
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    // Convertir le data URI en Blob URL si c'est trop long
-    var src=fileData;
-    if(fileData && fileData.length>500000){
-      try{src=dataUriToBlobUrl(fileData);}catch(e){}
-    }
-    b.innerHTML='<iframe src="'+src+'" class="embed-pdf"></iframe>';
+    var url=(fileData.length>500000)?dataUriToBlobUrl(fileData):fileData;
+    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
   } else if(ex==='txt' && fileData.startsWith('data:')){
     b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   } else {
+    // Dernier recours : si le data commence par data:application/pdf, on force l'affichage PDF
     if(fileData.startsWith('data:application/pdf') || fileData.startsWith('data:application/x-pdf')){
-      var src=fileData;
-      if(fileData && fileData.length>500000){
-        try{src=dataUriToBlobUrl(fileData);}catch(e){}
-      }
-      b.innerHTML='<iframe src="'+src+'" class="embed-pdf"></iframe>';
+      var url=(fileData.length>500000)?dataUriToBlobUrl(fileData):fileData;
+      b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
     } else {
       b.innerHTML='<div class="text-preview">'+
         '<p><strong>'+d.title+'</strong></p>'+
@@ -824,6 +822,7 @@ function openArchiveViewer(docId){
   }
   $('viewerOverlay').classList.add('open');
 }
+
 async function addDocument(){
   const t=$('docTitle').value.trim();
   const n=parseInt($('docNiveau').value);
@@ -952,7 +951,7 @@ function renderMedia(){
     c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';
     return;
   }
-  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Galerie photos et vidéos à venir.</p>';
 }
 </script>
 </body>
