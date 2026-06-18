@@ -776,7 +776,18 @@ function openArchiveViewer(docId){
   const b=$('viewerBody');
   const fileData=d.data||'';
   const fileName=d.fileName||'';
-  const ex=(d.type||fileName.split('.').pop()||'').toLowerCase();
+  const rawType=(d.type||fileName.split('.').pop()||'pdf').toLowerCase().trim();
+  
+  // Déterminer le type réel à partir du data base64 si disponible
+  var ex=rawType;
+  if(fileData.startsWith('data:') && fileData.indexOf('/')>5){
+    var mime=fileData.substring(5,fileData.indexOf(';'));
+    if(mime.indexOf('/')>0){
+      var mimeType=mime.split('/')[1].toLowerCase();
+      if(['jpeg','png','gif','webp'].includes(mimeType)) ex=mimeType;
+      else if(mimeType==='pdf' || mimeType==='x-pdf') ex='pdf';
+    }
+  }
   
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     if(fileData.startsWith('data:')||fileData.startsWith('http')){
@@ -793,11 +804,16 @@ function openArchiveViewer(docId){
   } else if(ex==='txt' && fileData.startsWith('data:')){
     b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   } else {
-    b.innerHTML='<div class="text-preview">'+
-      '<p><strong>'+d.title+'</strong></p>'+
-      '<p style="margin-top:4px;color:#888;font-size:13px">Type : '+(ex||'inconnu').toUpperCase()+'</p>'+
-      '<p style="margin-top:12px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger le document</a></p>'+
-    '</div>';
+    // Dernier recours : si le data commence par data:application/pdf, on force l'affichage PDF
+    if(fileData.startsWith('data:application/pdf') || fileData.startsWith('data:application/x-pdf')){
+      b.innerHTML='<iframe src="'+fileData+'" class="embed-pdf"></iframe>';
+    } else {
+      b.innerHTML='<div class="text-preview">'+
+        '<p><strong>'+d.title+'</strong></p>'+
+        '<p style="margin-top:4px;color:#888;font-size:13px">Type : '+(ex||'inconnu').toUpperCase()+'</p>'+
+        '<p style="margin-top:12px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger le document</a></p>'+
+      '</div>';
+    }
   }
   $('viewerOverlay').classList.add('open');
 }
