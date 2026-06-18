@@ -272,7 +272,23 @@
     <div id="loginMsg" style="margin-top:8px;display:none;color:#c62828;font-size:13px"></div>
   </div>
 </div>
+<div id="loginOverlay">
+  <div class="modal">
+    <h2>🔐 Connexion</h2>
+    <input id="loginUser" placeholder="Identifiant">
+    <input id="loginPass" type="password" placeholder="Mot de passe">
+    <button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button>
+    <button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button>
+    <div id="loginMsg" style="margin-top:8px;display:none;color:#c62828;font-size:13px"></div>
+  </div>
+</div>
 
+<!-- MODAL VIEWER -->
+<div id="viewerOverlay">
+  ...
+</div>
+
+<footer>...</footer>
 <!-- MODAL VIEWER -->
 <div id="viewerOverlay">
   <div class="viewer-modal">
