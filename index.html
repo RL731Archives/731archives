@@ -6,6 +6,19 @@
   <title>Archives de l'Étoile du Temple</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+  <style>
+    .pdfjs-container{width:100%;height:80vh;overflow-y:auto;background:#525659;display:flex;flex-direction:column;align-items:center;padding:12px 4px}
+    .pdfjs-container canvas{display:block;margin:0 auto 8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:#fff}
+    .pdfjs-controls{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#eee;border-radius:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center}
+    .pdfjs-controls button{padding:4px 12px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600}
+    .pdfjs-controls .btn-pdf-prev{background:var(--bordeaux);color:#fff}
+    .pdfjs-controls .btn-pdf-next{background:var(--bordeaux);color:#fff}
+    .pdfjs-controls .btn-pdf-zoom{background:var(--gold);color:#fff}
+    .pdfjs-controls span{font-size:13px;color:#555}
+    .pdfjs-loading{display:flex;align-items:center;justify-content:center;height:80vh;color:#888;font-size:15px;gap:8px}
+  </style>
   <style>
     :root{--bg:#F5F0E8;--bordeaux:#800020;--gold:#D4AF37;--text:#2a2a2a;--card1:#fffaf6;--card2:#f0ece8;--card3:#e7e2de}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -739,7 +752,7 @@ function openViewerById(docId){
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
+    openPdfViewer(d.data,d.title);
   } else if(ex==='txt'){
     b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
   } else {
@@ -756,6 +769,124 @@ async function deleteHistoryDoc(id){
     await db.collection('histoire_documents').doc(id).delete();
     loadHistoryDocs();
   }catch(e){alert(e.message);}
+}
+
+// =============================================
+// FONCTIONS UTILITAIRES : conversion base64 → blob URL
+// =============================================
+function dataUriToBlobUrl(dataUri){
+  try{
+    var parts=dataUri.split(',');
+    var mimeMatch=dataUri.match(/^data:([^;]+)/);
+    var mime=mimeMatch?mimeMatch[1]:'application/octet-stream';
+    var raw=atob(parts[1]);
+    var arr=new Uint8Array(raw.length);
+    for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+    var blob=new Blob([arr],{type:mime});
+    return URL.createObjectURL(blob);
+  }catch(e){
+    return null;
+  }
+}
+
+var _pdfViewerDoc=null;
+var _pdfViewerPage=1;
+var _pdfViewerTotal=0;
+var _pdfViewerScale=1.0;
+var _pdfViewerCurrentBlobUrl=null;
+
+function renderPdfPage(canvasId){
+  var canvas=document.getElementById(canvasId);
+  if(!canvas||!_pdfViewerDoc)return;
+  _pdfViewerDoc.getPage(_pdfViewerPage).then(function(page){
+    var viewport=page.getViewport({scale:_pdfViewerScale});
+    canvas.width=viewport.width;
+    canvas.height=viewport.height;
+    var ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    page.render({canvasContext:ctx,viewport:viewport});
+    document.getElementById('pdfPageInfo').textContent=_pdfViewerPage+' / '+_pdfViewerTotal;
+  });
+}
+
+function pdfPrevPage(){
+  if(_pdfViewerPage>1){_pdfViewerPage--;renderPdfPage('pdfCanvas');}
+}
+function pdfNextPage(){
+  if(_pdfViewerPage<_pdfViewerTotal){_pdfViewerPage++;renderPdfPage('pdfCanvas');}
+}
+function pdfZoomIn(){
+  _pdfViewerScale=Math.min(3,_pdfViewerScale+0.2);
+  renderPdfPage('pdfCanvas');
+  document.getElementById('pdfZoomInfo').textContent=Math.round(_pdfViewerScale*100)+'%';
+}
+function pdfZoomOut(){
+  _pdfViewerScale=Math.max(0.3,_pdfViewerScale-0.2);
+  renderPdfPage('pdfCanvas');
+  document.getElementById('pdfZoomInfo').textContent=Math.round(_pdfViewerScale*100)+'%';
+}
+
+function openPdfViewer(fileData,title){
+  var blobUrl=null;
+  if(fileData.startsWith('blob:')){
+    blobUrl=fileData;
+  } else if(fileData.startsWith('data:')){
+    blobUrl=dataUriToBlobUrl(fileData);
+    _pdfViewerCurrentBlobUrl=blobUrl;
+  } else {
+    blobUrl=fileData;
+  }
+  if(!blobUrl){simpleViewer(title,'<p>Impossible de charger le PDF.</p>');return;}
+  
+  $('viewerBody').innerHTML=
+    '<div class="pdfjs-controls">'+
+      '<button class="btn-pdf-prev" onclick="pdfPrevPage()">◀ Préc.</button>'+
+      '<span id="pdfPageInfo">—</span>'+
+      '<button class="btn-pdf-next" onclick="pdfNextPage()">Suiv. ▶</button>'+
+      '<span style="color:#ccc">|</span>'+
+      '<button class="btn-pdf-zoom" onclick="pdfZoomOut()">🔍−</button>'+
+      '<span id="pdfZoomInfo">100%</span>'+
+      '<button class="btn-pdf-zoom" onclick="pdfZoomIn()">🔍+</button>'+
+      '<span style="color:#ccc">|</span>'+
+      '<button class="btn-bdx" onclick="downloadCurrentPdf()" style="padding:4px 12px;border:none;border-radius:4px;cursor:pointer;font-size:13px;color:#fff;background:var(--bordeaux)">📥 Télécharger</button>'+
+    '</div>'+
+    '<div class="pdfjs-container" id="pdfContainer">'+
+      '<div class="pdfjs-loading" id="pdfLoading">⏳ Chargement du PDF...</div>'+
+      '<canvas id="pdfCanvas" style="display:none"></canvas>'+
+    '</div>'+
+    '<input type="hidden" id="pdfDataStore" value="'+encodeURIComponent(fileData)+'">';
+  
+  _pdfViewerPage=1;
+  _pdfViewerScale=1.0;
+  
+  pdfjsLib.getDocument(blobUrl).promise.then(function(pdfDoc){
+    _pdfViewerDoc=pdfDoc;
+    _pdfViewerTotal=pdfDoc.numPages;
+    var loading=$('pdfLoading');
+    if(loading)loading.style.display='none';
+    var canvas=$('pdfCanvas');
+    if(canvas)canvas.style.display='block';
+    renderPdfPage('pdfCanvas');
+  }).catch(function(err){
+    $('pdfContainer').innerHTML='<div style="padding:40px;text-align:center;color:#c62828"><p>❌ Erreur de chargement du PDF</p><p style="font-size:12px;color:#888;margin-top:6px">'+err.message+'</p></div>';
+  });
+}
+
+function downloadCurrentPdf(){
+  var store=$('pdfDataStore');
+  if(!store)return;
+  var data=decodeURIComponent(store.value);
+  var a=document.createElement('a');
+  a.href=data;
+  a.download='document.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function simpleViewer(title,html){
+  $('viewerTitle').textContent=title||'Document';
+  $('viewerBody').innerHTML=html;
 }
 
 // =============================================
@@ -792,13 +923,13 @@ function openArchiveViewer(docId){
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    b.innerHTML='<embed src="'+fileData+'" type="application/pdf" class="embed-pdf" />';
+    openPdfViewer(fileData,d.title);
   } else if(ex==='txt' && fileData.startsWith('data:')){
     b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   } else {
-    // Dernier recours : si le data commence par data:application/pdf, on force l'affichage PDF
+    // Dernier recours : si le data commence par data:application/pdf, on utilise pdf.js
     if(fileData.startsWith('data:application/pdf') || fileData.startsWith('data:application/x-pdf')){
-      b.innerHTML='<iframe src="'+fileData+'" class="embed-pdf"></iframe>';
+      openPdfViewer(fileData,d.title);
     } else {
       b.innerHTML='<div class="text-preview">'+
         '<p><strong>'+d.title+'</strong></p>'+
