@@ -414,23 +414,26 @@ async function doLogin(){
 }
 
 function applyLogin(){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  $('page-accueil').classList.add('active');
-  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
-  document.querySelector('nav a').classList.add('active');
-  
   $('logoutBtn').style.display='inline-block';
   
   if(currentUser.isAdmin){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    $('page-admin').classList.add('active');
+    document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+    
     $('adminPanel').style.display='block';
     $('loginPrompt').style.display='none';
-    $('adminPanel').style.display='block';
     $('historyAdminUpload').style.display='block';
     $('historyDisplay').setAttribute('contenteditable','true');
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
   } else {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    $('page-accueil').classList.add('active');
+    document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+    document.querySelector('nav a').classList.add('active');
+    
     $('adminPanel').style.display='none';
     $('loginPrompt').style.display='block';
   }
@@ -452,6 +455,12 @@ function doLogout(){
   currentSub=null;
   currentNiveau=1;
   sortMode='none';
+  
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-accueil').classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelector('nav a').classList.add('active');
+  
   updateHomeCards();
   renderDocs();
   renderMedia();
