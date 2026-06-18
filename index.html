@@ -523,7 +523,16 @@ function doLogout(){
     if(s){
       try{
         currentUser=JSON.parse(s);
+      }catch(e){currentUser=null;}
+      if(currentUser){
         if(currentUser.isAdmin){
+          var adminNav = document.getElementById('adminNavTab');
+          if(!adminNav){
+            var nav = document.querySelector('nav ul');
+            var li = document.createElement('li');
+            li.innerHTML = '<a id="adminNavTab" onclick="showPage(\'admin\',this)" style="background:var(--gold);color:var(--bordeaux);border-radius:4px">⚙ Administration</a>';
+            nav.appendChild(li);
+          }
           $('adminPanel').style.display='block';
           $('loginPrompt').style.display='none';
           $('logoutBtn').style.display='inline-block';
@@ -533,9 +542,10 @@ function doLogout(){
           updateSubs();
           renderMembersList();
         }
-        // Restauration complète pour tous (admin et membres)
         restoreSession();
-    }else{updateHomeCards();}
+      }
+    }
+    updateHomeCards();
     if(historyText)$('historyDisplay').innerHTML=historyText;
     loadHistoryDocs();
   });
