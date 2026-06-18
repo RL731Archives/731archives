@@ -790,17 +790,9 @@ function openArchiveViewer(docId){
   }
   
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    if(fileData.startsWith('data:')||fileData.startsWith('http')){
-      b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-    } else {
-      b.innerHTML='<div class="text-preview"><p>Aperçu non disponible pour ce format.</p><p style="margin-top:8px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
-    }
+    b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    if(fileData.startsWith('data:')||fileData.startsWith('http')){
-      b.innerHTML='<iframe src="'+fileData+'" class="embed-pdf"></iframe>';
-    } else {
-      b.innerHTML='<div class="text-preview"><p>Aperçu non disponible.</p></div>';
-    }
+    b.innerHTML='<iframe src="'+fileData+'" class="embed-pdf"></iframe>';
   } else if(ex==='txt' && fileData.startsWith('data:')){
     b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
   } else {
