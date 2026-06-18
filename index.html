@@ -454,6 +454,44 @@ function applyLogin(){
   renderMedia();
 }
 
+function restoreSession(){
+  // Restaure l'état complet après rechargement de page pour tous les utilisateurs
+  if(!currentUser) return;
+  $('logoutBtn').style.display='inline-block';
+  
+  if(currentUser.isAdmin){
+    $('adminPanel').style.display='block';
+    $('loginPrompt').style.display='none';
+    $('historyAdminUpload').style.display='block';
+    $('historyDisplay').setAttribute('contenteditable','true');
+    $('saveHistoryBtn').style.display='inline-block';
+    updateSubs();
+    renderMembersList();
+    // Ajouter l'onglet Administration dans la navigation
+    var adminNav = document.getElementById('adminNavTab');
+    if(!adminNav){
+      var nav = document.querySelector('nav ul');
+      var li = document.createElement('li');
+      li.innerHTML = '<a id="adminNavTab" onclick="showPage(\'admin\',this)" style="background:var(--gold);color:var(--bordeaux);border-radius:4px">⚙ Administration</a>';
+      nav.appendChild(li);
+    }
+    // Aller sur la page admin
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    $('page-admin').classList.add('active');
+  } else {
+    // Membre connecté : restaurer l'état
+    $('loginPrompt').style.display='none';
+    // Rester sur la page active, ou aller à l'accueil
+    var activePage = document.querySelector('.page.active');
+    if(!activePage) {
+      document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+      $('page-accueil').classList.add('active');
+    }
+  }
+  updateHomeCards();
+  loadHistoryDocs();
+}
+
 function doLogout(){
   currentUser=null;
   localStorage.removeItem('rl_session');
@@ -495,8 +533,8 @@ function doLogout(){
           updateSubs();
           renderMembersList();
         }
-        updateHomeCards();
-      }catch(e){updateHomeCards();}
+        // Restauration complète pour tous (admin et membres)
+        restoreSession();
     }else{updateHomeCards();}
     if(historyText)$('historyDisplay').innerHTML=historyText;
     loadHistoryDocs();
