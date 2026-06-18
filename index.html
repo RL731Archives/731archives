@@ -6,19 +6,6 @@
   <title>Archives de l'Étoile du Temple</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
-  <style>
-    .pdfjs-container{width:100%;height:80vh;overflow-y:auto;background:#525659;display:flex;flex-direction:column;align-items:center;padding:12px 4px}
-    .pdfjs-container canvas{display:block;margin:0 auto 8px;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:#fff}
-    .pdfjs-controls{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#eee;border-radius:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center}
-    .pdfjs-controls button{padding:4px 12px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600}
-    .pdfjs-controls .btn-pdf-prev{background:var(--bordeaux);color:#fff}
-    .pdfjs-controls .btn-pdf-next{background:var(--bordeaux);color:#fff}
-    .pdfjs-controls .btn-pdf-zoom{background:var(--gold);color:#fff}
-    .pdfjs-controls span{font-size:13px;color:#555}
-    .pdfjs-loading{display:flex;align-items:center;justify-content:center;height:80vh;color:#888;font-size:15px;gap:8px}
-  </style>
   <style>
     :root{--bg:#F5F0E8;--bordeaux:#800020;--gold:#D4AF37;--text:#2a2a2a;--card1:#fffaf6;--card2:#f0ece8;--card3:#e7e2de}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -436,7 +423,6 @@ function applyLogin(){
   
   if(currentUser.isAdmin){
     $('adminPanel').style.display='block';
-    $('loginPrompt').style.display='none';
     $('historyAdminUpload').style.display='block';
     $('historyDisplay').setAttribute('contenteditable','true');
     $('saveHistoryBtn').style.display='inline-block';
@@ -444,7 +430,7 @@ function applyLogin(){
     renderMembersList();
   } else {
     $('adminPanel').style.display='none';
-    $('loginPrompt').style.display='block';
+    $('historyAdminUpload').style.display='none';
   }
   loadHistoryDocs();
   updateHomeCards();
@@ -456,7 +442,6 @@ function doLogout(){
   currentUser=null;
   localStorage.removeItem('rl_session');
   $('adminPanel').style.display='none';
-  $('loginPrompt').style.display='block';
   $('logoutBtn').style.display='none';
   $('historyAdminUpload').style.display='none';
   $('historyDisplay').setAttribute('contenteditable','false');
@@ -479,7 +464,6 @@ function doLogout(){
         currentUser=JSON.parse(s);
         if(currentUser.isAdmin){
           $('adminPanel').style.display='block';
-          $('loginPrompt').style.display='none';
           $('logoutBtn').style.display='inline-block';
           $('historyAdminUpload').style.display='block';
           $('historyDisplay').setAttribute('contenteditable','true');
@@ -743,6 +727,10 @@ function displayAdminHistoryDocs(){
   }).join('');
 }
 
+// ============================================================
+// VERSION CORRIGÉE — Viewer PDF avec Blob URL
+// ============================================================
+
 function openViewerById(docId){
   var d=historyDocs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
@@ -752,11 +740,39 @@ function openViewerById(docId){
   if(['jpg','jpeg','png','gif','webp'].includes(ex)){
     b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
   } else if(ex==='pdf'){
-    openPdfViewer(d.data,d.title);
+    var dataSource=d.data;
+    // Si le data commence par "data:", c'est du base64 potentiellement volumineux
+    // On le convertit en Blob URL (bien plus performant pour le navigateur)
+    if(dataSource && dataSource.startsWith('data:')){
+      try{
+        var parts=dataSource.split(',');
+        var raw=atob(parts[1]);
+        var arr=new Uint8Array(raw.length);
+        for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+        var blob=new Blob([arr],{type:'application/pdf'});
+        dataSource=URL.createObjectURL(blob);
+      }catch(e){
+        // Si la conversion échoue, on garde l'original
+      }
+    }
+    b.innerHTML='<iframe src="'+dataSource+'" width="100%" height="80vh" style="border:none;border-radius:4px"></iframe>';
   } else if(ex==='txt'){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div>';
   } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+    // Pour les autres types, on essaie d'afficher dans l'iframe ou on propose le téléchargement
+    var src=d.data;
+    if(src && src.startsWith('data:')){
+      try{
+        var parts=src.split(',');
+        var mime=src.match(/^data:([^;]+)/);
+        var raw=atob(parts[1]);
+        var arr=new Uint8Array(raw.length);
+        for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+        var blob=new Blob([arr],{type:mime?mime[1]:'application/octet-stream'});
+        src=URL.createObjectURL(blob);
+      }catch(e){}
+    }
+    b.innerHTML='<iframe src="'+src+'" width="100%" height="80vh" style="border:none;border-radius:4px"></iframe>';
   }
   $('viewerOverlay').classList.add('open');
 }
@@ -771,211 +787,121 @@ async function deleteHistoryDoc(id){
   }catch(e){alert(e.message);}
 }
 
-// =============================================
-// FONCTIONS UTILITAIRES : conversion base64 → blob URL
-// =============================================
-function dataUriToBlobUrl(dataUri){
-  try{
-    var parts=dataUri.split(',');
-    var mimeMatch=dataUri.match(/^data:([^;]+)/);
-    var mime=mimeMatch?mimeMatch[1]:'application/octet-stream';
-    var raw=atob(parts[1]);
-    var arr=new Uint8Array(raw.length);
-    for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
-    var blob=new Blob([arr],{type:mime});
-    return URL.createObjectURL(blob);
-  }catch(e){
-    return null;
+// ============================================================
+// FONCTIONS POUR LES ARCHIVES (page principale)
+// ============================================================
+
+function renderArchives(){
+  const c=$('archivesContent');
+  if(!currentUser){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</p>';return;}
+  if(currentSub){
+    renderSubSection(currentSub,c);
+    return;
   }
-}
-
-var _pdfViewerDoc=null;
-var _pdfViewerPage=1;
-var _pdfViewerTotal=0;
-var _pdfViewerScale=1.0;
-var _pdfViewerCurrentBlobUrl=null;
-
-function renderPdfPage(canvasId){
-  var canvas=document.getElementById(canvasId);
-  if(!canvas||!_pdfViewerDoc)return;
-  _pdfViewerDoc.getPage(_pdfViewerPage).then(function(page){
-    var viewport=page.getViewport({scale:_pdfViewerScale});
-    canvas.width=viewport.width;
-    canvas.height=viewport.height;
-    var ctx=canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    page.render({canvasContext:ctx,viewport:viewport});
-    document.getElementById('pdfPageInfo').textContent=_pdfViewerPage+' / '+_pdfViewerTotal;
+  const g=currentUser.grade;
+  let h='<h3 style="color:var(--bordeaux);margin-bottom:12px">Archives par rubrique</h3><div class="rubriques">';
+  Object.keys(ssR).filter(k=>ssR[k].niveau<=g).forEach(k=>{
+    h+=`<div class="rubrique-card" onclick="goToSub('${k}')"><h4>${ssR[k].label}</h4><span style="font-size:11px;color:#888">Grade ${ssR[k].niveau}</span></div>`;
   });
+  h+='</div>';
+  c.innerHTML=h;
 }
 
-function pdfPrevPage(){
-  if(_pdfViewerPage>1){_pdfViewerPage--;renderPdfPage('pdfCanvas');}
-}
-function pdfNextPage(){
-  if(_pdfViewerPage<_pdfViewerTotal){_pdfViewerPage++;renderPdfPage('pdfCanvas');}
-}
-function pdfZoomIn(){
-  _pdfViewerScale=Math.min(3,_pdfViewerScale+0.2);
-  renderPdfPage('pdfCanvas');
-  document.getElementById('pdfZoomInfo').textContent=Math.round(_pdfViewerScale*100)+'%';
-}
-function pdfZoomOut(){
-  _pdfViewerScale=Math.max(0.3,_pdfViewerScale-0.2);
-  renderPdfPage('pdfCanvas');
-  document.getElementById('pdfZoomInfo').textContent=Math.round(_pdfViewerScale*100)+'%';
-}
-
-function openPdfViewer(fileData,title){
-  var blobUrl=null;
-  if(fileData.startsWith('blob:')){
-    blobUrl=fileData;
-  } else if(fileData.startsWith('data:')){
-    blobUrl=dataUriToBlobUrl(fileData);
-    _pdfViewerCurrentBlobUrl=blobUrl;
-  } else {
-    blobUrl=fileData;
+function renderSubSection(key,container){
+  const sub=ssR[key];
+  if(!sub){container.innerHTML='<p>Rubrique introuvable</p>';return;}
+  const filtre=docs.filter(d=>d.sub===key && d.grade<=currentUser.grade);
+  let h='<div><span class="back-link" onclick="backToArchives()">← Retour aux rubriques</span>';
+  h+='<h3 style="color:var(--bordeaux);margin-bottom:8px">'+sub.label+'</h3>';
+  if(!filtre.length){
+    h+='<p style="color:#999;padding:12px 0">Aucun document.</p></div>';
+    container.innerHTML=h;
+    return;
   }
-  if(!blobUrl){simpleViewer(title,'<p>Impossible de charger le PDF.</p>');return;}
-  
-  $('viewerBody').innerHTML=
-    '<div class="pdfjs-controls">'+
-      '<button class="btn-pdf-prev" onclick="pdfPrevPage()">◀ Préc.</button>'+
-      '<span id="pdfPageInfo">—</span>'+
-      '<button class="btn-pdf-next" onclick="pdfNextPage()">Suiv. ▶</button>'+
-      '<span style="color:#ccc">|</span>'+
-      '<button class="btn-pdf-zoom" onclick="pdfZoomOut()">🔍−</button>'+
-      '<span id="pdfZoomInfo">100%</span>'+
-      '<button class="btn-pdf-zoom" onclick="pdfZoomIn()">🔍+</button>'+
-      '<span style="color:#ccc">|</span>'+
-      '<button class="btn-bdx" onclick="downloadCurrentPdf()" style="padding:4px 12px;border:none;border-radius:4px;cursor:pointer;font-size:13px;color:#fff;background:var(--bordeaux)">📥 Télécharger</button>'+
-    '</div>'+
-    '<div class="pdfjs-container" id="pdfContainer">'+
-      '<div class="pdfjs-loading" id="pdfLoading">⏳ Chargement du PDF...</div>'+
-      '<canvas id="pdfCanvas" style="display:none"></canvas>'+
-    '</div>'+
-    '<input type="hidden" id="pdfDataStore" value="'+encodeURIComponent(fileData)+'">';
-  
-  _pdfViewerPage=1;
-  _pdfViewerScale=1.0;
-  
-  pdfjsLib.getDocument(blobUrl).promise.then(function(pdfDoc){
-    _pdfViewerDoc=pdfDoc;
-    _pdfViewerTotal=pdfDoc.numPages;
-    var loading=$('pdfLoading');
-    if(loading)loading.style.display='none';
-    var canvas=$('pdfCanvas');
-    if(canvas)canvas.style.display='block';
-    renderPdfPage('pdfCanvas');
-  }).catch(function(err){
-    $('pdfContainer').innerHTML='<div style="padding:40px;text-align:center;color:#c62828"><p>❌ Erreur de chargement du PDF</p><p style="font-size:12px;color:#888;margin-top:6px">'+err.message+'</p></div>';
+  // Trier par date décroissante si possible
+  filtre.sort((a,b)=>((b.date||'')>(a.date||'')?1:-1));
+  filtre.forEach(d=>{
+    const dateStr=d.date?'<span style="font-size:11px;color:#888;display:block">'+d.date+(d.auteur?' — '+d.auteur:'')+'</span>':'';
+    const ext=(d.type||d.fileName||'').split('.').pop().toLowerCase();
+    const icon=['jpg','jpeg','png','gif','webp'].includes(ext)?'🖼️':'📄';
+    h+=`<div class="histo-doc"><div class="preview">${icon}</div><div class="info"><strong onclick="openArchiveViewer('${d._fi}')">${d.titre||d.title||'Document'}</strong>${dateStr}</div><div class="actions"><button class="btn btn-gold" onclick="openArchiveViewer('${d._fi}')" style="padding:4px 10px;font-size:11px">👁️</button></div></div>`;
   });
+  h+='</div>';
+  container.innerHTML=h;
 }
 
-function downloadCurrentPdf(){
-  var store=$('pdfDataStore');
-  if(!store)return;
-  var data=decodeURIComponent(store.value);
-  var a=document.createElement('a');
-  a.href=data;
-  a.download='document.pdf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+function backToArchives(){
+  currentSub=null;
+  renderArchives();
 }
 
-function simpleViewer(title,html){
-  $('viewerTitle').textContent=title||'Document';
-  $('viewerBody').innerHTML=html;
-}
-
-// =============================================
-// FONCTION VIEWER POUR LES DOCUMENTS ARCHIVES
-// =============================================
 function openArchiveViewer(docId){
   var d=docs.find(function(x){return x._fi===docId;});
   if(!d){alert('Document introuvable');return;}
-  
-  // Vérifier les droits d'accès
-  if(!currentUser){openLogin();return;}
-  if(!currentUser.isAdmin && currentUser.grade<d.grade){
-    alert('Accès refusé : votre grade ne permet pas de consulter ce document.');
-    return;
-  }
-  
-  $('viewerTitle').textContent=d.title||'Document';
+  $('viewerTitle').textContent=d.titre||d.title||'Document';
   const b=$('viewerBody');
-  const fileData=d.data||'';
-  const fileName=d.fileName||'';
-  const rawType=(d.type||fileName.split('.').pop()||'pdf').toLowerCase().trim();
+  const dataVal=d.data||d.content||'';
+  const typeVal=d.type||d.fileName||'';
+  const ext=typeVal.split('.').pop().toLowerCase();
   
-  // Déterminer le type réel à partir du data base64 si disponible
-  var ex=rawType;
-  if(fileData.startsWith('data:') && fileData.indexOf('/')>5){
-    var mime=fileData.substring(5,fileData.indexOf(';'));
-    if(mime.indexOf('/')>0){
-      var mimeType=mime.split('/')[1].toLowerCase();
-      if(['jpeg','png','gif','webp'].includes(mimeType)) ex=mimeType;
-      else if(mimeType==='pdf' || mimeType==='x-pdf') ex='pdf';
+  if(['jpg','jpeg','png','gif','webp'].includes(ext)){
+    b.innerHTML='<img src="'+dataVal+'" alt="'+d.titre+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ext==='pdf'){
+    var src=dataVal;
+    if(src && src.startsWith('data:')){
+      try{
+        var parts=src.split(',');
+        var raw=atob(parts[1]);
+        var arr=new Uint8Array(raw.length);
+        for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+        var blob=new Blob([arr],{type:'application/pdf'});
+        src=URL.createObjectURL(blob);
+      }catch(e){}
     }
-  }
-  
-  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    openPdfViewer(fileData,d.title);
-  } else if(ex==='txt' && fileData.startsWith('data:')){
-    b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+    b.innerHTML='<iframe src="'+src+'" width="100%" height="80vh" style="border:none;border-radius:4px"></iframe>';
+  } else if(ext==='txt'){
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+dataVal+'</pre></div>';
   } else {
-    // Dernier recours : si le data commence par data:application/pdf, on utilise pdf.js
-    if(fileData.startsWith('data:application/pdf') || fileData.startsWith('data:application/x-pdf')){
-      openPdfViewer(fileData,d.title);
-    } else {
-      b.innerHTML='<div class="text-preview">'+
-        '<p><strong>'+d.title+'</strong></p>'+
-        '<p style="margin-top:4px;color:#888;font-size:13px">Type : '+(ex||'inconnu').toUpperCase()+'</p>'+
-        '<p style="margin-top:12px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger le document</a></p>'+
-      '</div>';
-    }
+    b.innerHTML='<p style="color:#999">Aperçu non disponible pour ce type de fichier.</p><p style="margin-top:8px"><a href="'+dataVal+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
 async function addDocument(){
-  const t=$('docTitle').value.trim();
-  const n=parseInt($('docNiveau').value);
-  const s=$('docSub').value;
-  const g=parseInt($('docGrade').value);
-  const d=$('docDate').value;
-  const a=$('docAuteur').value.trim();
-  const fi=$('docFile');
+  const title=$('docTitle').value.trim();
+  const sub=$('docSub').value;
+  const niveau=parseInt($('docNiveau').value);
+  const grade=parseInt($('docGrade').value);
+  const date=$('docDate').value;
+  const auteur=$('docAuteur').value;
+  const fileInput=$('docFile');
   const msg=$('docMsg');
   
-  if(!t||!fi.files||!fi.files[0]){
+  if(!title||!fileInput.files||!fileInput.files[0]){
     msg.textContent='Titre et fichier requis';msg.className='msg error';msg.style.display='block';return;
   }
   
-  const f=fi.files[0];
+  const f=fileInput.files[0];
   if(f.size>20*1024*1024){
-    msg.textContent='Fichier > 20 Mo';msg.className='msg error';msg.style.display='block';return;
+    msg.textContent='Fichier >20 Mo';msg.className='msg error';msg.style.display='block';return;
   }
   
-  msg.innerHTML='⏳ Upload...';msg.className='msg';msg.style.display='block';
+  msg.textContent='Upload...';msg.className='msg';msg.style.display='block';
   
   const reader=new FileReader();
   reader.onload=async function(e){
     try{
-      const base64=e.target.result;
+      const ext=f.name.split('.').pop().toLowerCase();
       await db.collection('documents').add({
-        title:t,
-        niveau:n,
-        sub:s,
-        grade:g,
-        date:d||'',
-        auteur:a||'',
+        titre:title,
+        sousRubrique:sub,
+        niveau:niveau,
+        grade:grade,
+        date:date,
+        auteur:auteur,
         fileName:f.name,
-        type:f.name.split('.').pop().toLowerCase(),
-        data:base64,
+        type:ext,
+        data:e.target.result,
         size:f.size,
         uploadedAt:new Date().toISOString()
       });
@@ -983,93 +909,33 @@ async function addDocument(){
       $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';
       const sd=await db.collection('documents').get();
       docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-      renderArchives();
+      if(currentSub)renderArchives();
     }catch(er){
-      msg.textContent='❌ Erreur: '+er.message;msg.className='msg error';msg.style.display='block';
+      msg.textContent='Erreur: '+er.message;msg.className='msg error';msg.style.display='block';
     }
   };
   reader.readAsDataURL(f);
 }
 
-async function deleteArchiveDoc(id){
-  if(!confirm('Supprimer ce document ?'))return;
-  try{
-    await db.collection('documents').doc(id).delete();
-    docs=docs.filter(d=>d._fi!==id);
-    renderArchives();
-  }catch(e){alert(e.message);}
-}
-
-function renderDocs(){
-  // Déjà géré par renderArchives()
-}
-
-// === DOCUMENTS ARCHIVES ===
-function renderArchives(){
-  const c=$('archivesContent');
-  if(!currentUser){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}
-  const subsArr=Object.entries(ssR).map(([k,v])=>({id:k,...v}));
-  
-  if(currentSub){
-    const sub=ssR[currentSub];
-    if(!sub||(currentUser.grade<sub.niveau&&!currentUser.isAdmin)){
-      c.innerHTML='<p style="color:#999;padding:20px">Accès refusé.</p>';return;
-    }
-    const gradeLabel=['','Apprenti','Compagnon','Maître'][sub.niveau];
-    var subDocs=docs.filter(d=>d.sub===currentSub);
-    subDocs.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
-    if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
-    c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
-      '<div id="subDocsList" style="margin-top:10px">'+
-      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openArchiveViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div><div class="actions">'+
-        '<button class="btn btn-gold" onclick="openArchiveViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>'+
-        (currentUser&&currentUser.isAdmin?'<button class="btn btn-danger" onclick="deleteArchiveDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button>':'')+
-      '</div></div>').join('')+
-      (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
-      '</div>';
-  } else {
-    const niveauLabels = {1:'APPRENTI',2:'COMPAGNON',3:'MAÎTRE'};
-    const niveauColors = {1:'var(--card1)',2:'var(--card2)',3:'var(--card3)'};
-    
-    let visibleNiveaux = [];
-    if(currentUser.isAdmin){
-      visibleNiveaux = [1,2,3];
-    } else {
-      visibleNiveaux = [1];
-      if(currentUser.grade>=2) visibleNiveaux.push(2);
-      if(currentUser.grade>=3) visibleNiveaux.push(3);
-    }
-    
-    let cardsHtml = '<p style="color:#555;font-size:13px;margin-bottom:10px">Sélectionnez une rubrique :</p><div class="cards">';
-    
-    visibleNiveaux.forEach(nv => {
-      const subsOfNiveau = subsArr.filter(s => s.niveau === nv);
-      cardsHtml += '<div class="card" style="background:'+niveauColors[nv]+';flex:1;padding:16px;border-radius:8px;border:2px solid var(--gold);position:relative">' +
-        '<div style="position:absolute;right:10px;top:10px;background:var(--gold);color:#fff;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px">🔒</div>' +
-        '<h3 style="color:var(--bordeaux);font-size:16px;margin-bottom:8px;text-align:center">'+niveauLabels[nv]+'</h3>' +
-        '<ul class="sub-list" style="list-style:none;margin-top:6px">';
-      subsOfNiveau.forEach(s => {
-        const emoji = s.label.includes('Rituels')?'📜':s.label.includes('Planches')?'📝':'🎙';
-        cardsHtml += '<li onclick="currentSub=\''+s.id+'\';renderArchives();" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+
-          '<span class="emoji-icon" style="font-size:16px;vertical-align:middle;margin-right:4px">'+emoji+'</span> '+
-          (s.label.includes('Rituels')?'Rituels '+(s.label.match(/\d/)?s.label.match(/\d/)[0]+'°':''):s.label)+
-          '</li>';
-      });
-      cardsHtml += '</ul></div>';
-    });
-    
-    cardsHtml += '</div>';
-    c.innerHTML = cardsHtml;
+async function renderMedia(){
+  const c=$('mediaList');
+  if(!currentUser){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p>';return;}
+  // Récupérer les documents photo/vidéo (simplifié)
+  const media=docs.filter(d=>{
+    const ext=(d.type||d.fileName||'').split('.').pop().toLowerCase();
+    return ['jpg','jpeg','png','gif','webp','mp4','avi','mov'].includes(ext);
+  });
+  if(!media.length){
+    c.innerHTML='<p style="color:#999">Aucun média.</p>';return;
   }
-}
-
-function renderMedia(){
-  var c=$('mediaList');
-  if(!currentUser){
-    c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';
-    return;
-  }
-  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous pour voir les médias.</p>';
+  c.innerHTML='<div class="histo-gallery">'+media.map(d=>{
+    const ext=(d.type||d.fileName||'').split('.').pop().toLowerCase();
+    const isVid=['mp4','avi','mov'].includes(ext);
+    if(isVid){
+      return '<div class="histo-gallery-item"><div class="thumb" style="background:#222;color:#fff;font-size:30px">▶️</div><div class="caption"><strong>'+(d.titre||d.title||'Vidéo')+'</strong></div></div>';
+    }
+    return '<div class="histo-gallery-item" onclick="openArchiveViewer(\''+d._fi+'\')"><div class="thumb"><img src="'+d.data+'" alt="'+(d.titre||'')+'"></div><div class="caption"><strong>'+(d.titre||'')+'</strong></div></div>';
+  }).join('')+'</div>';
 }
 </script>
 </body>
