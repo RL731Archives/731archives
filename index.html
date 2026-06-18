@@ -498,6 +498,207 @@ function getSortedMembres(){
     return sortMode==='nom_asc'?na.localeCompare(nb):nb.localeCompare(na);
   });
 }
+ async function changeMemberGrade(){
+  const id=$('memChangeId').value,ng=parseInt($('memChangeGrade').value),msg=$('memMsg');
+  if(!id){msg.textContent='Sélectionnez';msg.className='msg error';msg.style.display='block';return;}
+  try{
+    await db.collection('membres').doc(id).update({grade:ng});
+    msg.textContent='✅ OK';msg.className='msg';msg.style.display='block';
+    renderMembersList();
+  }catch(e){
+    msg.textContent='Erreur: '+e.message;msg.className='msg error';msg.style.display='block';
+  }
+}
+
+async function saveHistory(){
+  const c=$('historyDisplay').innerHTML;
+  try{
+    await db.collection('contenu').doc('histoire').set({texte:c});
+    historyText=c;
+  }catch(e){
+    localStorage.setItem('rl_history',c);
+    historyText=c;
+  }
+  const btn=$('saveHistoryBtn');
+  btn.textContent='✅ Sauvegardé';
+  setTimeout(()=>btn.innerHTML='💾 Sauvegarder',2000);
+}
+
+async function uploadHistoryDoc(){
+  const fi=$('historyFileInput');
+  const t=$('historyDocTitle').value.trim();
+  const d=$('historyDocDate').value;
+  const msg=$('uploadAdminMsg');
+  const ub=$('uploadBtn');
+  const pr=$('uploadProgress');
+  const br=$('uploadProgressBar');
+  
+  msg.className='admin-msg';
+  msg.style.display='none';
+  
+  if(!fi.files || !fi.files[0]){
+    msg.textContent='❌ Sélectionnez un fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  if(!t){
+    msg.textContent='❌ Titre requis';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
+  const f=fi.files[0];
+  if(f.size>20*1024*1024){
+    msg.textContent='❌ Fichier > 20 Mo';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
+  ub.disabled=true;
+  ub.innerHTML='⏳ Upload...';
+  pr.style.display='block';
+  br.style.width='0%';
+  msg.className='admin-msg info';
+  msg.textContent='⏳ Conversion du fichier...';
+  msg.style.display='block';
+  
+  const reader=new FileReader();
+  reader.onprogress=function(e){
+    if(e.lengthComputable){
+      br.style.width=(e.loaded/e.total*50)+'%';
+    }
+  };
+  reader.onload=async function(e){
+    br.style.width='60%';
+    msg.textContent='⏳ Enregistrement dans Firestore...';
+    try{
+      const base64=e.target.result;
+      await db.collection('histoire_documents').add({
+        title:t,
+        date:d||'',
+        fileName:f.name,
+        type:f.name.split('.').pop().toLowerCase(),
+        data:base64,
+        size:f.size,
+        uploadedAt:new Date().toISOString()
+      });
+      br.style.width='100%';
+      msg.textContent='✅ Upload réussi !';
+      msg.className='admin-msg success';
+      msg.style.display='block';
+      fi.value='';
+      $('historyDocTitle').value='';
+      $('historyDocDate').value='';
+      $('uploadZone').querySelector('p').innerHTML='<strong>Cliquez</strong> ou glissez-déposez un fichier';
+      setTimeout(function(){
+        pr.style.display='none';
+        br.style.width='0%';
+      },800);
+      await loadHistoryDocs();
+    }catch(er){
+      msg.textContent='❌ Erreur: '+er.message;
+      msg.className='admin-msg error';
+      msg.style.display='block';
+      pr.style.display='none';
+      br.style.width='0%';
+    }
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+  };
+  reader.onerror=function(){
+    msg.textContent='❌ Erreur lors de la lecture du fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    ub.disabled=false;
+    ub.innerHTML='📤 Uploader';
+    pr.style.display='none';
+    br.style.width='0%';
+  };
+  reader.readAsDataURL(f);
+}
+
+async function loadHistoryDocs(){
+  try{
+    var s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
+    historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){
+    console.log('histoire_documents status:', e.message);
+    historyDocs=[];
+  }
+  displayPublicHistoryDocs();
+  if(currentUser && currentUser.isAdmin) displayAdminHistoryDocs();
+}
+
+function displayPublicHistoryDocs(){
+  var c=$('historyDocsPublic');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="color:#999;font-size:13px;font-style:italic">Aucun document pour l\'instant.</p>';
+    return;
+  }
+  var imgs=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;});
+  var oth=historyDocs.filter(function(d){return ['jpg','jpeg','png','gif','webp'].indexOf(d.type)<0;});
+  var h='';
+  
+  if(imgs.length){
+    h+='<div style="margin-bottom:14px"><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">🖼️ Galerie</h5><div class="histo-gallery">';
+    imgs.forEach(function(d){
+      h+='<div class="histo-gallery-item" onclick="openViewerById(\\''+d._fi+'\\')"><div class="thumb"><img src="'+d.data+'" alt="'+d.title+'"></div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>';
+    });
+    h+='</div></div>';
+  }
+  
+  if(oth.length){
+    h+='<div><h5 style="color:var(--bordeaux);font-size:13px;margin-bottom:6px">📄 Documents</h5>';
+    oth.forEach(function(d){
+      h+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openViewerById(\\''+d._fi+'\\')">'+d.title+'</strong><span>'+d.type.toUpperCase()+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">👁️</button><button class="btn btn-bdx" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:4px 10px;font-size:11px">📥</button></div></div>';
+    });
+    h+='</div>';
+  }
+  
+  c.innerHTML=h;
+}
+
+function displayAdminHistoryDocs(){
+  var c=$('historyDocsList');
+  if(!historyDocs || !historyDocs.length){
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';
+    return;
+  }
+  c.innerHTML=historyDocs.map(function(d){
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\\''+d._fi+'\\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+  }).join('');
+}
+
+function openViewerById(docId){
+  var d=historyDocs.find(function(x){return x._fi===docId;});
+  if(!d){alert('Document introuvable');return;}
+  $('viewerTitle').textContent=d.title||'Document';
+  const b=$('viewerBody');
+  const ex=(d.type||'').toLowerCase();
+  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
+    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
+  } else if(ex==='pdf'){
+    b.innerHTML='<iframe src="'+d.data+'" class="embed-pdf"></iframe>';
+  } else if(ex==='txt'){
+    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+  } else {
+    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+
+function closeViewer(){$('viewerOverlay').classList.remove('open');}
+
+async function deleteHistoryDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('histoire_documents').doc(id).delete();
+    loadHistoryDocs();
+  }catch(e){alert(e.message);}
+} 
 function getSortIcon(){return sortMode==='none'?' ⇅':sortMode==='nom_asc'?' ▲':' ▼';}
 
 async function addMember(){
