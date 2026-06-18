@@ -458,7 +458,6 @@ function applyLogin(){
 }
 
 function restoreSession(){
-  // Restaure l'état complet après rechargement de page pour tous les utilisateurs
   if(!currentUser) return;
   $('logoutBtn').style.display='inline-block';
   
@@ -470,7 +469,6 @@ function restoreSession(){
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
-    // Ajouter l'onglet Administration dans la navigation
     var adminNav = document.getElementById('adminNavTab');
     if(!adminNav){
       var nav = document.querySelector('nav ul');
@@ -478,13 +476,10 @@ function restoreSession(){
       li.innerHTML = '<a id="adminNavTab" onclick="showPage(\'admin\',this)" style="background:var(--gold);color:var(--bordeaux);border-radius:4px">⚙ Administration</a>';
       nav.appendChild(li);
     }
-    // Aller sur la page admin
     document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
     $('page-admin').classList.add('active');
   } else {
-    // Membre connecté : restaurer l'état
     $('loginPrompt').style.display='none';
-    // Rester sur la page active, ou aller à l'accueil
     var activePage = document.querySelector('.page.active');
     if(!activePage) {
       document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -797,6 +792,7 @@ function displayAdminHistoryDocs(){
     c.innerHTML='<p style="font-size:12px;color:#999">Aucun.</p>';
     return;
   }
+  c.style.display='block';
   c.innerHTML=historyDocs.map(function(d){
     return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
   }).join('');
@@ -840,14 +836,85 @@ function closeViewer(){
   $('viewerOverlay').classList.remove('open');
 }
 
-function renderDocs(){
-  // placeholder
-}
-function renderMedia(){
-  // placeholder
-}
+/* ===== FONCTIONS MANQUANTES AJOUTÉES ===== */
+
 function renderArchives(){
-  // placeholder
+  if(!currentSub||!currentUser){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';return;}
+  const s=ssR[currentSub];
+  if(!s||currentUser.grade<s.niveau){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Accès réservé.</p>';return;}
+  const filtered=docs.filter(d=>d.sub===currentSub);
+  if(!filtered.length){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucun document.</p>';return;}
+  let h='<div style="display:flex;gap:8px;margin-bottom:10px"><span class="back-link" onclick="currentSub=null;showPage(\'accueil\',document.querySelector(\'nav a\'))">← Retour</span><h3 style="color:var(--bordeaux);font-size:16px;flex:1">'+s.label+'</h3></div>';
+  filtered.forEach(function(d){
+    const isImg=['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;
+    h+='<div class="histo-doc"><div class="preview">'+(isImg?'<img src="'+d.data+'">':'📄')+'</div><div class="info"><strong onclick="openViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur?d.auteur:'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
+    if(currentUser&&currentUser.isAdmin)h+='<button class="btn btn-danger" onclick="deleteDocument(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
+    h+='</div></div>';
+  });
+  $('archivesContent').innerHTML=h;
+}
+
+function renderDocs(){
+  if(!currentUser||!docs.length)return;
+}
+
+function renderMedia(){
+  const c=$('mediaList');
+  if(!currentUser){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p>';return;}
+  const media=docs.filter(d=>['jpg','jpeg','png','gif','webp','mp4','avi','mov'].indexOf(d.type)>=0);
+  if(!media.length){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucun média.</p>';return;}
+  c.innerHTML='<div class="histo-gallery">'+media.map(d=>'<div class="histo-gallery-item" onclick="openViewer(\''+d._fi+'\')"><div class="thumb">'+(d.type==='mp4'?'<div style="display:grid;place-items:center;height:100%">🎬</div>':'<img src="'+d.data+'">')+'</div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>').join('')+'</div>';
+}
+
+async function addDocument(){
+  const t=$('docTitle').value.trim();
+  const n=$('docNiveau').value;
+  const sb=$('docSub').value;
+  const g=$('docGrade').value;
+  const d=$('docDate').value.trim();
+  const a=$('docAuteur').value.trim();
+  const fi=$('docFile');
+  const msg=$('docMsg');
+  if(!t||!fi.files||!fi.files[0]){msg.textContent='Titre + fichier requis';msg.className='msg error';msg.style.display='block';return;}
+  const f=fi.files[0];
+  let tp=f.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      await db.collection('documents').add({title:t,niveau:parseInt(n),sub:sb,grade:parseInt(g),date:d,auteur:a,fileName:f.name,type:tp,data:e.target.result,uploadedAt:new Date().toISOString()});
+      msg.textContent='✅ Ajouté !';msg.className='msg';msg.style.display='block';
+      $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';fi.value='';
+      const sd=await db.collection('documents').get();
+      docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+    }catch(er){msg.textContent='❌ '+er.message;msg.className='msg error';msg.style.display='block';}
+  };
+  reader.readAsDataURL(f);
+}
+
+function openViewer(id){
+  const doc=docs.find(function(d){return d._fi===id;});
+  if(!doc)return;
+  $('viewerTitle').textContent=doc.title||'Document';
+  const body=$('viewerBody');
+  if(['jpg','jpeg','png','gif','webp'].indexOf(doc.type)>=0){
+    body.innerHTML='<img src="'+doc.data+'" alt="'+doc.title+'">';
+  } else if(doc.type==='pdf'){
+    body.innerHTML='<embed class="embed-pdf" src="'+doc.data+'" type="application/pdf">';
+  } else if(doc.type==='mp4'){
+    body.innerHTML='<video controls style="max-width:100%;max-height:80vh"><source src="'+doc.data+'" type="video/mp4"></video>';
+  } else {
+    body.innerHTML='<div class="text-preview"><pre>'+atob(doc.data.split(',')[1])+'</pre></div>';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+
+async function deleteDocument(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('documents').doc(id).delete();
+    docs=docs.filter(function(d){return d._fi!==id;});
+    renderArchives();
+  }catch(e){alert(e.message);}
 }
 </script>
 </body>
