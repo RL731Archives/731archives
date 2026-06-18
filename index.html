@@ -12,8 +12,9 @@
     body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
     .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:50px;height:50px;background:linear-gradient(135deg,var(--gold),#b8942b);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:26px;font-weight:700}
-    .site-title{color:var(--bordeaux);font-size:18px;font-weight:700;line-height:1.2}
+    .logo{width:50px;height:50px;border-radius:50%;overflow:hidden;display:grid;place-items:center;border:2px solid var(--gold)}
+    .logo img{width:100%;height:100%;object-fit:cover;display:block}
+    .site-title{color:var(--bordeaux);font-size:24px;font-weight:700;line-height:1.2}
     .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;text-decoration:none;font-size:14px}
     .btn-gold{background:var(--gold);color:#fff}
     .btn-bdx{background:var(--bordeaux);color:#fff}
@@ -29,7 +30,7 @@
     .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
     .banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
     .banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,0.4));display:flex;align-items:center;justify-content:center;padding:24px}
-    .banner h1{color:var(--gold);font-size:28px;text-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center}
+    .banner h1{display:none}
     .page{display:none}
     .page.active{display:block}
     .cards{display:flex;gap:12px;margin:14px 0}
@@ -115,13 +116,13 @@
 <body>
 
 <header>
-  <div class="brand"><div class="logo">★</div><div class="site-title">Archives de l'Étoile du Temple</div></div>
+  <div class="brand"><div class="logo"><img src="https://raw.githubusercontent.com/RL731Archives/731archives/main/logo731.jpg" alt="Logo"></div><div class="site-title">Archives de l'Étoile du Temple</div></div>
   <div><button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button><button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button></div>
 </header>
 
 <nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
 
-<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"><div><h1>Archives de l'Étoile du Temple</h1></div></div></div>
+<div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"></div></div>
 
 <!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
@@ -208,7 +209,9 @@
 <!-- PAGE CONTACT -->
 <div id="page-contact" class="page">
   <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
-  <p style="color:#555">Pour toute information, contactez les archives de la Loge.</p>
+  <p style="color:#555">Pour toute information veuillez contacter l'administrateur du site.</p>
+  <p style="margin-top:8px;color:#555">📧 <a href="mailto:administrateur@rl731archives.net" style="color:var(--bordeaux);font-weight:bold;text-decoration:none">administrateur@rl731archives.net</a></p>
+  <p style="color:#555">🌐 <a href="https://rl731archives.net" target="_blank" style="color:var(--bordeaux);font-weight:bold;text-decoration:none">www.rl731archives.net</a></p>
 </div>
 
 <!-- PAGE ADMIN -->
@@ -303,7 +306,7 @@
   </div>
 </div>
 
-<footer>731archives.netlify.app — Étoile du Temple — 1956</footer>
+<footer>MMXXVI - Archives de l'Étoile du Temple - Tout droit réservé</footer>
 
 <script>
 const firebaseConfig = {
@@ -800,226 +803,51 @@ function displayAdminHistoryDocs(){
 }
 
 function dataUriToBlobUrl(dataUri){
-  var arr=dataUri.split(','),mime=arr[0].match(/:(.*?);/);
-  if(!mime)return dataUri;
-  mime=mime[1];
-  var bstr=atob(arr[1]),n=bstr.length,u8arr=new Uint8Array(n);
-  while(n--)u8arr[n]=bstr.charCodeAt(n);
-  return URL.createObjectURL(new Blob([u8arr],{type:mime}));
+  var parts=dataUri.split(','),mime=parts[0].match(/:(.*?);/)[1],bytes=atob(parts[1]),ab=new ArrayBuffer(bytes.length),ia=new Uint8Array(ab);
+  for(var i=0;i<bytes.length;i++)ia[i]=bytes.charCodeAt(i);
+  return URL.createObjectURL(new Blob([ab],{type:mime}));
 }
 
-function openViewerById(docId){
-  var d=historyDocs.find(function(x){return x._fi===docId;});
-  if(!d){alert('Document introuvable');return;}
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody');
-  const ex=(d.type||'').toLowerCase();
-  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+d.data+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    var url=(d.data.length>500000)?dataUriToBlobUrl(d.data):d.data;
-    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-  } else if(ex==='txt'){
-    b.innerHTML='<div class="text-preview"><pre style="white-space:pre-wrap">'+d.data+'</pre></div><p style="margin-top:8px"><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p>';
+function openViewerById(id){
+  var doc=historyDocs.find(function(d){return d._fi===id;});
+  if(!doc) return;
+  $('viewerTitle').textContent=doc.title||'Document';
+  var body=$('viewerBody');
+  var imgTypes=['jpg','jpeg','png','gif','webp'];
+  var textTypes=['txt'];
+  var pdfTypes=['pdf'];
+  
+  if(imgTypes.indexOf(doc.type)>=0){
+    body.innerHTML='<img src="'+doc.data+'" alt="'+doc.title+'">';
+  } else if(pdfTypes.indexOf(doc.type)>=0){
+    body.innerHTML='<embed class="embed-pdf" src="'+doc.data+'" type="application/pdf">';
+  } else if(textTypes.indexOf(doc.type)>=0){
+    body.innerHTML='<div class="text-preview"><pre>'+atob(doc.data.split(',')[1])+'</pre></div>';
   } else {
-    b.innerHTML='<div class="text-preview"><p><a href="'+d.data+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
+    body.innerHTML='<div class="text-preview"><p><strong>Type :</strong> '+doc.type.toUpperCase()+'</p><p><a href="'+doc.data+'" download="'+doc.fileName+'" class="btn btn-bdx" style="margin-top:12px">📥 Télécharger</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-function closeViewer(){$('viewerOverlay').classList.remove('open');}
-
-async function deleteHistoryDoc(id){
-  if(!confirm('Supprimer ce document ?'))return;
-  try{
-    await db.collection('histoire_documents').doc(id).delete();
+function deleteHistoryDoc(id){
+  if(!confirm('Supprimer ce document ?')) return;
+  db.collection('histoire_documents').doc(id).delete().then(function(){
     loadHistoryDocs();
-  }catch(e){alert(e.message);}
+  });
 }
 
-// =============================================
-// FONCTION VIEWER POUR LES DOCUMENTS ARCHIVES
-// =============================================
-function openArchiveViewer(docId){
-  var d=docs.find(function(x){return x._fi===docId;});
-  if(!d){alert('Document introuvable');return;}
-  
-  // Vérifier les droits d'accès
-  if(!currentUser){openLogin();return;}
-  if(!currentUser.isAdmin && currentUser.grade<d.grade){
-    alert('Accès refusé : votre grade ne permet pas de consulter ce document.');
-    return;
-  }
-  
-  $('viewerTitle').textContent=d.title||'Document';
-  const b=$('viewerBody');
-  const fileData=d.data||'';
-  const fileName=d.fileName||'';
-  const rawType=(d.type||fileName.split('.').pop()||'pdf').toLowerCase().trim();
-  
-  // Déterminer le type réel à partir du data base64 si disponible
-  var ex=rawType;
-  if(fileData.startsWith('data:') && fileData.indexOf('/')>5){
-    var mime=fileData.substring(5,fileData.indexOf(';'));
-    if(mime.indexOf('/')>0){
-      var mimeType=mime.split('/')[1].toLowerCase();
-      if(['jpeg','png','gif','webp'].includes(mimeType)) ex=mimeType;
-      else if(mimeType==='pdf' || mimeType==='x-pdf') ex='pdf';
-    }
-  }
-  
-  if(['jpg','jpeg','png','gif','webp'].includes(ex)){
-    b.innerHTML='<img src="'+fileData+'" alt="'+d.title+'" style="max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto">';
-  } else if(ex==='pdf'){
-    var url=(fileData.length>500000)?dataUriToBlobUrl(fileData):fileData;
-    b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-  } else if(ex==='txt' && fileData.startsWith('data:')){
-    b.innerHTML='<div class="text-preview"><p>Fichier texte — <a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger</a></p></div>';
-  } else {
-    // Dernier recours : si le data commence par data:application/pdf, on force l'affichage PDF
-    if(fileData.startsWith('data:application/pdf') || fileData.startsWith('data:application/x-pdf')){
-      var url=(fileData.length>500000)?dataUriToBlobUrl(fileData):fileData;
-      b.innerHTML='<iframe src="'+url+'" class="embed-pdf"></iframe>';
-    } else {
-      b.innerHTML='<div class="text-preview">'+
-        '<p><strong>'+d.title+'</strong></p>'+
-        '<p style="margin-top:4px;color:#888;font-size:13px">Type : '+(ex||'inconnu').toUpperCase()+'</p>'+
-        '<p style="margin-top:12px"><a href="'+fileData+'" download class="btn btn-bdx">📥 Télécharger le document</a></p>'+
-      '</div>';
-    }
-  }
-  $('viewerOverlay').classList.add('open');
-}
-
-async function addDocument(){
-  const t=$('docTitle').value.trim();
-  const n=parseInt($('docNiveau').value);
-  const s=$('docSub').value;
-  const g=parseInt($('docGrade').value);
-  const d=$('docDate').value;
-  const a=$('docAuteur').value.trim();
-  const fi=$('docFile');
-  const msg=$('docMsg');
-  
-  if(!t||!fi.files||!fi.files[0]){
-    msg.textContent='Titre et fichier requis';msg.className='msg error';msg.style.display='block';return;
-  }
-  
-  const f=fi.files[0];
-  if(f.size>20*1024*1024){
-    msg.textContent='Fichier > 20 Mo';msg.className='msg error';msg.style.display='block';return;
-  }
-  
-  msg.innerHTML='⏳ Upload...';msg.className='msg';msg.style.display='block';
-  
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      const base64=e.target.result;
-      await db.collection('documents').add({
-        title:t,
-        niveau:n,
-        sub:s,
-        grade:g,
-        date:d||'',
-        auteur:a||'',
-        fileName:f.name,
-        type:f.name.split('.').pop().toLowerCase(),
-        data:base64,
-        size:f.size,
-        uploadedAt:new Date().toISOString()
-      });
-      msg.textContent='✅ Document ajouté';msg.className='msg';msg.style.display='block';
-      $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';$('docFile').value='';
-      const sd=await db.collection('documents').get();
-      docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-      renderArchives();
-    }catch(er){
-      msg.textContent='❌ Erreur: '+er.message;msg.className='msg error';msg.style.display='block';
-    }
-  };
-  reader.readAsDataURL(f);
-}
-
-async function deleteArchiveDoc(id){
-  if(!confirm('Supprimer ce document ?'))return;
-  try{
-    await db.collection('documents').doc(id).delete();
-    docs=docs.filter(d=>d._fi!==id);
-    renderArchives();
-  }catch(e){alert(e.message);}
+function closeViewer(){
+  $('viewerOverlay').classList.remove('open');
 }
 
 function renderDocs(){
-  // Déjà géré par renderArchives()
+  // placeholder
 }
-
-// === DOCUMENTS ARCHIVES ===
-function renderArchives(){
-  const c=$('archivesContent');
-  if(!currentUser){c.innerHTML='<p style="font-size:13px;color:#666;padding:20px;text-align:center">Connectez-vous.</p>';return;}
-  const subsArr=Object.entries(ssR).map(([k,v])=>({id:k,...v}));
-  
-  if(currentSub){
-    const sub=ssR[currentSub];
-    if(!sub||(currentUser.grade<sub.niveau&&!currentUser.isAdmin)){
-      c.innerHTML='<p style="color:#999;padding:20px">Accès refusé.</p>';return;
-    }
-    const gradeLabel=['','Apprenti','Compagnon','Maître'][sub.niveau];
-    var subDocs=docs.filter(d=>d.sub===currentSub);
-    subDocs.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
-    if(!currentUser.isAdmin)subDocs=subDocs.filter(d=>currentUser.grade>=d.grade);
-    c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</a><h3 style="color:var(--bordeaux)">'+sub.label+' <span style="font-size:13px;color:#888">('+gradeLabel+')</span></h3>'+
-      '<div id="subDocsList" style="margin-top:10px">'+
-      subDocs.map(d=>'<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openArchiveViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur||'')+((d.date)?' — '+d.date:'')+'</span></div><div class="actions">'+
-        '<button class="btn btn-gold" onclick="openArchiveViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>'+
-        (currentUser&&currentUser.isAdmin?'<button class="btn btn-danger" onclick="deleteArchiveDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button>':'')+
-      '</div></div>').join('')+
-      (!subDocs.length?'<p style="color:#999;font-size:13px;padding:10px">Aucun document.</p>':'')+
-      '</div>';
-  } else {
-    const niveauLabels = {1:'APPRENTI',2:'COMPAGNON',3:'MAÎTRE'};
-    const niveauColors = {1:'var(--card1)',2:'var(--card2)',3:'var(--card3)'};
-    
-    let visibleNiveaux = [];
-    if(currentUser.isAdmin){
-      visibleNiveaux = [1,2,3];
-    } else {
-      visibleNiveaux = [1];
-      if(currentUser.grade>=2) visibleNiveaux.push(2);
-      if(currentUser.grade>=3) visibleNiveaux.push(3);
-    }
-    
-    let cardsHtml = '<p style="color:#555;font-size:13px;margin-bottom:10px">Sélectionnez une rubrique :</p><div class="cards">';
-    
-    visibleNiveaux.forEach(nv => {
-      const subsOfNiveau = subsArr.filter(s => s.niveau === nv);
-      cardsHtml += '<div class="card" style="background:'+niveauColors[nv]+';flex:1;padding:16px;border-radius:8px;border:2px solid var(--gold);position:relative">' +
-        '<div style="position:absolute;right:10px;top:10px;background:var(--gold);color:#fff;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font-size:14px">🔒</div>' +
-        '<h3 style="color:var(--bordeaux);font-size:16px;margin-bottom:8px;text-align:center">'+niveauLabels[nv]+'</h3>' +
-        '<ul class="sub-list" style="list-style:none;margin-top:6px">';
-      subsOfNiveau.forEach(s => {
-        const emoji = s.label.includes('Rituels')?'📜':s.label.includes('Planches')?'📝':'🎙';
-        cardsHtml += '<li onclick="currentSub=\''+s.id+'\';renderArchives();" style="padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent">'+
-          '<span class="emoji-icon" style="font-size:16px;vertical-align:middle;margin-right:4px">'+emoji+'</span> '+
-          (s.label.includes('Rituels')?'Rituels '+(s.label.match(/\d/)?s.label.match(/\d/)[0]+'°':''):s.label)+
-          '</li>';
-      });
-      cardsHtml += '</ul></div>';
-    });
-    
-    cardsHtml += '</div>';
-    c.innerHTML = cardsHtml;
-  }
-}
-
 function renderMedia(){
-  var c=$('mediaList');
-  if(!currentUser){
-    c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Connectez-vous.</p>';
-    return;
-  }
-  c.innerHTML='<p style="color:#999;text-align:center;padding:30px">Galerie photos et vidéos à venir.</p>';
+  // placeholder
+}
+function renderArchives(){
+  // placeholder
 }
 </script>
 </body>
