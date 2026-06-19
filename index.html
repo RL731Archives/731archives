@@ -866,40 +866,24 @@ function renderDocs(){
 }
 
 function renderArchives(){
-  // Rien de changé ici - le code original s'exécute
-  const c=$('archivesContent');
-  if(!currentUser){
-    c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p>';
-    return;
-  }
-  if(!dataLoaded){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Chargement...</p>';return;}
-  
-  if(!currentSub){
-    const n=currentUser.grade;
-    const r=Object.entries(ssR).filter(([k,v])=>v.niveau<=n);
-    if(!r.length){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucune rubrique disponible.</p>';return;}
-    c.innerHTML='<div style="margin-bottom:10px"><span style="font-size:13px;color:#666">Bienvenue '+currentUser.prenom+', sélectionnez une rubrique depuis l\'accueil ou ci-dessous :</span></div><div class="rubriques">'+
-      r.map(([k,v])=>'<div class="rubrique-card" onclick="goToSub(\''+k+'\')"><h4>'+v.label+'</h4></div>').join('')+'</div>';
-    return;
-  }
-  
-  const sub=ssR[currentSub];
-  if(!sub){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Rubrique introuvable.</p>';return;}
-  
-  const filtered=docs.filter(d=>d.sous_rubrique===currentSub);
-  
-  c.innerHTML='<a class="back-link" onclick="currentSub=null;renderArchives()">← Retour</a>'+
-    '<h3 style="color:var(--bordeaux);margin-bottom:10px">'+sub.label+'</h3>'+
-    (filtered.length?filtered.map(d=>{
-      const ext=(d.fileName||d.titre||'').split('.').pop().toLowerCase();
-      const isImg=['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0;
-      const isPdf=ext==='pdf';
-      return '<div class="histo-doc"><div class="preview">'+
-        (isImg?'<img src="'+d.data+'">':'<span>'+ext.toUpperCase()+'</span>')+
-        '</div><div class="info"><strong onclick="openArchDocViewer(\''+d._fi+'\')">'+(d.titre||'Sans titre')+'</strong><span>'+(d.auteur?(d.auteur+' • '):'')+(d.date||'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openArchDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button></div></div>';
-    }).join(''):'<p style="color:#999;font-size:13px;font-style:italic">Aucun document dans cette rubrique.</p>');
+  if(!currentSub||!currentUser){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';return;}
+  var s=ssR[currentSub];
+  if(!s||currentUser.grade<s.niveau){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Accès réservé.</p>';return;}
+  var h='<div style="display:flex;gap:8px;margin-bottom:10px"><span class="back-link" onclick="currentSub=null;showPage(\'accueil\',document.querySelector(\'nav a\'))">← Retour</span><h3 style="color:var(--bordeaux);font-size:16px;flex:1">'+s.label+'</h3></div>';
+  db.collection('documents').get().then(function(sd){
+    var tempDocs=sd.docs.map(function(d){return Object.assign({},d.data(),{_fi:d.id});});
+    var filtered=tempDocs.filter(function(d){return d.sub===currentSub;});
+    if(!filtered.length){$('archivesContent').innerHTML=h+'<p style="color:#999;padding:20px;text-align:center">Aucun document dans cette rubrique.</p>';return;}
+    filtered.forEach(function(d){
+      var isImg=['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;
+      var icon='📝';if(isImg)icon='🖼️';if(d.type==='pdf')icon='📄';if(d.type==='mp4'||d.type==='avi'||d.type==='mov')icon='🎬';
+      h+='<div class="histo-doc"><div class="preview">'+(isImg?'<img src="'+d.data+'">':icon)+'</div><div class="info"><strong onclick="openViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur?d.auteur:'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
+      if(currentUser&&currentUser.isAdmin)h+='<button class="btn btn-danger" onclick="deleteDocument(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
+      h+='</div></div>';
+    });
+    $('archivesContent').innerHTML=h;
+  }).catch(function(){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Erreur de chargement.</p>';});
 }
-
 function openArchDocViewer(id){
   var d=docs.find(x=>x._fi===id);
   if(!d){alert('Document introuvable');return;}
