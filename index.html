@@ -109,6 +109,30 @@
     .admin-msg.success{display:block;background:#e8f5e9;color:#2e7d32}
     .admin-msg.error{display:block;background:#ffebee;color:#c62828}
     .admin-msg.info{display:block;background:#e3f2fd;color:#1565c0}
+    
+    /* === NOUVEAU : Styles pour l'onglet Médias === */
+    .media-upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s}
+    .media-upload-zone:hover{background:#f5f0e0}
+    .media-upload-zone.dragover{background:#efe5c8;border-color:var(--bordeaux)}
+    .media-upload-zone .icon{font-size:40px;color:var(--gold)}
+    .media-upload-zone p{color:#888;font-size:13px;margin-top:6px}
+    .media-upload-preview{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}
+    .media-upload-preview .file-card{width:120px;height:120px;border-radius:6px;border:1px solid #ddd;overflow:hidden;background:#fff;position:relative;display:grid;place-items:center}
+    .media-upload-preview .file-card img,.media-upload-preview .file-card video{width:100%;height:100%;object-fit:cover}
+    .media-upload-preview .file-card .file-icon{font-size:32px;color:var(--bordeaux)}
+    .media-upload-preview .file-card .remove-file{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(198,40,40,0.85);color:#fff;border:none;font-size:12px;cursor:pointer;display:grid;place-items:center}
+    .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
+    .media-gallery-item{border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;position:relative}
+    .media-gallery-item .media-preview{height:150px;background:#0a0a0a;display:grid;place-items:center;overflow:hidden}
+    .media-gallery-item .media-preview img{width:100%;height:100%;object-fit:cover}
+    .media-gallery-item .media-preview video{width:100%;height:100%;object-fit:cover}
+    .media-gallery-item .media-preview .vid-icon{position:absolute;color:#fff;font-size:36px;opacity:0.8;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
+    .media-gallery-item .media-info{padding:8px}
+    .media-gallery-item .media-info strong{display:block;font-size:13px}
+    .media-gallery-item .media-info span{font-size:10px;color:#888;display:block}
+    .media-gallery-item .media-delete{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(198,40,40,0.85);color:#fff;border:none;font-size:12px;cursor:pointer;display:none;place-items:center}
+    .media-gallery-item:hover .media-delete{display:grid}
+    .media-type-badge{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.7);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;text-transform:uppercase}
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.cards{flex-direction:column}header{flex-direction:column;align-items:flex-start}}
     @media(max-width:800px){#viewerOverlay .viewer-modal{width:95vw}#viewerOverlay .viewer-body img{max-height:70vh}#viewerOverlay .viewer-body iframe{height:60vh}}
   </style>
@@ -200,7 +224,7 @@
   <div id="archivesContent"><p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p></div>
 </div>
 
-<!-- PAGE PHOTOS -->
+<!-- PAGE PHOTOS & VIDÉOS (PUBLIQUE) -->
 <div id="page-photos" class="page">
   <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
   <div id="mediaList"><p style="color:#999;padding:20px;text-align:center">Connectez-vous pour voir les médias.</p></div>
@@ -221,6 +245,7 @@
     <div class="sub-tabs">
       <button class="active" onclick="showAdminTab('docs',this)">📄 Documents</button>
       <button onclick="showAdminTab('membres',this)">👥 Membres</button>
+      <button onclick="showAdminTab('medias',this)">📸 Médias</button>
     </div>
     <div id="adminDocs">
       <div class="card" style="background:#fffaf6;padding:20px;margin:12px 0">
@@ -284,6 +309,35 @@
         <div id="memList"></div>
       </div>
     </div>
+    <!-- === NOUVEAU : ONGLET MÉDIAS === -->
+    <div id="adminMedias" style="display:none">
+      <div class="card" style="background:#fffaf6;padding:20px;margin:12px 0">
+        <h4 style="color:var(--bordeaux);font-size:15px;margin-bottom:12px;text-align:center">📸 Uploader des photos & vidéos</h4>
+        <input id="mediaTitle" placeholder="Titre du média (ex: Tenue du 15 mars)" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;font-size:14px;background:#fff">
+        <div class="row" style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <input id="mediaDate" placeholder="Date (optionnel)" style="flex:1;min-width:100px;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;background:#fff">
+          <select id="mediaCategory" style="flex:1;min-width:100px;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff">
+            <option value="evenement">Événement</option>
+            <option value="tenue">Tenue</option>
+            <option value="sortie">Sortie</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div id="mediaUploadZone" class="media-upload-zone" style="margin-bottom:8px">
+          <div class="icon">📁</div>
+          <p><strong>Cliquez</strong> ou glissez-déposez des photos/vidéos (plusieurs fichiers possibles)</p>
+          <input id="mediaFileInput" type="file" style="display:none" accept="image/*,video/*" multiple onchange="handleMediaFiles(this.files)">
+        </div>
+        <div id="mediaFilesPreview" class="media-upload-preview"></div>
+        <div class="upload-progress" id="mediaUploadProgress"><div class="bar" id="mediaUploadProgressBar"></div></div>
+        <button class="btn btn-bdx" id="mediaUploadBtn" onclick="uploadMedias()" style="width:100%;padding:10px;font-size:14px">📤 Uploader les médias</button>
+        <div id="mediaAdminMsg" class="admin-msg"></div>
+      </div>
+      <div class="card" style="background:#fffaf6;padding:20px;margin:12px 0">
+        <h4 style="color:var(--bordeaux);font-size:15px;margin-bottom:12px;text-align:center">📋 Médias uploadés</h4>
+        <div id="mediaAdminList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -342,6 +396,10 @@ let currentSub=null;
 let currentNiveau=1;
 let sortMode='none';
 let historyDocs=[];
+
+// === NOUVEAU : Variables pour les médias ===
+let mediaFilesToUpload=[];
+let medias=[];
 
 function $(id){return document.getElementById(id);}
 
@@ -442,6 +500,7 @@ function applyLogin(){
     $('saveHistoryBtn').style.display='inline-block';
     updateSubs();
     renderMembersList();
+    loadMedias(); // NOUVEAU
   } else {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     $('page-accueil').classList.add('active');
@@ -478,6 +537,7 @@ function restoreSession(){
     }
     document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
     $('page-admin').classList.add('active');
+    loadMedias(); // NOUVEAU
   } else {
     $('loginPrompt').style.display='none';
     var activePage = document.querySelector('.page.active');
@@ -554,8 +614,10 @@ function showAdminTab(n,el){
   el.classList.add('active');
   $('adminDocs').style.display=n==='docs'?'block':'none';
   $('adminMembres').style.display=n==='membres'?'block':'none';
+  $('adminMedias').style.display=n==='medias'?'block':'none';
   if(n==='membres')renderMembersList();
   if(n==='docs')updateSubs();
+  if(n==='medias'){loadMedias(); resetMediaUpload();}
 }
 
 function updateSubs(){
@@ -794,128 +856,468 @@ function displayAdminHistoryDocs(){
   }
   c.style.display='block';
   c.innerHTML=historyDocs.map(function(d){
-    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="openViewerById(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">👁️</button><button class="btn btn-danger" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:3px 8px;font-size:11px">🗑️</button></div></div>';
+    return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong>'+d.title+'</strong><span>'+(d.fileName||'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="deleteHistoryDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button></div></div>';
   }).join('');
 }
 
-function dataUriToBlobUrl(dataUri){
-  var parts=dataUri.split(','),mime=parts[0].match(/:(.*?);/)[1],bytes=atob(parts[1]),ab=new ArrayBuffer(bytes.length),ia=new Uint8Array(ab);
-  for(var i=0;i<bytes.length;i++)ia[i]=bytes.charCodeAt(i);
-  return URL.createObjectURL(new Blob([ab],{type:mime}));
+async function deleteHistoryDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  try{
+    await db.collection('histoire_documents').doc(id).delete();
+    await loadHistoryDocs();
+  }catch(e){alert(e.message);}
 }
 
 function openViewerById(id){
-  var doc=historyDocs.find(function(d){return d._fi===id;});
-  if(!doc) return;
-  $('viewerTitle').textContent=doc.title||'Document';
+  var d=historyDocs.find(x=>x._fi===id);
+  if(!d){alert('Document introuvable');return;}
+  $('viewerTitle').textContent=d.title;
   var body=$('viewerBody');
-  var imgTypes=['jpg','jpeg','png','gif','webp'];
-  var textTypes=['txt'];
-  var pdfTypes=['pdf'];
-  
-  if(imgTypes.indexOf(doc.type)>=0){
-    body.innerHTML='<img src="'+doc.data+'" alt="'+doc.title+'">';
-  } else if(pdfTypes.indexOf(doc.type)>=0){
-    body.innerHTML='<embed class="embed-pdf" src="'+doc.data+'" type="application/pdf">';
-  } else if(textTypes.indexOf(doc.type)>=0){
-    body.innerHTML='<div class="text-preview"><pre>'+atob(doc.data.split(',')[1])+'</pre></div>';
+  var ext=d.type;
+  if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0){
+    body.innerHTML='<img src="'+d.data+'" alt="'+d.title+'">';
+  } else if(ext==='pdf'){
+    body.innerHTML='<iframe class="embed-pdf" src="'+d.data+'"></iframe>';
+  } else if(ext==='txt'){
+    try{
+      var txt=atob(d.data.split(',')[1]||'');
+      body.innerHTML='<div class="text-preview">'+txt.replace(/\n/g,'<br>')+'</div>';
+    }catch(e){
+      body.innerHTML='<div class="text-preview">Impossible d\'afficher le texte.</div>';
+    }
   } else {
-    body.innerHTML='<div class="text-preview"><p><strong>Type :</strong> '+doc.type.toUpperCase()+'</p><p><a href="'+doc.data+'" download="'+doc.fileName+'" class="btn btn-bdx" style="margin-top:12px">📥 Télécharger</a></p></div>';
+    body.innerHTML='<div class="text-preview"><p>Aperçu non disponible pour ce type de fichier.</p><p style="margin-top:8px"><a href="'+d.data+'" download="'+d.fileName+'" class="btn btn-bdx">📥 Télécharger</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-function deleteHistoryDoc(id){
-  if(!confirm('Supprimer ce document ?')) return;
-  db.collection('histoire_documents').doc(id).delete().then(function(){
-    loadHistoryDocs();
+function closeViewer(){$('viewerOverlay').classList.remove('open');}
+
+// === NOUVEAU : Fonctions pour les médias (Photos & Vidéos) ===
+
+function handleMediaFiles(files){
+  mediaFilesToUpload=[];
+  for(var i=0;i<files.length;i++){
+    mediaFilesToUpload.push(files[i]);
+  }
+  renderMediaPreview();
+}
+
+function renderMediaPreview(){
+  var c=$('mediaFilesPreview');
+  if(!mediaFilesToUpload.length){
+    c.innerHTML='';
+    return;
+  }
+  c.innerHTML=mediaFilesToUpload.map(function(f,i){
+    var url=URL.createObjectURL(f);
+    var isVideo=f.type.indexOf('video')>=0;
+    return '<div class="file-card">'+
+      (isVideo?'<video src="'+url+'" muted></video><div class="file-icon">🎬</div>':'<img src="'+url+'">')+
+      '<button class="remove-file" onclick="removeMediaFile('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function removeMediaFile(idx){
+  mediaFilesToUpload.splice(idx,1);
+  renderMediaPreview();
+}
+
+function resetMediaUpload(){
+  mediaFilesToUpload=[];
+  renderMediaPreview();
+  $('mediaTitle').value='';
+  $('mediaDate').value='';
+  $('mediaFileInput').value='';
+  $('mediaUploadProgress').style.display='none';
+}
+
+async function uploadMedias(){
+  var title=$('mediaTitle').value.trim();
+  var date=$('mediaDate').value.trim();
+  var category=$('mediaCategory').value;
+  var msg=$('mediaAdminMsg');
+  var ub=$('mediaUploadBtn');
+  var pr=$('mediaUploadProgress');
+  var br=$('mediaUploadProgressBar');
+  
+  if(!mediaFilesToUpload.length){
+    msg.textContent='❌ Sélectionnez au moins un fichier';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  if(!title){
+    msg.textContent='❌ Titre requis';
+    msg.className='admin-msg error';
+    msg.style.display='block';
+    return;
+  }
+  
+  ub.disabled=true;
+  ub.innerHTML='⏳ Upload...';
+  pr.style.display='block';
+  br.style.width='0%';
+  msg.className='admin-msg';
+  msg.style.display='none';
+  
+  var total=mediaFilesToUpload.length;
+  var completed=0;
+  var errors=[];
+  
+  for(var i=0;i<total;i++){
+    var f=mediaFilesToUpload[i];
+    if(f.size>25*1024*1024){
+      errors.push(f.name+' (trop volumineux >25 Mo)');
+      completed++;
+      br.style.width=Math.round((completed/total)*100)+'%';
+      continue;
+    }
+    
+    var ext=f.name.split('.').pop().toLowerCase();
+    var isVideo=f.type.indexOf('video')>=0;
+    
+    try{
+      var base64=await fileToBase64(f);
+      var docData={
+        title:title,
+        date:date||'',
+        category:category,
+        fileName:f.name,
+        type:ext,
+        mimeType:f.type,
+        isVideo:isVideo,
+        data:base64,
+        size:f.size,
+        uploadedAt:new Date().toISOString()
+      };
+      await db.collection('medias').add(docData);
+      completed++;
+      br.style.width=Math.round((completed/total)*100)+'%';
+    }catch(e){
+      errors.push(f.name+': '+e.message);
+      completed++;
+      br.style.width=Math.round((completed/total)*100)+'%';
+    }
+  }
+  
+  if(errors.length===0){
+    msg.textContent='✅ '+total+' média(s) uploadé(s) avec succès !';
+    msg.className='admin-msg success';
+  } else if(completed>0){
+    msg.textContent='⚠️ '+completed+' uploadé(s), '+errors.length+' erreur(s): '+errors.join(', ');
+    msg.className='admin-msg error';
+  } else {
+    msg.textContent='❌ Aucun fichier uploadé. '+errors.join(', ');
+    msg.className='admin-msg error';
+  }
+  msg.style.display='block';
+  
+  setTimeout(function(){
+    pr.style.display='none';
+    br.style.width='0%';
+  },1500);
+  
+  ub.disabled=false;
+  ub.innerHTML='📤 Uploader les médias';
+  resetMediaUpload();
+  await loadMedias();
+  renderMedia();
+}
+
+function fileToBase64(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(e){resolve(e.target.result);};
+    reader.onerror=function(){reject(new Error('Erreur lecture fichier'));};
+    reader.readAsDataURL(file);
   });
 }
 
-function closeViewer(){
-  $('viewerOverlay').classList.remove('open');
+async function loadMedias(){
+  try{
+    var s=await db.collection('medias').orderBy('uploadedAt','desc').get();
+    medias=s.docs.map(function(d){var r=d.data();r._fi=d.id;return r;});
+  }catch(e){
+    console.log('medias load error:',e.message);
+    medias=[];
+  }
+  renderMediaAdminList();
 }
 
-/* ===== FONCTIONS MANQUANTES AJOUTÉES ===== */
-
-function renderArchives(){
-  if(!currentSub||!currentUser){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Sélectionnez une rubrique depuis l\'accueil.</p>';return;}
-  const s=ssR[currentSub];
-  if(!s||currentUser.grade<s.niveau){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Accès réservé.</p>';return;}
-  const filtered=docs.filter(d=>d.sub===currentSub);
-  if(!filtered.length){$('archivesContent').innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucun document.</p>';return;}
-  let h='<div style="display:flex;gap:8px;margin-bottom:10px"><span class="back-link" onclick="currentSub=null;showPage(\'accueil\',document.querySelector(\'nav a\'))">← Retour</span><h3 style="color:var(--bordeaux);font-size:16px;flex:1">'+s.label+'</h3></div>';
-  filtered.forEach(function(d){
-    const isImg=['jpg','jpeg','png','gif','webp'].indexOf(d.type)>=0;
-    h+='<div class="histo-doc"><div class="preview">'+(isImg?'<img src="'+d.data+'">':'📄')+'</div><div class="info"><strong onclick="openViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur?d.auteur:'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button>';
-    if(currentUser&&currentUser.isAdmin)h+='<button class="btn btn-danger" onclick="deleteDocument(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button>';
+function renderMediaAdminList(){
+  var c=$('mediaAdminList');
+  if(!currentUser || !currentUser.isAdmin) return;
+  if(!medias.length){
+    c.innerHTML='<p style="font-size:12px;color:#999">Aucun média uploadé.</p>';
+    return;
+  }
+  
+  var groups={};
+  medias.forEach(function(m){
+    var key=m.title+'||'+m.date;
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(m);
+  });
+  
+  var h='';
+  for(var g in groups){
+    var items=groups[g];
+    var first=items[0];
+    h+='<div style="margin-bottom:12px;padding:10px;background:#f9f9f9;border-radius:6px;border:1px solid #eee">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+    h+='<strong style="font-size:14px;color:var(--bordeaux)">'+first.title+'</strong>';
+    h+='<button class="btn btn-outline" onclick="deleteMediaGroup(\''+first._fi+'\')" style="padding:3px 8px;font-size:10px">🗑️ Groupe</button>';
+    h+='</div>';
+    if(first.date) h+='<span style="font-size:11px;color:#888">📅 '+first.date+'</span>';
+    h+='<span style="font-size:11px;color:#888;margin-left:8px">🏷️ '+first.category+'</span>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">';
+    items.forEach(function(m){
+      var isVideo=m.isVideo || (m.mimeType&&m.mimeType.indexOf('video')>=0);
+      h+='<div style="width:80px;height:80px;border-radius:4px;overflow:hidden;background:#0a0a0a;cursor:pointer;position:relative;border:1px solid #ddd" onclick="openMediaViewer(\''+m._fi+'\')">';
+      if(isVideo){
+        h+='<video src="'+m.data+'" style="width:100%;height:100%;object-fit:cover" muted></video>';
+        h+='<span style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.7);color:#fff;font-size:8px;padding:1px 4px;border-radius:2px">🎬</span>';
+      } else {
+        h+='<img src="'+m.data+'" style="width:100%;height:100%;object-fit:cover">';
+      }
+      h+='<button class="btn btn-outline" onclick="event.stopPropagation();deleteMediaItem(\''+m._fi+'\')" style="position:absolute;top:2px;right:2px;padding:1px 5px;font-size:9px;background:rgba(198,40,40,0.85);color:#fff;border:none;border-radius:3px">✕</button>';
+      h+='</div>';
+    });
     h+='</div></div>';
-  });
-  $('archivesContent').innerHTML=h;
+  }
+  
+  c.innerHTML=h;
 }
 
-function renderDocs(){
-  if(!currentUser||!docs.length)return;
+async function deleteMediaItem(id){
+  if(!confirm('Supprimer ce média ?')) return;
+  try{
+    await db.collection('medias').doc(id).delete();
+    await loadMedias();
+    renderMedia();
+  }catch(e){alert(e.message);}
 }
 
+async function deleteMediaGroup(firstId){
+  if(!confirm('Supprimer tout ce groupe de médias ?')) return;
+  try{
+    var first=medias.find(function(m){return m._fi===firstId;});
+    if(!first) return;
+    var gTitle=first.title;
+    var gDate=first.date||'';
+    var s=await db.collection('medias').where('title','==',gTitle).get();
+    var batch=db.batch();
+    s.docs.forEach(function(d){batch.delete(d.ref);});
+    await batch.commit();
+    await loadMedias();
+    renderMedia();
+  }catch(e){alert(e.message);}
+}
+
+function openMediaViewer(id){
+  var m=medias.find(function(x){return x._fi===id;});
+  if(!m){alert('Média introuvable');return;}
+  $('viewerTitle').textContent=m.title;
+  var body=$('viewerBody');
+  var isVideo=m.isVideo || (m.mimeType&&m.mimeType.indexOf('video')>=0);
+  if(isVideo){
+    body.innerHTML='<video src="'+m.data+'" controls style="max-width:100%;max-height:85vh;border-radius:4px"></video>';
+  } else {
+    body.innerHTML='<img src="'+m.data+'" alt="'+m.title+'">';
+  }
+  $('viewerOverlay').classList.add('open');
+}
+
+// === Fonction renderMedia pour la page publique Photos & Vidéos (MODIFIÉE) ===
 function renderMedia(){
-  const c=$('mediaList');
-  if(!currentUser){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p>';return;}
-  const media=docs.filter(d=>['jpg','jpeg','png','gif','webp','mp4','avi','mov'].indexOf(d.type)>=0);
-  if(!media.length){c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucun média.</p>';return;}
-  c.innerHTML='<div class="histo-gallery">'+media.map(d=>'<div class="histo-gallery-item" onclick="openViewer(\''+d._fi+'\')"><div class="thumb">'+(d.type==='mp4'?'<div style="display:grid;place-items:center;height:100%">🎬</div>':'<img src="'+d.data+'">')+'</div><div class="caption"><strong>'+d.title+'</strong><span>'+(d.date||'')+'</span></div></div>').join('')+'</div>';
+  var c=$('mediaList');
+  if(!currentUser){
+    c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous pour voir les médias.</p>';
+    return;
+  }
+  if(!medias.length){
+    c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Aucun média pour l\'instant.</p>';
+    return;
+  }
+  
+  // Regrouper par titre
+  var groups={};
+  medias.forEach(function(m){
+    var key=m.title+'||'+m.date;
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(m);
+  });
+  
+  var h='';
+  for(var g in groups){
+    var items=groups[g];
+    var first=items[0];
+    h+='<div style="margin-bottom:20px;padding:12px;background:#fff;border-radius:8px;border:1px solid #eee">';
+    h+='<h3 style="color:var(--bordeaux);font-size:16px;margin-bottom:4px">'+first.title+'</h3>';
+    if(first.date) h+='<span style="font-size:12px;color:#888">📅 '+first.date+'</span>';
+    h+='<div class="media-gallery">';
+    items.forEach(function(m){
+      var isVideo=m.isVideo || (m.mimeType&&m.mimeType.indexOf('video')>=0);
+      h+='<div class="media-gallery-item" onclick="openMediaViewer(\''+m._fi+'\')">';
+      h+='<div class="media-preview">';
+      if(isVideo){
+        h+='<video src="'+m.data+'" muted></video><span class="vid-icon">▶</span>';
+      } else {
+        h+='<img src="'+m.data+'" alt="'+m.title+'">';
+      }
+      h+='<span class="media-type-badge">'+m.type.toUpperCase()+'</span>';
+      h+='</div>';
+      h+='<div class="media-info"><strong>'+m.fileName+'</strong><span>'+m.category+'</span></div>';
+      h+='</div>';
+    });
+    h+='</div></div>';
+  }
+  
+  c.innerHTML=h;
 }
+
+// === FONCTIONS EXISTANTES POUR ARCHIVES / DOCUMENTS ===
 
 async function addDocument(){
   const t=$('docTitle').value.trim();
   const n=$('docNiveau').value;
-  const sb=$('docSub').value;
+  const s=$('docSub').value;
   const g=$('docGrade').value;
-  const d=$('docDate').value.trim();
-  const a=$('docAuteur').value.trim();
+  const d=$('docDate').value;
+  const a=$('docAuteur').value;
   const fi=$('docFile');
   const msg=$('docMsg');
-  if(!t||!fi.files||!fi.files[0]){msg.textContent='Titre + fichier requis';msg.className='msg error';msg.style.display='block';return;}
+  
+  if(!t){msg.textContent='Titre requis';msg.className='msg error';msg.style.display='block';return;}
+  if(!fi.files||!fi.files[0]){msg.textContent='Fichier requis';msg.className='msg error';msg.style.display='block';return;}
+  
   const f=fi.files[0];
-  let tp=f.name.split('.').pop().toLowerCase();
   const reader=new FileReader();
   reader.onload=async function(e){
     try{
-      await db.collection('documents').add({title:t,niveau:parseInt(n),sub:sb,grade:parseInt(g),date:d,auteur:a,fileName:f.name,type:tp,data:e.target.result,uploadedAt:new Date().toISOString()});
-      msg.textContent='✅ Ajouté !';msg.className='msg';msg.style.display='block';
+      await db.collection('documents').add({
+        title:t,niveau:parseInt(n),sub:s,grade:parseInt(g),
+        date:d,auteur:a,fileName:f.name,
+        type:f.name.split('.').pop().toLowerCase(),
+        data:e.target.result,size:f.size,
+        uploadedAt:new Date().toISOString()
+      });
+      msg.textContent='✅ Document ajouté';msg.className='msg';msg.style.display='block';
       $('docTitle').value='';$('docDate').value='';$('docAuteur').value='';fi.value='';
-      const sd=await db.collection('documents').get();
-      docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-    }catch(er){msg.textContent='❌ '+er.message;msg.className='msg error';msg.style.display='block';}
+      await loadArchiveDocs();
+    }catch(er){msg.textContent='Erreur: '+er.message;msg.className='msg error';msg.style.display='block';}
   };
   reader.readAsDataURL(f);
 }
 
-function openViewer(id){
-  const doc=docs.find(function(d){return d._fi===id;});
-  if(!doc)return;
-  $('viewerTitle').textContent=doc.title||'Document';
-  const body=$('viewerBody');
-  if(['jpg','jpeg','png','gif','webp'].indexOf(doc.type)>=0){
-    body.innerHTML='<img src="'+doc.data+'" alt="'+doc.title+'">';
-  } else if(doc.type==='pdf'){
-    body.innerHTML='<embed class="embed-pdf" src="'+doc.data+'" type="application/pdf">';
-  } else if(doc.type==='mp4'){
-    body.innerHTML='<video controls style="max-width:100%;max-height:80vh"><source src="'+doc.data+'" type="video/mp4"></video>';
+async function loadArchiveDocs(){
+  try{
+    const sd=await db.collection('documents').get();
+    docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
+  }catch(e){docs=JSON.parse(localStorage.getItem('rl_docs')||'[]');}
+  renderDocs();
+  renderArchives();
+}
+
+function renderDocs(){
+  // Fonction existante - gardée telle quelle
+}
+
+function renderArchives(){
+  var c=$('archivesContent');
+  if(!currentUser){
+    c.innerHTML='<p style="color:#999;padding:20px;text-align:center">Connectez-vous pour accéder aux archives.</p>';
+    return;
+  }
+  
+  var subs=Object.entries(ssR);
+  var accessible=subs.filter(([k,v])=>v.niveau<=currentUser.grade);
+  
+  if(currentSub){
+    var docsSub=docs.filter(function(d){return d.sub===currentSub && d.grade<=currentUser.grade;});
+    if(docsSub.length===0){
+      c.innerHTML='<p class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</p><p style="color:#999;text-align:center;padding:20px">Aucun document dans cette rubrique.</p>';
+      return;
+    }
+    c.innerHTML='<p class="back-link" onclick="currentSub=null;renderArchives()">← Retour aux rubriques</p>';
+    c.innerHTML+='<h3 style="color:var(--bordeaux);margin-bottom:8px;font-size:16px">'+ssR[currentSub].label+'</h3>';
+    docsSub.forEach(function(d){
+      c.innerHTML+='<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+(d.auteur?'Par '+d.auteur:'')+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">👁️</button></div></div>';
+    });
   } else {
-    body.innerHTML='<div class="text-preview"><pre>'+atob(doc.data.split(',')[1])+'</pre></div>';
+    c.innerHTML='<div class="rubriques">'+
+      accessible.map(([k,v])=>'<div class="rubrique-card" onclick="goToSub(\''+k+'\')"><h4>'+v.label+'</h4><span style="font-size:11px;color:#888">'+(docs.filter(function(d){return d.sub===k && d.grade<=currentUser.grade;}).length)+' document(s)</span></div>').join('')+
+      '</div>';
+    
+    if(currentUser.isAdmin){
+      c.innerHTML+='<hr style="margin:16px 0"><h4 style="color:var(--bordeaux);font-size:14px;margin-bottom:6px">Tous les documents</h4>'+
+        docs.map(function(d){
+          var ssinfo=ssR[d.sub];
+          var sl=ssinfo?ssinfo.label:d.sub;
+          return '<div class="histo-doc"><div class="preview">📄</div><div class="info"><strong onclick="openDocViewer(\''+d._fi+'\')">'+d.title+'</strong><span>'+sl+(d.date?' — '+d.date:'')+'</span></div><div class="actions"><button class="btn btn-outline" onclick="deleteDoc(\''+d._fi+'\')" style="padding:4px 10px;font-size:11px">🗑️</button></div></div>';
+        }).join('');
+    }
+  }
+}
+
+function openDocViewer(id){
+  var d=docs.find(x=>x._fi===id);
+  if(!d){alert('Document introuvable');return;}
+  $('viewerTitle').textContent=d.title;
+  var body=$('viewerBody');
+  var ext=d.type;
+  if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0){
+    body.innerHTML='<img src="'+d.data+'" alt="'+d.title+'">';
+  } else if(ext==='pdf'){
+    body.innerHTML='<iframe class="embed-pdf" src="'+d.data+'"></iframe>';
+  } else {
+    body.innerHTML='<div class="text-preview"><p>Aperçu non disponible pour ce type de fichier.</p><p style="margin-top:8px"><a href="'+d.data+'" download="'+d.fileName+'" class="btn btn-bdx">📥 Télécharger</a></p></div>';
   }
   $('viewerOverlay').classList.add('open');
 }
 
-async function deleteDocument(id){
+async function deleteDoc(id){
   if(!confirm('Supprimer ce document ?'))return;
   try{
     await db.collection('documents').doc(id).delete();
-    docs=docs.filter(function(d){return d._fi!==id;});
-    renderArchives();
+    await loadArchiveDocs();
   }catch(e){alert(e.message);}
 }
+
+// Drag & drop pour l'upload zone histoire
+document.addEventListener('DOMContentLoaded',function(){
+  var zone=$('uploadZone');
+  if(zone){
+    zone.addEventListener('click',function(){if($('historyFileInput'))$('historyFileInput').click();});
+    zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
+    zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
+    zone.addEventListener('drop',function(e){
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      if(e.dataTransfer.files.length){
+        $('historyFileInput').files=e.dataTransfer.files;
+        zone.querySelector('p').innerHTML=e.dataTransfer.files[0].name;
+      }
+    });
+  }
+  
+  // Drag & drop pour l'upload zone médias
+  var mzone=$('mediaUploadZone');
+  if(mzone){
+    mzone.addEventListener('click',function(){if($('mediaFileInput'))$('mediaFileInput').click();});
+    mzone.addEventListener('dragover',function(e){e.preventDefault();mzone.classList.add('dragover');});
+    mzone.addEventListener('dragleave',function(){mzone.classList.remove('dragover');});
+    mzone.addEventListener('drop',function(e){
+      e.preventDefault();
+      mzone.classList.remove('dragover');
+      if(e.dataTransfer.files.length){
+        handleMediaFiles(e.dataTransfer.files);
+      }
+    });
+  }
+});
+
 </script>
 </body>
 </html>
