@@ -142,7 +142,6 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
 <div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"></div></div>
 
-<!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
 <div class="two-col">
 <div>
@@ -187,7 +186,6 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 </div>
 </div>
 
-<!-- PAGE HISTOIRE -->
 <div id="page-histoire" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Histoire de la Loge</h2>
 <div id="historyDisplay" class="history-content"><p style="color:#999">Chargement...</p></div>
@@ -212,26 +210,23 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <div id="historyDocsList" class="histo-doc-admin-section" style="display:none"></div>
 </div>
 
-<!-- PAGE ARCHIVES -->
 <div id="page-archives" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Archives</h2>
 <div id="archivesContent"><p style="color:#999;padding:20px;text-align:center">Connectez-vous.</p></div>
 </div>
 
-<!-- PAGE PHOTOS & VIDÉOS -->
 <div id="page-photos" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
 <div id="mediaList"><p style="color:#999;padding:20px;text-align:center">Connectez-vous pour voir les médias.</p></div>
 </div>
 
-<!-- PAGE CONTACT -->
 <div id="page-contact" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Contact</h2>
 <p style="color:#555">Pour toute information veuillez contacter l'administrateur du site.</p>
 <p style="margin-top:8px;color:#555">📧 <a href="mailto:administrateur@rl731archives.net" style="color:var(--bordeaux);font-weight:bold;text-decoration:none">administrateur@rl731archives.net</a></p>
+<p style="color:#555">🌐 <a href="https://rl731archives.net" target="_blank" style="color:var(--bordeaux);font-weight:bold;text-decoration:none">www.rl731archives.net</a></p>
 </div>
 
-<!-- PAGE ADMIN -->
 <div id="page-admin" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:16px;font-size:22px;text-align:center">✦ Administration</h2>
 <div id="adminPanel" style="display:none">
@@ -314,6 +309,8 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="Identifiant"><input id="loginPass" type="password" placeholder="Mot de passe"><button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button><button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button><div id="loginMsg" style="margin-top:8px;display:none;color:#c62828;font-size:13px"></div></div></div>
 <div id="viewerOverlay"><div class="viewer-modal"><div class="viewer-header"><h3 id="viewerTitle">Document</h3><button onclick="closeViewer()">✕ Fermer</button></div><div class="viewer-body" id="viewerBody"></div></div></div>
 
+<footer>MMXXVI - Archives de l'Étoile du Temple - Tout droit réservé</footer>
+
 <script>
 const firebaseConfig = {apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",authDomain: "archives-4bf4d.firebaseapp.com",projectId: "archives-4bf4d",storageBucket: "archives-4bf4d.firebasestorage.app",messagingSenderId: "1042447510184",appId: "1:1042447510184:web:4724fcf049159b231af09d"};
 firebase.initializeApp(firebaseConfig);
@@ -353,12 +350,6 @@ function applyLogin(){
     updateHomeCards(); showPage('accueil');
 }
 
-function showAdminTab(n,el){
-    document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active')); el.classList.add('active');
-    $('adminDocs').style.display=n==='docs'?'block':'none'; $('adminMembres').style.display=n==='membres'?'block':'none'; $('adminMedias').style.display=n==='medias'?'block':'none';
-    if(n==='membres')renderMembersList(); if(n==='medias'){loadMedias(); resetMediaUpload();}
-}
-
 function renderArchives(){
     const c=$('archivesContent'); if(!currentUser){c.innerHTML='Connectez-vous.'; return;}
     const filtered = currentSub ? docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade) : docs.filter(d=>d.grade<=currentUser.grade);
@@ -370,19 +361,9 @@ function renderArchives(){
 }
 
 async function correctionDoc(id){
-    const d=docs.find(x=>x._fi===id); const nt=prompt("Titre:",d.title); if(!nt)return;
-    const na=prompt("Auteur:",d.auteur||"");
+    const d=docs.find(x=>x._fi===id); const nt=prompt("Nouveau titre:",d.title); if(!nt)return;
+    const na=prompt("Nouvel auteur:",d.auteur||"");
     await db.collection('documents').doc(id).update({title:nt, auteur:na}); loadAllData().then(renderArchives);
-}
-
-async function addDocument(){
-    const t=$('docTitle').value.trim(), n=$('docNiveau').value, s=$('docSub').value, g=$('docGrade').value, d=$('docDate').value, a=$('docAuteur').value, fi=$('docFile'), msg=$('docMsg');
-    if(!t||!fi.files) return;
-    const reader=new FileReader();
-    reader.onload=async (e)=>{
-        await db.collection('documents').add({title:t,niveau:parseInt(n),sub:s,grade:parseInt(g),date:d,auteur:a,fileName:fi.files.name,type:fi.files.name.split('.').pop().toLowerCase(),data:e.target.result,uploadedAt:new Date().toISOString()});
-        msg.textContent='✅ Ajouté'; msg.style.display='block'; loadAllData().then(renderArchives);
-    }; reader.readAsDataURL(fi.files);
 }
 
 function openDocViewer(id){
@@ -393,13 +374,31 @@ function openDocViewer(id){
     $('viewerOverlay').classList.add('open');
 }
 
-function closeViewer(){$('viewerOverlay').classList.remove('open');}
+function renderMedia(){
+    const c=$('mediaList'); if(!currentUser)return;
+    const groups={}; medias.forEach(m=>{const key=m.title+'||'+m.date; if(!groups[key])groups[key]=[]; groups[key].push(m);});
+    c.innerHTML=Object.values(groups).map(items=>{
+        const first=items;
+        return `<div style="margin-bottom:20px;padding:12px;background:#fff;border-radius:8px;border:1px solid #eee">
+        <h3 style="color:var(--bordeaux);font-size:16px;margin-bottom:4px">${first.title}</h3>
+        <div class="media-gallery">${items.map(m=>`
+            <div class="media-gallery-item" onclick="openDocViewer('${m._fi}')">
+                <div class="media-preview">${m.isVideo?`<video src="${m.data}"></video><span class="vid-icon">▶</span>`:`<img src="${m.data}">`}</div>
+                <div class="media-info"><strong>${m.title}</strong><span>${m.category}</span></div>
+            </div>`).join('')}</div></div>`;
+    }).join('');
+}
+
+function showAdminTab(n,el){
+    document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active')); el.classList.add('active');
+    $('adminDocs').style.display=n==='docs'?'block':'none'; $('adminMembres').style.display=n==='membres'?'block':'none'; $('adminMedias').style.display=n==='medias'?'block':'none';
+}
+
 function updateSubs(){const n=parseInt($('docNiveau').value); $('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');}
 function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=>{$(id).style.display=(currentUser && currentUser.grade<i+1)?'none':'block';});}
 function goToSub(key){ if(!currentUser){openLogin();return;} currentSub=key; showPage('archives'); }
-async function loadHistoryDocs(){const s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));$('historyDocsPublic').innerHTML=historyDocs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer('${d._fi}')" style="padding:4px 10px;font-size:11px">👁️ Voir</button></div></div>`).join('');}
+async function loadHistoryDocs(){const s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));$('historyDocsPublic').innerHTML=historyDocs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong></div><div class="actions"><button class="btn btn-gold" style="font-size:10px" onclick="openDocViewer('${d._fi}')">👁️ Voir</button></div></div>`).join('');}
 async function loadMedias(){const s=await db.collection('medias').get(); medias=s.docs.map(d=>({...d.data(),_fi:d.id})); renderMedia();}
-function renderMedia(){const c=$('mediaList'); if(!currentUser)return; c.innerHTML=medias.map(m=>`<div class="media-gallery-item" onclick="openDocViewer('${m._fi}')"><div class="media-preview">${m.isVideo?`<video src="${m.data}"></video>`:`<img src="${m.data}">`}</div></div>`).join('');}
 function doLogout(){currentUser=null; location.reload();}
 window.onload=loadAllData;
 </script>
