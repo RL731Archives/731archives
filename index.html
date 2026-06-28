@@ -54,11 +54,11 @@ nav a:hover,nav a.active{color:var(--gold)}
 .histo-doc .info strong{display:block;font-size:14px;cursor:pointer}
 .histo-doc .actions{display:flex;gap:4px;flex-shrink:0}
 .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
-.media-gallery-item{border:none;overflow:hidden;background:none;position:relative}
-.media-gallery-item .media-preview{height:150px;background:#000;display:grid;place-items:center;overflow:hidden;border-radius:4px}
-.media-gallery-item .media-preview img,.media-gallery-item .media-preview video{width:100%;height:100%;object-fit:cover}
-.media-gallery-item .media-info{padding:8px;text-align:center}
-.media-gallery-item .media-info strong{display:block;font-size:13px;color:var(--text)}
+.media-gallery-item{border:none;overflow:hidden;background:none;position:relative;text-align:center}
+.media-preview{height:150px;background:#000;display:grid;place-items:center;overflow:hidden;border-radius:4px}
+.media-preview img,.media-preview video{width:100%;height:100%;object-fit:cover}
+.media-info{padding:8px}
+.media-info strong{display:block;font-size:13px;color:var(--text)}
 .rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
 .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center}
 </style>
@@ -89,16 +89,11 @@ nav a:hover,nav a.active{color:var(--gold)}
 <div class="sub-tabs"><button class="active" onclick="showAdminTab('docs',this)">📄 Documents</button><button onclick="showAdminTab('membres',this)">👥 Membres</button><button onclick="showAdminTab('medias',this)">📸 Médias</button></div>
 <div id="adminDocs">
 <div class="card" style="background:#fffaf6;padding:20px">
-<h4 style="margin-bottom:10px">📄 Ajouter un document aux Archives</h4>
-<input id="docTitle" placeholder="Titre du document">
-<div class="row" style="display:flex;gap:8px">
-<select id="docNiveau" onchange="updateSubs()"><option value="1">Apprenti (1°)</option><option value="2">Compagnon (2°)</option><option value="3">Maître (3°)</option></select>
-<select id="docSub"></select>
-<select id="docGrade"><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option></select>
-</div>
-<div class="row" style="display:flex;gap:8px"><input id="docDate" placeholder="Date (ex: 06/2024)"><input id="docAuteur" placeholder="Auteur"></div>
-<input id="docFile" type="file" style="margin-top:10px"><button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="addDocument()">➕ Ajouter aux Archives</button>
-<div id="docMsg" class="msg"></div>
+<h4 style="margin-bottom:10px">📄 Ajouter un document</h4>
+<input id="docTitle" placeholder="Titre">
+<div class="row" style="display:flex;gap:8px"><select id="docNiveau" onchange="updateSubs()"><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option></select><select id="docSub"></select><select id="docGrade"><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option></select></div>
+<div class="row" style="display:flex;gap:8px"><input id="docDate" placeholder="Date"><input id="docAuteur" placeholder="Auteur"></div>
+<input id="docFile" type="file" style="margin-top:10px"><button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="addDocument()">➕ Ajouter</button>
 </div>
 </div>
 <div id="adminMembres" style="display:none"><div id="memList"></div></div>
@@ -106,15 +101,15 @@ nav a:hover,nav a.active{color:var(--gold)}
 </div>
 </div>
 
-<div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="ID"><input id="loginPass" type="password" placeholder="Pass"><button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button><button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button></div></div>
+<div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="ID"><input id="loginPass" type="password" placeholder="Pass"><button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button><button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button><div id="loginMsg" style="display:none;color:red;margin-top:10px"></div></div></div>
 <div id="viewerOverlay"><div class="viewer-modal"><div class="viewer-header"><h3 id="viewerTitle"></h3><button onclick="closeViewer()">✕ Fermer</button></div><div class="viewer-body" id="viewerBody"></div></div></div>
 
 <script>
 const firebaseConfig = {apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",authDomain: "archives-4bf4d.firebaseapp.com",projectId: "archives-4bf4d",storageBucket: "archives-4bf4d.firebasestorage.app",messagingSenderId: "1042447510184",appId: "1:1042447510184:web:4724fcf049159b231af09d"};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches d'Apprenti",niveau:1},'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},'orateur1':{label:"Orateur 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches Compagnons',niveau:2},'orateur2':{label:'Orateur 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},'orateur3':{label:'Orateur 3°',niveau:3}};
-let currentUser=null, members=[], docs=[], historyDocs=[], medias=[], currentSub=null, historyText='';
+const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches Apprenti",niveau:1},'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},'orateur1':{label:"Orateur 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches Compagnon',niveau:2},'orateur2':{label:'Orateur 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3},'orateur3':{label:'Orateur 3°',niveau:3}};
+let currentUser=null, members=[], docs=[], historyDocs=[], medias=[], currentSub=null, historyText='', dataLoaded=false;
 
 function $(id){return document.getElementById(id);}
 async function loadAllData(){
@@ -122,16 +117,16 @@ async function loadAllData(){
     const sd=await db.collection('documents').get(); docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
     const hd=await db.collection('contenu').doc('histoire').get(); if(hd.exists)historyText=hd.data().texte;
     if(historyText)$('historyDisplay').innerHTML=historyText;
-    loadHistoryDocs(); loadMedias();
+    dataLoaded=true; loadHistoryDocs(); loadMedias();
 }
 
 function showPage(n,el){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
     document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active')); if(el)el.classList.add('active');
     const banner = document.querySelector('.banner');
-    if(n === 'photos') { if(banner) banner.style.display = 'none'; document.body.style.background = '#fff'; } 
-    else { if(banner) banner.style.display = 'block'; document.body.style.background = 'var(--bg)'; }
-    if(n==='archives')renderArchives(); if(n==='photos')renderMedia(); if(n==='histoire')loadHistoryDocs();
+    if(n==='photos'){ if(banner)banner.style.display='none'; document.body.style.background='#fff'; }
+    else { if(banner)banner.style.display='block'; document.body.style.background='var(--bg)'; }
+    if(n==='archives')renderArchives(); if(n==='photos')renderMedia();
 }
 
 function injectAdminNav(){
@@ -142,16 +137,27 @@ function injectAdminNav(){
     }
 }
 
-function applyLogin(){
-    if(currentUser.isAdmin){ $('adminPanel').style.display='block'; injectAdminNav(); updateSubs(); }
-    $('logoutBtn').style.display='inline-block'; updateHomeCards(); showPage('accueil');
+async function doLogin(){
+    const u=$('loginUser').value.trim(), p=$('loginPass').value.trim(), msg=$('loginMsg');
+    msg.style.display='none';
+    if(u==='RL731' && p==='08051956'){
+        currentUser={id:'RL731',prenom:'Admin',grade:3,isAdmin:true};
+        localStorage.setItem('rl_session',JSON.stringify(currentUser));
+        applyLogin(); return;
+    }
+    if(!dataLoaded) await loadAllData();
+    const m=members.find(x=>x.id===u && x.birth===p);
+    if(m){
+        currentUser={id:m.id,prenom:m.prenom,nom:m.nom,grade:m.grade,isAdmin:false};
+        localStorage.setItem('rl_session',JSON.stringify(currentUser));
+        applyLogin();
+    } else { msg.textContent='Identifiants incorrects'; msg.style.display='block'; }
 }
 
-async function doLogin(){
-    const u=$('loginUser').value.trim(), p=$('loginPass').value.trim();
-    if(u==='RL731' && p==='08051956'){currentUser={id:'RL731',prenom:'Admin',grade:3,isAdmin:true}; closeLogin(); applyLogin(); return;}
-    const m=members.find(x=>x.id===u && x.birth===p);
-    if(m){currentUser={...m,isAdmin:false}; closeLogin(); applyLogin();}
+function applyLogin(){
+    closeLogin(); $('logoutBtn').style.display='inline-block';
+    if(currentUser.isAdmin){ $('adminPanel').style.display='block'; injectAdminNav(); updateSubs(); }
+    updateHomeCards(); showPage('accueil');
 }
 
 function renderArchives(){
@@ -160,27 +166,11 @@ function renderArchives(){
     if(!currentSub){
         c.innerHTML = '<div class="rubriques">' + Object.entries(ssR).filter(([k,v])=>v.niveau<=currentUser.grade).map(([k,v])=>`<div class="rubrique-card" onclick="goToSub('${k}')"><h4>${v.label}</h4></div>`).join('') + '</div>';
         if(currentUser.isAdmin){
-            c.innerHTML += '<hr style="margin:20px 0"><h3>Tous les documents (Admin)</h3>' + docs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong><span>${d.auteur||''}</span></div><div class="actions"><button class="btn btn-gold" onclick="correctionDoc('${d._fi}')">✍️ Correction</button><button class="btn btn-gold" onclick="openDocViewer('${d._fi}', docs)">👁️ Voir</button><button class="btn btn-outline" onclick="deleteDoc('${d._fi}')">🗑️</button></div></div>`).join('');
+            c.innerHTML += '<hr style="margin:20px 0"><h3>Tous les documents (Admin)</h3>' + docs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong><span>${d.auteur||''}</span></div><div class="actions"><button class="btn btn-gold" onclick="correctionDoc('${d._fi}')">✍️ Correction</button><button class="btn btn-gold" onclick="openDocViewer('${d._fi}', docs)">👁️ Voir</button></div></div>`).join('');
         }
     } else {
         c.innerHTML = '<p class="back-link" onclick="currentSub=null;renderArchives()">← Retour</p>' + filtered.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong><span>${d.auteur||''}</span></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer('${d._fi}', docs)">👁️ Voir</button></div></div>`).join('');
     }
-}
-
-async function addDocument(){
-    const t=$('docTitle').value.trim(), n=$('docNiveau').value, s=$('docSub').value, g=$('docGrade').value, d=$('docDate').value, a=$('docAuteur').value, fi=$('docFile');
-    if(!t || !fi.files) return;
-    const reader=new FileReader();
-    reader.onload=async (e)=>{
-        await db.collection('documents').add({title:t,niveau:parseInt(n),sub:s,grade:parseInt(g),date:d,auteur:a,type:fi.files.name.split('.').pop().toLowerCase(),data:e.target.result,uploadedAt:new Date().toISOString()});
-        $('docTitle').value=''; $('docDate').value=''; $('docAuteur').value=''; fi.value='';
-        loadAllData().then(renderArchives); alert('✅ Document ajouté');
-    }; reader.readAsDataURL(fi.files);
-}
-
-async function correctionDoc(id){
-    const d=docs.find(x=>x._fi===id); const nt=prompt("Nouveau titre:", d.title);
-    if(nt){ await db.collection('documents').doc(id).update({title:nt}); loadAllData().then(renderArchives); }
 }
 
 function openDocViewer(id, source){
@@ -190,11 +180,28 @@ function openDocViewer(id, source){
     $('viewerOverlay').classList.add('open');
 }
 
+async function addDocument(){
+    const t=$('docTitle').value.trim(), n=$('docNiveau').value, s=$('docSub').value, g=$('docGrade').value, d=$('docDate').value, a=$('docAuteur').value, fi=$('docFile');
+    if(!t || !fi.files) return;
+    const reader=new FileReader();
+    reader.onload=async (e)=>{
+        await db.collection('documents').add({title:t,niveau:parseInt(n),sub:s,grade:parseInt(g),date:d,auteur:a,type:fi.files.name.split('.').pop().toLowerCase(),data:e.target.result,uploadedAt:new Date().toISOString()});
+        loadAllData().then(renderArchives);
+    }; reader.readAsDataURL(fi.files);
+}
+
+async function correctionDoc(id){
+    const d=docs.find(x=>x._fi===id); const nt=prompt("Nouveau titre:", d.title);
+    if(nt){ await db.collection('documents').doc(id).update({title:nt}); loadAllData().then(renderArchives); }
+}
+
 function renderMedia(){
     const c=$('mediaList'); if(!currentUser)return;
     c.innerHTML = '<div class="media-gallery">' + medias.map(m=>`<div class="media-gallery-item" onclick="openDocViewer('${m._fi}', medias)"><div class="media-preview">${m.isVideo?`<video src="${m.data}"></video><span>▶</span>`:`<img src="${m.data}">`}</div><div class="media-info"><strong>${m.title}</strong></div></div>`).join('') + '</div>';
 }
 
+function openLogin(){$('loginOverlay').classList.add('open');}
+function closeLogin(){$('loginOverlay').classList.remove('open');}
 function closeViewer(){$('viewerOverlay').classList.remove('open');}
 function goToSub(key){currentSub=key; renderArchives();}
 function updateSubs(){const n=parseInt($('docNiveau').value); $('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');}
@@ -202,7 +209,7 @@ function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=
 function showAdminTab(n,el){ document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); $('adminDocs').style.display=n==='docs'?'block':'none'; $('adminMembres').style.display=n==='membres'?'block':'none'; $('adminMedias').style.display=n==='medias'?'block':'none';}
 async function loadHistoryDocs(){const s=await db.collection('histoire_documents').get(); historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));}
 async function loadMedias(){const s=await db.collection('medias').get(); medias=s.docs.map(d=>({...d.data(),_fi:d.id}));}
-function doLogout(){currentUser=null; location.reload();}
+function doLogout(){currentUser=null; localStorage.removeItem('rl_session'); location.reload();}
 window.onload=loadAllData;
 </script>
 </body>
