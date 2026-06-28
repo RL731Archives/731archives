@@ -11,11 +11,10 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;padding:20px;max-width:1100px;margin:0 auto}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px}
 .logo{width:50px;height:50px;border-radius:50%;overflow:hidden;display:grid;place-items:center;border:2px solid var(--gold)}
 .logo img{width:100%;height:100%;object-fit:cover;display:block}
 .site-title{color:var(--bordeaux);font-size:24px;font-weight:700;line-height:1.2}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;text-decoration:none;font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-weight:600;font-size:14px}
 .btn-gold{background:var(--gold);color:#fff}
 .btn-bdx{background:var(--bordeaux);color:#fff}
 .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
@@ -25,7 +24,7 @@ nav li{flex:1}
 nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:none;font-weight:600;font-size:14px;cursor:pointer}
 nav a:hover,nav a.active{color:var(--gold)}
 .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
-.banner img{width:100%;height:100%;object-fit:cover;opacity:0.85}
+.banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
 .page{display:none}
 .page.active{display:block}
 .cards{display:flex;gap:12px;margin:14px 0}
@@ -34,51 +33,48 @@ nav a:hover,nav a.active{color:var(--gold)}
 .card.apprenti{background:var(--card1)}
 .card.compagnon{background:var(--card2)}
 .card.maitre{background:var(--card3)}
-.card .sub-list{list-style:none;margin-top:6px}
-.card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text)}
-.card .sub-list li:hover{background:var(--gold);color:#fff}
+.sub-list{list-style:none;margin-top:6px}
+.sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text)}
+.sub-list li:hover{background:var(--gold);color:#fff}
 .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
-.admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
-.sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
-.sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
+.admin-panel input,.admin-panel select{width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:5px}
+.sub-tabs{display:flex;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
+.sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600}
 .sub-tabs button.active{background:var(--bordeaux);color:#fff}
 #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
 #loginOverlay.open{display:grid}
-#loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;text-align:center}
+.modal{background:#fff;padding:28px;border-radius:10px;width:360px;text-align:center}
 #viewerOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;place-items:center;padding:30px}
 #viewerOverlay.open{display:grid}
-#viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:210mm;max-width:95vw;max-height:95vh;overflow-y:auto;position:relative}
-#viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
-.histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-.histo-doc .info{flex:1;min-width:0}
-.histo-doc .info strong{display:block;font-size:14px;cursor:pointer}
+.viewer-modal{background:#fff;border-radius:10px;width:210mm;max-width:95vw;max-height:95vh;overflow-y:auto;position:relative}
+.viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
 .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
 .media-gallery-item{border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;cursor:pointer}
 .media-preview{height:150px;background:#000;display:grid;place-items:center;overflow:hidden}
-.media-preview img, .media-preview video{width:100%;height:100%;object-fit:cover}
+.media-preview img,.media-preview video{width:100%;height:100%;object-fit:cover}
 .media-info{padding:8px;text-align:center}
-.media-info strong{display:block;font-size:13px;color:var(--text)}
 .rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
 .rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center}
+.histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
 </style>
 </head>
 <body>
 <header>
-<div class="brand"><div class="logo"><img src="https://raw.githubusercontent.com/RL731Archives/731archives/main/logo731.jpg" alt="Logo"></div><div class="site-title">Archives de l'Étoile du Temple<br><span style="font-size:0.8rem;font-family:Georgia;">R.L731 Orient de Cagnes-sur-Mer</span></div></div>
+<div class="brand"><div class="logo"><img src="https://raw.githubusercontent.com/RL731Archives/731archives/main/logo731.jpg"></div><div class="site-title">Archives de l'Étoile du Temple<br><span style="font-size:0.8rem;letter-spacing:1px;font-family:Georgia;">R.L731 Orient de Cagnes-sur-Mer</span></div></div>
 <div><button class="btn btn-gold" onclick="openLogin()">🔓 Connexion</button><button id="logoutBtn" class="btn btn-outline" style="display:none;margin-left:6px" onclick="doLogout()">Déconnexion</button></div>
 </header>
 <nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
 <div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"></div>
 
 <div id="page-accueil" class="page active">
-<div class="cards">
-<div class="card apprenti" id="homeCard1"><h3>APPRENTI</h3><ul class="sub-list"><li onclick="goToSub('rituels1')">📜 Rituels 1°</li><li onclick="goToSub('planches-apprenti')">📝 Planches</li></ul></div>
-<div class="card compagnon" id="homeCard2"><h3>COMPAGNON</h3><ul class="sub-list"><li onclick="goToSub('rituels2')">📜 Rituels 2°</li><li onclick="goToSub('planches-compagnon')">📝 Planches</li></ul></div>
-<div class="card maitre" id="homeCard3"><h3>MAÎTRE</h3><ul class="sub-list"><li onclick="goToSub('rituels3')">📜 Rituels 3°</li><li onclick="goToSub('planches-maitres3')">📝 Planches</li></ul></div>
+<div class="cards" id="homeCards">
+<div class="card apprenti" id="homeCard1"><h3>APPRENTI</h3><ul class="sub-list"><li onclick="goToSub('rituels1')">📜 Rituels 1°</li><li onclick="goToSub('planches-apprenti')">📝 Planches</li><li onclick="goToSub('planches-maitres1')">📝 Planches Maîtres 1°</li><li onclick="goToSub('orateur1')">🎙 Orateur 1°</li></ul></div>
+<div class="card compagnon" id="homeCard2"><h3>COMPAGNON</h3><ul class="sub-list"><li onclick="goToSub('rituels2')">📜 Rituels 2°</li><li onclick="goToSub('planches-compagnon')">📝 Planches</li><li onclick="goToSub('orateur2')">🎙 Orateur 2°</li></ul></div>
+<div class="card maitre" id="homeCard3"><h3>MAÎTRE</h3><ul class="sub-list"><li onclick="goToSub('rituels3')">📜 Rituels 3°</li><li onclick="goToSub('planches-maitres3')">📝 Planches</li><li onclick="goToSub('orateur3')">🎙 Orateur 3°</li></ul></div>
 </div>
 </div>
 
-<div id="page-histoire" class="page"><h2>Histoire</h2><div id="historyDisplay" class="history-content"></div><div id="historyDocsPublic"></div></div>
+<div id="page-histoire" class="page"><h2>Histoire de la Loge</h2><div id="historyDisplay" class="history-content"></div><div id="historyDocsPublic"></div><div id="historyAdminUpload" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #ddd"><h4>Ajouter un document</h4><input id="historyDocTitle" placeholder="Titre"><input id="historyFileInput" type="file" onchange="uploadHistoryDoc()"><div id="uploadAdminMsg" class="admin-msg"></div></div></div>
 <div id="page-archives" class="page"><h2>Archives</h2><div id="archivesContent"></div></div>
 <div id="page-photos" class="page"><h2>Photos & Vidéos</h2><div id="mediaList"></div></div>
 
@@ -87,22 +83,24 @@ nav a:hover,nav a.active{color:var(--gold)}
 <div id="adminPanel" style="display:none">
 <div class="sub-tabs"><button class="active" onclick="showAdminTab('docs',this)">📄 Documents</button><button onclick="showAdminTab('membres',this)">👥 Membres</button><button onclick="showAdminTab('medias',this)">📸 Médias</button></div>
 <div id="adminDocs">
-<div class="card"><h4>📄 Ajouter un document</h4><input id="docTitle" placeholder="Titre"><div class="row" style="display:flex;gap:8px"><select id="docNiveau" onchange="updateSubs()"><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option></select><select id="docSub"></select><select id="docGrade"><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option></select></div><input id="docFile" type="file" style="margin-top:10px"><button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="addDocument()">➕ Ajouter</button></div>
+<div class="card"><h4>Ajouter un document</h4><input id="docTitle" placeholder="Titre"><select id="docNiveau" onchange="updateSubs()"><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option></select><select id="docSub"></select><select id="docGrade"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select><input id="docFile" type="file"><button class="btn btn-bdx" onclick="addDocument()">➕ Ajouter</button><div id="docMsg" class="msg"></div></div>
 </div>
-<div id="adminMembres" style="display:none"><div class="card"><h4>👤 Membre</h4><input id="memPrenom" placeholder="Prénom"><input id="memNom" placeholder="Nom"><input id="memBirth" placeholder="JJMMAAAA"><button class="btn btn-gold" style="width:100%" onclick="addMember()">➕ Ajouter</button></div><div id="memList"></div></div>
-<div id="adminMedias" style="display:none"><div class="card"><h4>📸 Upload</h4><input id="mediaTitle" placeholder="Titre"><input id="mediaFileInput" type="file" multiple onchange="handleMediaFiles(this.files)"><button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="uploadMedias()">📤 Uploader</button></div><div id="mediaAdminList"></div></div>
+<div id="adminMembres" style="display:none"><div class="card"><h4>Nouveau Membre</h4><input id="memPrenom" placeholder="Prénom"><input id="memNom" placeholder="Nom"><input id="memBirth" placeholder="JJMMAAAA"><button class="btn btn-gold" onclick="addMember()">➕ Ajouter</button><div id="memMsg" class="msg"></div></div><div id="memList"></div></div>
+<div id="adminMedias" style="display:none"><div class="card"><h4>Uploader Médias</h4><input id="mediaTitle" placeholder="Titre"><input id="mediaFileInput" type="file" multiple onchange="handleMediaFiles(this.files)"><button class="btn btn-bdx" onclick="uploadMedias()">📤 Uploader</button><div id="mediaAdminMsg" class="admin-msg"></div></div><div id="mediaAdminList"></div></div>
 </div>
 </div>
 
-<div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="ID"><input id="loginPass" type="password" placeholder="Pass"><button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button><button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button><div id="loginMsg" style="display:none;color:red;margin-top:10px"></div></div></div>
+<div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="ID"><input id="loginPass" type="password" placeholder="Pass"><button class="btn btn-gold" onclick="doLogin()" style="width:100%">Se connecter</button><button class="btn btn-outline" onclick="closeLogin()" style="width:100%;margin-top:6px">Annuler</button><div id="loginMsg" style="display:none;color:red;margin-top:10px"></div></div></div>
 <div id="viewerOverlay"><div class="viewer-modal"><div class="viewer-header"><h3 id="viewerTitle"></h3><button onclick="closeViewer()">✕ Fermer</button></div><div class="viewer-body" id="viewerBody" style="padding:20px;text-align:center"></div></div></div>
+
+<footer>MMXXVI - Archives de l'Étoile du Temple</footer>
 
 <script>
 const firebaseConfig = {apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",authDomain: "archives-4bf4d.firebaseapp.com",projectId: "archives-4bf4d",storageBucket: "archives-4bf4d.firebasestorage.app",messagingSenderId: "1042447510184",appId: "1:1042447510184:web:4724fcf049159b231af09d"};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches 3°',niveau:3}};
-let currentUser=null, members=[], docs=[], historyDocs=[], medias=[], currentSub=null, historyText='', dataLoaded=false;
+const ssR = {'rituels1':{label:'Rituels 1°',niveau:1},'planches-apprenti':{label:"Planches 1°",niveau:1},'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1},'orateur1':{label:"Orateur 1°",niveau:1},'rituels2':{label:'Rituels 2°',niveau:2},'planches-compagnon':{label:'Planches 2°',niveau:2},'orateur2':{label:'Orateur 2°',niveau:2},'rituels3':{label:'Rituels 3°',niveau:3},'planches-maitres3':{label:'Planches 3°',niveau:3},'orateur3':{label:'Orateur 3°',niveau:3}};
+let currentUser=null, members=[], docs=[], medias=[], historyDocs=[], currentSub=null, historyText='', dataLoaded=false, mediaFilesToUpload=[];
 
 function $(id){return document.getElementById(id);}
 async function loadAllData(){
@@ -117,14 +115,13 @@ function showPage(n,el){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
     document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active')); if(el)el.classList.add('active');
     const banner = document.querySelector('.banner');
-    if(n==='photos'){ if(banner)banner.style.display='none'; document.body.style.background='#fff'; }
-    else { if(banner)banner.style.display='block'; document.body.style.background='var(--bg)'; }
+    if(n === 'photos') { if(banner) banner.style.display = 'none'; document.body.style.background = '#ffffff'; } 
+    else { if(banner) banner.style.display = 'block'; document.body.style.background = 'var(--bg)'; }
     if(n==='archives')renderArchives(); if(n==='photos')renderMedia();
 }
 
 async function doLogin(){
-    const u=$('loginUser').value.trim(), p=$('loginPass').value.trim(), msg=$('loginMsg');
-    msg.style.display='none';
+    const u=$('loginUser').value.trim(), p=$('loginPass').value.trim(), msg=$('loginMsg'); msg.style.display='none';
     if(u==='RL731' && p==='08051956'){ currentUser={id:'RL731',prenom:'Admin',grade:3,isAdmin:true}; applyLogin(); return; }
     if(!dataLoaded) await loadAllData();
     const m=members.find(x=>x.id===u && x.birth===p);
@@ -134,24 +131,23 @@ async function doLogin(){
 function applyLogin(){
     closeLogin(); $('logoutBtn').style.display='inline-block';
     if(currentUser.isAdmin){
-        $('adminPanel').style.display='block';
+        $('adminPanel').style.display='block'; $('historyAdminUpload').style.display='block';
         if(!$('adminNavTab')){
             var nav = document.querySelector('nav ul'); var li = document.createElement('li');
             li.innerHTML = '<a id="adminNavTab" onclick="showPage(\'admin\',this)" style="background:var(--gold);color:var(--bordeaux);border-radius:4px">⚙ Administration</a>';
             nav.appendChild(li);
         }
-        updateSubs();
     }
-    updateHomeCards(); showPage('accueil');
+    updateHomeCards(); loadHistoryDocs(); renderArchives(); renderMedia(); showPage('accueil');
 }
 
 function renderArchives(){
     const c=$('archivesContent'); if(!currentUser)return;
     if(!currentSub){
-        c.innerHTML = '<div class="rubriques">' + Object.entries(ssR).filter(([k,v])=>v.niveau<=currentUser.grade).map(([k,v])=>`<div class="rubrique-card" onclick="goToSub('${k}')"><h4>${v.label}</h4></div>`).join('') + '</div>';
+        c.innerHTML = '<div class="rubriques">' + Object.entries(ssR).filter(([k,v])=>currentUser.isAdmin || v.niveau<=currentUser.grade).map(([k,v])=>`<div class="rubrique-card" onclick="goToSub('${k}')"><h4>${v.label}</h4></div>`).join('') + '</div>';
         if(currentUser.isAdmin) c.innerHTML += '<hr><h3>Admin : Tous les documents</h3>' + docs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer('${d._fi}', docs)">👁️</button></div></div>`).join('');
     } else {
-        const filtered = docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade);
+        const filtered = docs.filter(d=>d.sub===currentSub && (currentUser.isAdmin || d.grade<=currentUser.grade));
         c.innerHTML = '<p onclick="currentSub=null;renderArchives()" style="cursor:pointer;color:var(--bordeaux)">← Retour</p>' + filtered.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong></div><div class="actions"><button class="btn btn-gold" onclick="openDocViewer('${d._fi}', docs)">👁️ Voir</button></div></div>`).join('');
     }
 }
@@ -169,29 +165,40 @@ function openDocViewer(id, source){
 }
 
 function openViewerById(id){
-    var d=historyDocs.find(x=>x._fi===id);
-    if(!d) return;
+    var d=historyDocs.find(x=>x._fi===id); if(!d) return;
     $('viewerTitle').textContent=d.title;
-    var body=$('viewerBody');
-    var ext=d.type;
-    if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0){
-        body.innerHTML='<img src="'+d.data+'" alt="'+d.title+'">';
-    } else if(ext==='pdf'){
-        body.innerHTML='<iframe src="'+d.data+'" width="100%" height="500px"></iframe>';
-    }
+    var body=$('viewerBody'); var ext=d.type;
+    if(['jpg','jpeg','png','gif','webp'].indexOf(ext)>=0) body.innerHTML='<img src="'+d.data+'" style="max-width:100%">';
+    else if(ext==='pdf') body.innerHTML='<iframe src="'+d.data+'" width="100%" height="500px"></iframe>';
     $('viewerOverlay').classList.add('open');
 }
 
-function closeLogin(){$('loginOverlay').classList.remove('open');}
+async function addDocument(){
+    const t=$('docTitle').value.trim(), n=$('docNiveau').value, s=$('docSub').value, g=$('docGrade').value, fi=$('docFile');
+    if(!t || !fi.files) return;
+    const reader=new FileReader(); reader.onload=async (e)=>{
+        await db.collection('documents').add({title:t,niveau:parseInt(n),sub:s,grade:parseInt(g),type:fi.files.name.split('.').pop().toLowerCase(),data:e.target.result,uploadedAt:new Date().toISOString()});
+        loadAllData(); alert('✅ Ajouté');
+    }; reader.readAsDataURL(fi.files);
+}
+
+async function addMember(){
+    const p=$('memPrenom').value.trim(), n=$('memNom').value.trim(), b=$('memBirth').value.trim();
+    if(!p || !n || !b) return;
+    const id=(p+'.'+n).toLowerCase(); await db.collection('membres').doc(id).set({id,prenom:p,nom:n,grade:1,birth:b});
+    alert('✅ Membre ajouté'); loadAllData();
+}
+
 function openLogin(){$('loginOverlay').classList.add('open');}
+function closeLogin(){$('loginOverlay').classList.remove('open');}
 function closeViewer(){$('viewerOverlay').classList.remove('open');}
 function goToSub(key){currentSub=key; renderArchives();}
 function updateSubs(){const n=parseInt($('docNiveau').value); $('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');}
-function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=>{if($(id))$(id).style.display=(currentUser && currentUser.grade<i+1)?'none':'block';});}
-function showAdminTab(n,el){ document.querySelectorAll('.sub-tabs button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); $('adminDocs').style.display=n==='docs'?'block':'none'; $('adminMembres').style.display=n==='membres'?'block':'none'; $('adminMedias').style.display=n==='medias'?'block':'none';}
-async function loadHistoryDocs(){const s=await db.collection('histoire_documents').get(); historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));}
+function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=>{if($(id))$(id).style.display=(currentUser && (currentUser.isAdmin || currentUser.grade>=i+1))?'block':'none';});}
+async function loadHistoryDocs(){const s=await db.collection('histoire_documents').get(); historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id})); displayPublicHistoryDocs();}
+function displayPublicHistoryDocs(){$('historyDocsPublic').innerHTML=historyDocs.map(d=>`<div class="histo-doc"><strong>${d.title}</strong><button class="btn btn-gold" onclick="openViewerById('${d._fi}')">👁️</button></div>`).join('');}
 async function loadMedias(){const s=await db.collection('medias').get(); medias=s.docs.map(d=>({...d.data(),_fi:d.id}));}
-function handleMediaFiles(f){ mediaFilesToUpload=f; }
+function handleMediaFiles(f){mediaFilesToUpload=f;}
 async function uploadMedias(){const t=$('mediaTitle').value; for(let f of mediaFilesToUpload){const r=new FileReader(); r.onload=async (e)=>{await db.collection('medias').add({title:t,data:e.target.result,isVideo:f.type.includes('video'),type:f.name.split('.').pop()}); loadMedias().then(renderMedia);}; r.readAsDataURL(f);}}
 window.onload=loadAllData;
 </script>
