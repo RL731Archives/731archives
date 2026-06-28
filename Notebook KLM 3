@@ -19,9 +19,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ma
 .btn-gold{background:var(--gold);color:#fff}
 .btn-bdx{background:var(--bordeaux);color:#fff}
 .btn-outline{background:transparent;color:var(--bordeaux);border:1px solid var(--bordeaux)}
-.btn-danger{background:#c62828;color:#fff}
 .btn-green{background:#2e7d32;color:#fff}
-.btn-sort{background:transparent;border:none;cursor:pointer;color:inherit;font-weight:600;font-size:13px;padding:0 2px;display:inline-flex;align-items:center;gap:3px}
 nav{background:var(--bordeaux);border-radius:6px;margin:10px 0 14px}
 nav ul{list-style:none;display:flex}
 nav li{flex:1}
@@ -29,7 +27,6 @@ nav a{display:block;padding:10px;color:#fff;text-align:center;text-decoration:no
 nav a:hover,nav a.active{color:var(--gold)}
 .banner{position:relative;height:260px;border-radius:10px;overflow:hidden;margin-bottom:16px;background:#2a1a15}
 .banner img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0.85}
-.banner .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,0.4));display:flex;align-items:center;justify-content:center;padding:24px}
 .page{display:none}
 .page.active{display:block}
 .cards{display:flex;gap:12px;margin:14px 0}
@@ -41,20 +38,16 @@ nav a:hover,nav a.active{color:var(--gold)}
 .card.maitre{background:var(--card3)}
 .card .sub-list{list-style:none;margin-top:6px}
 .card .sub-list li{padding:4px 6px;border-radius:4px;margin-bottom:2px;font-size:11px;cursor:pointer;color:var(--text);border:1px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .sub-list li .emoji-icon{font-size:16px;vertical-align:middle;margin-right:4px}
 .card .sub-list li:hover{background:var(--gold);color:#fff}
 .two-col{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
 .admin-panel{background:#fff;border-radius:8px;padding:16px;border:1px solid rgba(0,0,0,0.06)}
 .admin-panel h3{color:var(--bordeaux);margin-bottom:8px}
 .admin-panel input,.admin-panel select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:5px;margin-bottom:8px;font-size:14px}
-.admin-panel label{font-size:12px;color:#777}
-.admin-panel .row{display:flex;gap:8px}
-footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid #ddd}
 .history-content{background:#fff;padding:20px;border-radius:8px;min-height:100px;line-height:1.6}
 .history-content[contenteditable="true"]{border:2px dashed var(--gold);outline:none}
-.rubriques{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:14px}
-.rubrique-card{padding:14px;border-radius:6px;border:1px solid var(--gold);background:#fff;cursor:pointer;text-align:center}
-.rubrique-card h4{color:var(--bordeaux);font-size:14px;margin-bottom:4px}
+.sub-tabs{display:flex;gap:0;margin-bottom:10px;border-radius:5px;overflow:hidden;border:1px solid var(--bordeaux)}
+.sub-tabs button{flex:1;padding:8px;border:none;background:#fff;color:var(--bordeaux);cursor:pointer;font-weight:600;font-size:13px}
+.sub-tabs button.active{background:var(--bordeaux);color:#fff}
 #loginOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;place-items:center}
 #loginOverlay.open{display:grid}
 #loginOverlay .modal{background:#fff;padding:28px;border-radius:10px;width:360px;max-width:90vw;text-align:center}
@@ -63,19 +56,13 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 #viewerOverlay .viewer-modal{background:#fff;border-radius:10px;width:210mm;max-width:95vw;max-height:95vh;overflow-y:auto;position:relative}
 #viewerOverlay .viewer-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--bordeaux);color:#fff;border-radius:10px 10px 0 0}
 #viewerOverlay .viewer-body{padding:20px;text-align:center}
-#viewerOverlay .viewer-body img{max-width:100%;max-height:85vh;border-radius:4px;display:block;margin:0 auto}
-#viewerOverlay .viewer-body iframe{width:100%;height:80vh;border:none}
+#viewerOverlay .viewer-body img{max-width:100%;max-height:85vh;display:block;margin:0 auto}
 .upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
 .histo-doc{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:5px;margin-bottom:6px;border:1px solid #eee}
-.histo-doc .preview{width:48px;height:48px;border-radius:4px;background:#f0ece8;display:grid;place-items:center;font-size:22px;flex-shrink:0;overflow:hidden}
 .histo-doc .info{flex:1;min-width:0}
 .histo-doc .info strong{display:block;font-size:14px;cursor:pointer}
 .histo-doc .info span{font-size:11px;color:#888;display:block}
-.histo-doc .actions{display:flex;gap:4px;flex-shrink:0}
-.histo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px}
-.histo-gallery-item{border:1px solid #eee;border-radius:6px;overflow:hidden;background:#fff;cursor:pointer}
-.histo-gallery-item .thumb{height:140px;background:#f0ece8;display:grid;place-items:center;overflow:hidden}
-.histo-gallery-item .thumb img{width:100%;height:100%;object-fit:cover}
+.media-upload-zone{background:#f9f9f9;border:2px dashed var(--gold);border-radius:8px;padding:20px;text-align:center;cursor:pointer}
 .media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
 .media-gallery-item{border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;position:relative}
 .media-gallery-item .media-preview{height:150px;background:#0a0a0a;display:grid;place-items:center;overflow:hidden}
@@ -91,7 +78,6 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <nav><ul><li><a class="active" onclick="showPage('accueil',this)">Accueil</a></li><li><a onclick="showPage('histoire',this)">Histoire</a></li><li><a onclick="showPage('archives',this)">Archives</a></li><li><a onclick="showPage('photos',this)">Photos & Vidéos</a></li><li><a onclick="showPage('contact',this)">Contact</a></li></ul></nav>
 <div class="banner"><img src="https://i.ibb.co/WvCqG07B/signe-d-ordre.jpg" alt="Loge"><div class="overlay"></div></div>
 
-<!-- ACCUEIL -->
 <div id="page-accueil" class="page active">
 <div class="two-col">
 <div>
@@ -101,26 +87,26 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <div class="card apprenti" id="homeCard1">
 <h3>APPRENTI</h3><div class="lock">🔒</div>
 <ul class="sub-list">
-<li onclick="goToSub('rituels1')"><span class="emoji-icon">📜</span> Rituels 1°</li>
-<li onclick="goToSub('planches-apprenti')"><span class="emoji-icon">📝</span> Planches Apprenti</li>
-<li onclick="goToSub('planches-maitres1')"><span class="emoji-icon">📝</span> Planches Maîtres 1°</li>
-<li onclick="goToSub('orateur1')"><span class="emoji-icon">🎙</span> Orateur 1°</li>
+<li onclick="goToSub('rituels1')">📜 Rituels 1°</li>
+<li onclick="goToSub('planches-apprenti')">📝 Planches Apprenti</li>
+<li onclick="goToSub('planches-maitres1')">📝 Planches Maîtres 1°</li>
+<li onclick="goToSub('orateur1')">🎙 Orateur 1°</li>
 </ul>
 </div>
 <div class="card compagnon" id="homeCard2">
 <h3>COMPAGNON</h3><div class="lock">🔒</div>
 <ul class="sub-list">
-<li onclick="goToSub('rituels2')"><span class="emoji-icon">📜</span> Rituels 2°</li>
-<li onclick="goToSub('planches-compagnon')"><span class="emoji-icon">📝</span> Planches Compagnon</li>
-<li onclick="goToSub('orateur2')"><span class="emoji-icon">🎙</span> Orateur 2°</li>
+<li onclick="goToSub('rituels2')">📜 Rituels 2°</li>
+<li onclick="goToSub('planches-compagnon')">📝 Planches Compagnon</li>
+<li onclick="goToSub('orateur2')">🎙 Orateur 2°</li>
 </ul>
 </div>
 <div class="card maitre" id="homeCard3">
 <h3>MAÎTRE</h3><div class="lock">🔒</div>
 <ul class="sub-list">
-<li onclick="goToSub('rituels3')"><span class="emoji-icon">📜</span> Rituels 3°</li>
-<li onclick="goToSub('planches-maitres3')"><span class="emoji-icon">📝</span> Planches Maîtres 3°</li>
-<li onclick="goToSub('orateur3')"><span class="emoji-icon">🎙</span> Orateur 3°</li>
+<li onclick="goToSub('rituels3')">📜 Rituels 3°</li>
+<li onclick="goToSub('planches-maitres3')">📝 Planches Maîtres 3°</li>
+<li onclick="goToSub('orateur3')">🎙 Orateur 3°</li>
 </ul>
 </div>
 </div>
@@ -135,49 +121,53 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 </div>
 </div>
 
-<!-- PAGE HISTOIRE -->
 <div id="page-histoire" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Histoire de la Loge</h2>
 <div id="historyDisplay" class="history-content"><p style="color:#999">Chargement...</p></div>
 <button id="saveHistoryBtn" class="btn btn-green" style="display:none;margin-top:8px" onclick="saveHistory()">💾 Sauvegarder</button>
-<div id="historyAdminUpload" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #ddd">
+<div id="historyAdminUpload" style="display:none;margin-top:12px;border-top:1px solid #ddd">
 <h4 style="color:var(--bordeaux);margin-bottom:8px">Uploader un document d'histoire</h4>
-<input id="historyDocTitle" placeholder="Titre du document" style="width:100%;margin-bottom:8px">
+<input id="historyDocTitle" placeholder="Titre" style="width:100%;margin-bottom:5px">
 <div id="uploadZone" class="upload-zone"><p>Cliquez ou glissez-déposez un fichier</p><input id="historyFileInput" type="file" style="display:none"></div>
 <button class="btn btn-bdx" style="margin-top:8px" onclick="uploadHistoryDoc()">📤 Uploader</button>
-<div id="historyDocsList" class="histo-doc-admin-section" style="display:none"></div>
+<div id="historyDocsList" class="histo-doc-admin-section"></div>
 </div>
-<h4 style="color:var(--bordeaux);margin-top:16px;margin-bottom:6px">Documents d'histoire</h4>
 <div id="historyDocsPublic"></div>
 </div>
 
-<!-- PAGE ARCHIVES -->
 <div id="page-archives" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Archives</h2>
 <div id="archivesContent"></div>
 </div>
 
-<!-- PAGE PHOTOS & VIDÉOS -->
 <div id="page-photos" class="page">
 <h2 style="color:var(--bordeaux);margin-bottom:10px">Photos & Vidéos</h2>
 <div id="mediaList"></div>
 </div>
 
-<!-- PAGE ADMIN -->
 <div id="page-admin" class="page">
-<h2 style="color:var(--bordeaux);text-align:center">✦ Administration</h2>
+<h2 style="color:var(--bordeaux);text-align:center;margin-bottom:16px">✦ Administration</h2>
 <div id="adminPanel" style="display:none">
-<div id="adminDocs">
-<div class="card" style="background:#fffaf6;padding:20px;margin:12px 0">
-<h4 style="text-align:center">📄 Ajouter un document aux Archives</h4>
-<input id="docTitle" placeholder="Titre du document" style="width:100%;margin-bottom:8px">
-<div class="row" style="display:flex;gap:8px">
-<select id="docNiveau" onchange="updateSubs()" style="flex:1"><option value="1">Apprenti</option><option value="2">Compagnon</option><option value="3">Maître</option></select>
-<select id="docSub" style="flex:1"></select>
-<select id="docGrade" style="flex:1"><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option></select>
+<div class="sub-tabs">
+<button class="active" onclick="showAdminTab('docs',this)">📄 Documents</button>
+<button onclick="showAdminTab('membres',this)">👥 Membres</button>
+<button onclick="showAdminTab('medias',this)">📸 Médias</button>
 </div>
-<input id="docFile" type="file" style="margin-top:10px">
-<button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="addDocument()">➕ Ajouter aux Archives</button>
+<div id="adminDocs">
+<div class="card" style="background:#fffaf6;padding:20px">
+<h4>Ajouter un document aux Archives</h4>
+<input id="docTitle" placeholder="Titre"><div class="row" style="display:flex;gap:8px"><select id="docNiveau" onchange="updateSubs()"><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option></select><select id="docSub"></select></div>
+<input id="docFile" type="file" style="margin-top:10px"><button class="btn btn-bdx" style="width:100%;margin-top:10px" onclick="addDocument()">➕ Ajouter</button>
+</div>
+</div>
+<div id="adminMembres" style="display:none"><div id="memList"></div></div>
+<div id="adminMedias" style="display:none">
+<div class="card" style="background:#fffaf6;padding:20px">
+<h4>Uploader des médias</h4>
+<input id="mediaTitle" placeholder="Titre"><select id="mediaCategory"><option value="evenement">Événement</option><option value="tenue">Tenue</option></select>
+<div id="mediaUploadZone" class="media-upload-zone"><p>Glissez vos fichiers ici</p><input id="mediaFileInput" type="file" multiple style="display:none"></div>
+<button class="btn btn-bdx" onclick="uploadMedias()" style="width:100%;margin-top:10px">📤 Uploader</button>
+<div id="mediaAdminList"></div>
 </div>
 </div>
 </div>
@@ -186,116 +176,88 @@ footer{text-align:center;color:#888;font-size:12px;margin-top:24px;padding-top:1
 <div id="loginOverlay"><div class="modal"><h2>🔐 Connexion</h2><input id="loginUser" placeholder="ID"><input id="loginPass" type="password" placeholder="Pass"><button class="btn btn-gold" style="width:100%" onclick="doLogin()">Se connecter</button><button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="closeLogin()">Annuler</button><div id="loginMsg" style="display:none;color:red"></div></div></div>
 <div id="viewerOverlay"><div class="viewer-modal"><div class="viewer-header"><h3 id="viewerTitle"></h3><button onclick="closeViewer()">✕ Fermer</button></div><div class="viewer-body" id="viewerBody"></div></div></div>
 
-<footer>MMXXVI - Archives de l'Étoile du Temple - Tout droit réservé</footer>
-
 <script>
 const firebaseConfig = {apiKey: "AIzaSyDUdEFcETCnw0pJem1txPZLEnWZGeMT5Ec",authDomain: "archives-4bf4d.firebaseapp.com",projectId: "archives-4bf4d",storageBucket: "archives-4bf4d.firebasestorage.app",messagingSenderId: "1042447510184",appId: "1:1042447510184:web:4724fcf049159b231af09d"};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const ssR = {
-'rituels1':{label:'Rituels 1°',niveau:1}, 'planches-apprenti':{label:"Planches d'Apprenti",niveau:1}, 'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1}, 'orateur1':{label:"Orateur 1°",niveau:1},
-'rituels2':{label:'Rituels 2°',niveau:2}, 'planches-compagnon':{label:'Planches Compagnons',niveau:2}, 'orateur2':{label:'Orateur 2°',niveau:2},
-'rituels3':{label:'Rituels 3°',niveau:3}, 'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3}, 'orateur3':{label:'Orateur 3°',niveau:3}
-};
+const ssR = {'rituels1':{label:'Rituels 1°',niveau:1}, 'planches-apprenti':{label:"Planches d'Apprenti",niveau:1}, 'planches-maitres1':{label:'Planches Maîtres 1°',niveau:1}, 'orateur1':{label:"Orateur 1°",niveau:1}, 'rituels2':{label:'Rituels 2°',niveau:2}, 'planches-compagnon':{label:'Planches Compagnon',niveau:2}, 'orateur2':{label:'Orateur 2°',niveau:2}, 'rituels3':{label:'Rituels 3°',niveau:3}, 'planches-maitres3':{label:'Planches Maîtres 3°',niveau:3}, 'orateur3':{label:'Orateur 3°',niveau:3}};
+let currentUser=null, members=[], docs=[], historyDocs=[], medias=[], currentSub=null, historyText='';
 
-let currentUser=null, members=[], docs=[], historyText='', historyDocs=[], medias=[], currentSub=null;
 function $(id){return document.getElementById(id);}
-
 async function loadAllData(){
     const sm=await db.collection('membres').get(); members=sm.docs.map(d=>d.data());
     const sd=await db.collection('documents').get(); docs=sd.docs.map(d=>({...d.data(),_fi:d.id}));
-    const hd=await db.collection('contenu').doc('histoire').get(); if(hd.exists)historyText=hd.data().texte||'';
+    const hd=await db.collection('contenu').doc('histoire').get(); if(hd.exists)historyText=hd.data().texte;
     if(historyText)$('historyDisplay').innerHTML=historyText;
-    loadHistoryDocs();
+    loadHistoryDocs(); loadMedias();
 }
 
 function showPage(n,el){
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); $('page-'+n).classList.add('active');
     if(el){document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active')); el.classList.add('active');}
-    if(n==='archives')renderArchives(); if(n==='photos')renderMedia(); if(n==='histoire')loadHistoryDocs();
+    if(n==='archives')renderArchives(); if(n==='photos')renderMedia();
+}
+
+function applyLogin(){
+    if(currentUser.isAdmin){
+        $('adminPanel').style.display='block'; $('historyAdminUpload').style.display='block';
+        $('historyDisplay').setAttribute('contenteditable','true'); $('saveHistoryBtn').style.display='inline-block';
+        if(!document.getElementById('adminNavTab')){
+            var nav = document.querySelector('nav ul');
+            var li = document.createElement('li');
+            li.innerHTML = '<a id="adminNavTab" onclick="showPage(\'admin\',this)" style="background:var(--gold);color:var(--bordeaux);border-radius:4px">⚙ Administration</a>';
+            nav.appendChild(li);
+        }
+    }
+    $('logoutBtn').style.display='inline-block'; updateHomeCards(); showPage('accueil');
+}
+
+async function doLogin(){
+    const u=$('loginUser').value, p=$('loginPass').value;
+    if(u==='RL731' && p==='08051956'){currentUser={id:'RL731',prenom:'Admin',grade:3,isAdmin:true}; closeLogin(); applyLogin(); return;}
+    const m=members.find(x=>x.id===u && x.birth===p);
+    if(m){currentUser={...m,isAdmin:false}; closeLogin(); applyLogin();} else {$('loginMsg').style.display='block';}
 }
 
 function openLogin(){$('loginOverlay').classList.add('open');}
 function closeLogin(){$('loginOverlay').classList.remove('open');}
+function goToSub(key){ if(!currentUser){openLogin();return;} currentSub=key; showPage('archives'); }
 
-async function doLogin(){
-    const u=$('loginUser').value.trim(), p=$('loginPass').value.trim();
-    if(u==='RL731' && p==='08051956'){currentUser={id:'RL731',prenom:'Admin',grade:3,isAdmin:true};applyLogin();return;}
-    const m=members.find(x=>x.id===u && x.birth===p);
-    if(m){currentUser={...m,isAdmin:false};applyLogin();}else{$('loginMsg').textContent='Erreur';$('loginMsg').style.display='block';}
+async function loadMedias(){
+    const s=await db.collection('medias').orderBy('uploadedAt','desc').get();
+    medias=s.docs.map(d=>({...d.data(),_fi:d.id}));
+    renderMedia(); if(currentUser && currentUser.isAdmin) renderMediaAdminList();
 }
 
-function applyLogin(){
-    closeLogin(); $('logoutBtn').style.display='inline-block';
-    if(currentUser.isAdmin){
-        $('adminPanel').style.display='block'; $('historyAdminUpload').style.display='block';
-        $('historyDisplay').setAttribute('contenteditable','true'); $('saveHistoryBtn').style.display='inline-block';
-        updateSubs();
-    }
-    updateHomeCards(); showPage('accueil');
+function renderMedia(){
+    const c=$('mediaList'); if(!currentUser){c.innerHTML='<p style="text-align:center;padding:20px">Connectez-vous.</p>'; return;}
+    c.innerHTML=medias.map(m=>`<div class="media-gallery-item" onclick="openViewer('${m._fi}',medias)"><div class="media-preview">${m.isVideo?`<video src="${m.data}"></video>`:`<img src="${m.data}">`}</div></div>`).join('');
 }
-
-function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=>{$(id).style.display=(currentUser && currentUser.grade<i+1)?'none':'block';});}
-function goToSub(key){ if(!currentUser){openLogin();return;} currentSub=key; showPage('archives'); renderArchives(); }
-
-async function loadHistoryDocs(){
-    const s=await db.collection('histoire_documents').orderBy('uploadedAt','desc').get();
-    historyDocs=s.docs.map(d=>({...d.data(),_fi:d.id}));
-    displayPublicHistoryDocs();
-    if(currentUser && currentUser.isAdmin) displayAdminHistoryDocs();
-}
-
-function displayPublicHistoryDocs(){
-    const c=$('historyDocsPublic'); if(!historyDocs.length){c.innerHTML='Aucun document.';return;}
-    let h='', imgs=historyDocs.filter(d=>['jpg','jpeg','png','webp'].includes(d.type)), oth=historyDocs.filter(d=>!['jpg','jpeg','png','webp'].includes(d.type));
-    if(imgs.length){h+='<div class="histo-gallery">'+imgs.map(d=>`<div class="histo-gallery-item" onclick="openViewerById('${d._fi}',historyDocs)"><div class="thumb"><img src="${d.data}"></div><div class="caption"><strong>${d.title}</strong></div></div>`).join('')+'</div>';}
-    if(oth.length){h+=oth.map(d=>`<div class="histo-doc"><div class="info"><strong onclick="openViewerById('${d._fi}',historyDocs)">${d.title}</strong><span>${d.type.toUpperCase()}</span></div><div class="actions"><button class="btn btn-gold" onclick="openViewerById('${d._fi}',historyDocs)">👁️</button></div></div>`).join('');}
-    c.innerHTML=h;
-}
-
-function displayAdminHistoryDocs(){
-    $('historyDocsList').style.display='block';
-    $('historyDocsList').innerHTML=historyDocs.map(d=>`<div class="histo-doc"><div class="info"><strong>${d.title}</strong></div><div class="actions"><button class="btn btn-outline" onclick="deleteHistoryDoc('${d._fi}')">🗑️</button></div></div>`).join('');
-}
-
-async function uploadHistoryDoc(){
-    const fi=$('historyFileInput'), t=$('historyDocTitle').value;
-    if(!fi.files || !t) return;
-    const reader=new FileReader();
-    reader.onload=async (e)=>{
-        await db.collection('histoire_documents').add({title:t, type:fi.files.name.split('.').pop().toLowerCase(), data:e.target.result, uploadedAt:new Date().toISOString()});
-        loadHistoryDocs();
-    }; reader.readAsDataURL(fi.files);
-}
-
-async function deleteHistoryDoc(id){ if(confirm('Supprimer?')){await db.collection('histoire_documents').doc(id).delete(); loadHistoryDocs();}}
 
 function renderArchives(){
-    const c=$('archivesContent'); if(!currentUser){c.innerHTML='Connectez-vous.';return;}
-    let filtered = currentSub ? docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade) : docs.filter(d=>d.grade<=currentUser.grade);
-    c.innerHTML=(currentSub?'<p class="back-link" onclick="currentSub=null;renderArchives()">← Retour</p>':'') + 
-    filtered.map(d=>`<div class="histo-doc"><div class="info"><strong onclick="openViewerById('${d._fi}',docs)">${d.title}</strong><span>${d.auteur||''}</span></div><div class="actions">
-        ${currentUser.isAdmin?`<button class="btn btn-gold" style="font-size:10px" onclick="editDoc('${d._fi}')">✍️</button><button class="btn btn-outline" style="font-size:10px" onclick="deleteDoc('${d._fi}')">🗑️</button>`:''}
-        <button class="btn btn-gold" style="font-size:10px" onclick="openViewerById('${d._fi}',docs)">👁️</button>
-    </div></div>`).join('');
+    const c=$('archivesContent'); if(!currentUser){c.innerHTML='Connectez-vous.'; return;}
+    const filtered = currentSub ? docs.filter(d=>d.sub===currentSub && d.grade<=currentUser.grade) : docs.filter(d=>d.grade<=currentUser.grade);
+    c.innerHTML=filtered.map(d=>`<div class="histo-doc"><div class="info"><strong onclick="openViewer('${d._fi}',docs)">${d.title}</strong></div>
+    ${currentUser.isAdmin?`<div class="actions"><button class="btn btn-outline" onclick="deleteDoc('${d._fi}')">🗑️</button></div>`:''}</div>`).join('');
 }
 
-async function editDoc(id){
-    const d=docs.find(x=>x._fi===id); const nt=prompt("Titre:",d.title); if(!nt)return;
-    const na=prompt("Auteur:",d.auteur||"");
-    await db.collection('documents').doc(id).update({title:nt, auteur:na}); loadAllData().then(renderArchives);
+async function uploadMedias(){
+    const fi=$('mediaFileInput'), t=$('mediaTitle').value; if(!fi.files.length || !t) return;
+    for(let f of fi.files){
+        const reader=new FileReader();
+        reader.onload=async (e)=>{ await db.collection('medias').add({title:t, data:e.target.result, isVideo:f.type.includes('video'), uploadedAt:new Date().toISOString()}); loadMedias(); };
+        reader.readAsDataURL(f);
+    }
 }
 
-async function deleteDoc(id){if(confirm('Supprimer?')){await db.collection('documents').doc(id).delete(); loadAllData().then(renderArchives);}}
-
-function openViewerById(id, sourceArray){
-    const d=sourceArray.find(x=>x._fi===id); $('viewerTitle').textContent=d.title;
-    $('viewerBody').innerHTML=d.type==='pdf'?`<iframe src="${d.data}" width="100%" height="500px"></iframe>`:`<img src="${d.data}" style="max-width:100%">`;
+function openViewer(id, src){
+    const d=src.find(x=>x._fi===id); $('viewerTitle').textContent=d.title;
+    $('viewerBody').innerHTML=d.data.includes('pdf')?`<iframe src="${d.data}" width="100%" height="500px"></iframe>`:`<img src="${d.data}" style="max-width:100%">`;
     $('viewerOverlay').classList.add('open');
 }
 function closeViewer(){$('viewerOverlay').classList.remove('open');}
 function updateSubs(){const n=parseInt($('docNiveau').value); $('docSub').innerHTML=Object.entries(ssR).filter(([k,v])=>v.niveau===n).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');}
-async function saveHistory(){await db.collection('contenu').doc('histoire').set({texte:$('historyDisplay').innerHTML});}
+function updateHomeCards(){['homeCard1','homeCard2','homeCard3'].forEach((id,i)=>{$(id).style.display=(currentUser && currentUser.grade<i+1)?'none':'block';});}
 function doLogout(){currentUser=null; location.reload();}
 window.onload=loadAllData;
 </script>
